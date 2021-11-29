@@ -1,0 +1,16 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+
+class {{modelName}}Controller extends Controller
+{
+    protected ${{modelNameSingularLowerCase}};
+
+    public function __construct({{modelName}}Repository ${{modelNameSingularLowerCase}}Repository)
+    {
+        $this->{{modelNameSingularLowerCase}} = ${{modelNameSingularLowerCase}}Repository;
+    }
+}
