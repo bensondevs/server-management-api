@@ -63,8 +63,10 @@ class UserController extends Controller
      * @param \App\Models\User  $user
      * @return Illuminate\Support\Facades\Response
      */
-    public function updatePassword(UpdatePasswordRequest $request, User $user)
-    {
+    public function updatePassword(
+        UpdatePasswordRequest $request, 
+        User $user
+    ) {
     	$this->user->setModel($user);
 
         $input = $request->validated();

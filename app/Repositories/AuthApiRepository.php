@@ -2,20 +2,30 @@
 
 namespace App\Repositories;
 
-use \Illuminate\Support\Facades\DB;
-use \Illuminate\Database\QueryException;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
 use App\Repositories\Base\BaseRepository;
 
 use App\Models\User;
 
 class AuthApiRepository extends BaseRepository
 {
+	/**
+	 * Repository constructor method
+	 * 
+	 * @return void
+	 */
 	public function __construct()
 	{
 		$this->setInitModel(new User);
 	}
 
+	/**
+	 * Authenticate any user from supplied arguments
+	 * 
+	 * @param array  $credentials
+	 * @return \App\Models\User|null
+	 */
 	public function login(array $credentials)
 	{
 		try {
@@ -23,62 +33,70 @@ class AuthApiRepository extends BaseRepository
 			$identity = $credentials['identity'];
 			$password = $credentials['password'];
 
-			// Find user
-			$user = $this->getModel()->where('email', $identity)
-				->orWhere('username', $identity)
-				->first();
-			if (! $user) {
+			if (! $user = User::findByIdentity($identity)) {
 				$this->setNotFound('User not found!');
-				return null;
+				return;
 			}
-			$this->setModel($user); // Found!
 
 			// Check if password matched the record
-			if (! hashCheck($password, $user->password)) {
+			if (! $user->isPasswordMatch($password)) {
 				$this->setUnprocessedInput('Password mismatch the record!');
-				return null;
+				return;
 			}
 
-			// API Login Token
-			$user->token = $user->createToken(time())->plainTextToken;
+			// Generate API Authentication Token
+			$user->generateToken();
 
-			$this->setModel($user);
-
-			$this->setSuccess('Successfully login');
+			$this->setSuccess('Successfully login.');
 		} catch (QueryException $qe) {
-			$this->setError('Failed to do login, there is something wrong and we don\' know yet', $qe->getMessage());
+			$error = $qe->getMessage();
+			$this->setError('Failed to do login.', $error);
+			return;
 		}
 
-		return $this->getModel();
+		return $user;
 	}
 
+	/**
+	 * Register user
+	 * 
+	 * @param array  $registration
+	 * @return \App\Models\User
+	 */
 	public function register(array $registration)
 	{
 		try {
-			// Create user
 			$user = $this->getModel();
 			$user->fill($registration);
 			$user->save();
 
-			$this->setSuccess('Successfully registered as user, please confirm email address to complete .');
+			$this->setSuccess('Successfully registered as user, please confirm email address to complete.');
 		} catch (QueryException $qe) {
-			$this->setError('Failed to register as user, we don\'t know why', $qe->getMessage());
+			$error = $qe->getMessage();
+			$this->setError('Failed to register as user, we don\'t know why', $error);
 		}
+
+		return $user;
 	}
 
+	/**
+	 * Logout the user
+	 * 
+	 * @return bool
+	 */
 	public function logout()
 	{
 		try {
 			$user = $this->getModel();
-			$user->tokens()->delete();
-
-			$this->destroyModel();
+			$logout = $user->tokens()->delete();
 
 			$this->setSuccess('Successfully logged out.');
+			return $logout;
 		} catch (QueryException $qe) {
-			$this->setError('Failed to log out', $qe->getMessage());
+			$error = $qe->getMessage();
+			$this->setError('Failed to log out', $error);
 		}
 
-		return null;
+		return $user;
 	}
 }

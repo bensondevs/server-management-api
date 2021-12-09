@@ -2,53 +2,51 @@
 
 namespace App\Repositories;
 
-use \Illuminate\Support\Facades\DB;
-use \Illuminate\Database\QueryException;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
 use App\Repositories\Base\BaseRepository;
 
-use App\Models\User;
-use App\Models\Subnet;
-use App\Models\SubnetIp;
+use App\Models\{ User, Subnet, SubnetIp };
 
 class SubnetIpRepository extends BaseRepository
 {
+	/**
+	 * Repository constructor method
+	 * 
+	 * @return void
+	 */
 	public function __construct()
 	{
 		$this->setInitModel(new SubnetIp);
 	}
 
-	public function assignables(array $options, bool $pagination = false)
-	{
-		$subnetIp = SubnetIp::assignable();
-		$this->setModel($subnetIp);
-
-		return $this->all($options, $pagination);
-	}
-
-	public function selectRandomFreeIp(Subnet $subnet)
-	{
-		return SubnetIp::assignable()
-			->where('subnet_id', $subnet->id)
-			->first();
-	}
-
-	public function assignSelectedIpTo(User $user)
+	/**
+	 * Assign subnet ip to a user
+	 * 
+	 * @param \App\Models\User  $user
+	 * @return \App\Models\SubnetIp
+	 */
+	public function assignToUser(User $user)
 	{
 		try {
 			$ip = $this->getModel();
 			$ip->assignTo($user);
-
 			$this->setModel($ip);
 
 			$this->setSuccess('Successfully assign IP to a user.');
 		} catch (QueryException $qe) {
-			$this->setError('Failed to assign IP to a user.');
+			$error = $qe->getMessage();
+			$this->setError('Failed to assign IP to a user.', $error);
 		}
 
 		return $this->getModel();
 	}
 
+	/**
+	 * Switch subnet ip to forbidden or otherwise
+	 * 
+	 * @return \App\Models\SubnetIp
+	 */
 	public function switchForbidden()
 	{
 		try {
@@ -60,12 +58,18 @@ class SubnetIpRepository extends BaseRepository
 			$this->setSuccess('Successfully switch Subnet IP forbidden status.');
 		} catch (QueryException $qe) {
 			$error = $qe->getMessage();
-			$this->setError('Failed to switch Subnet IP forbidden status', $error);
+			$this->setError('Failed to switch Subnet IP forbidden status.', $error);
 		}
 
 		return $this->getModel();
 	}
 
+	/**
+	 * Save subnet ip
+	 * 
+	 * @param  array  $ipData
+	 * @return \App\Models\SubnetIp
+	 */
 	public function save(array $ipData)
 	{
 		try {
@@ -85,6 +89,11 @@ class SubnetIpRepository extends BaseRepository
 		return $this->getModel();
 	}
 
+	/**
+	 * Delete subnet ip
+	 * 
+	 * @return bool
+	 */
 	public function delete()
 	{
 		try {

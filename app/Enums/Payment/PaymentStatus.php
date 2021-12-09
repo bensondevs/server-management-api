@@ -28,6 +28,13 @@ final class PaymentStatus extends Enum
     const Failed = 3;
 
     /**
+     * Payment status is Refunded
+     * 
+     * @return int
+     */
+    const Refunded = 4;
+
+    /**
      * Get badge HTML class for status <span> class
      * 
      * @return string
@@ -45,6 +52,10 @@ final class PaymentStatus extends Enum
 
             case self::Failed:
                 $labelType = 'label-failed';
+                break;
+
+            case self::Refunded:
+                $labelType = 'label-warning';
                 break;
 
             default:

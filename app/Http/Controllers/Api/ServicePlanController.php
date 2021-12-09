@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-use App\Repositories\{ ServicePlanRepository, ServiceAddonRepository };
+use App\Repositories\{ 
+    ServicePlanRepository, 
+    ServiceAddonRepository 
+};
 use App\Http\Resources\ServicePlanResource;
 
 class ServicePlanController extends Controller
@@ -47,10 +50,8 @@ class ServicePlanController extends Controller
      */
     public function servicePlans()
     {
-    	$plans = $this->plan->all();
-        $plans = $this->plan->paginate();
-        $plans = ServicePlanResource::apiCollection($plans);
-
+        $plans = ServicePlan::all();
+        $plans = ServicePlanResource::collection($plans);
     	return response()->json(['plans' => $plans]);
     }
 

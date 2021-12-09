@@ -2,37 +2,31 @@
 
 namespace App\Repositories;
 
-use \Illuminate\Support\Facades\DB;
-use \Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
 
-use App\Models\User;
-use App\Models\Role;
-
+use App\Models\{ User, Role };
 use App\Repositories\Base\BaseRepository;
 
 class UserRepository extends BaseRepository
 {
+	/**
+	 * Repository constructor method
+	 * 
+	 * @return void
+	 */
 	public function __construct()
 	{
 		$this->setInitModel(new User);
 	}
 
-	public function allWithoutAdmins()
-	{
-		$this->setCollection(User::doesntHave('roles')->get());
-		return $this->getCollection();
-	}
-
-	public function administrators()
-	{
-		$role = Role::findByName('administrator');
-		$administrators = $role->users()->get();
-		$this->setCollection($administrators);
-		
-		return $this->getCollection();
-	}
-
-	public function save($userData)
+	/**
+	 * Save user
+	 * 
+	 * @param array  $userData
+	 * @return \App\Models\User
+	 */
+	public function save(array $userData)
 	{
 		try {
 			$user = $this->getModel();
@@ -50,52 +44,11 @@ class UserRepository extends BaseRepository
 		return $this->getModel();
 	}
 
-	public function updateProfile($userProfileData)
+	public function updatePassword(string $password)
 	{
 		try {
 			$user = $this->getModel();
-			$user->first_name = $userProfileData['first_name'];
-			$user->middle_name = isset($userProfileData['middle_name']) ?
-				$userProfileData['middle_name'] : null;
-			$user->last_name = $userProfileData['last_name'];
-			$user->company_name = isset($userProfileData['company_name']) ?
-				$userProfileData['company_name'] : null;
-			$user->save();
-			$this->setModel($user);
-
-			$this->setSuccess('Successfully save user profile data.');
-		} catch (QueryException $qe) {
-			$error = $qe->getMessage();
-			$this->setError('Failed to save user profile data.', $error);
-		}
-
-		return $this->getModel();
-	}
-
-	public function updateAccount($userAccountData)
-	{
-		try {
-			$user = $this->getModel();
-			$user->email = $userAccountData['email'];
-			$user->username = $userAccountData['username'];
-			$user->save();
-
-			$this->setModel($user);
-
-			$this->setSuccess('Successfully update user account information.');
-		} catch (QueryException $qe) {
-			$error = $qe->getMessage();
-			$this->setError('Failed to update user account information.', $error);
-		}
-
-		return $this->getModel();
-	}
-
-	public function updatePassword($userPasswordData)
-	{
-		try {
-			$user = $this->getModel();
-			$user->unhashed_password = $userPasswordData['password'];
+			$user->unhashed_password = $password;
 			$user->save();
 
 			$this->setModel($user);

@@ -33,27 +33,6 @@ use App\Jobs\Container\{
 class ContainerRepository extends BaseRepository
 {
 	/**
-	 * Amqp repository class container
-	 * 
-	 * @var \App\Repositories\AmqpRepository
-	 */
-	private $amqpRepo;
-
-	/**
-	 * Service repository class container
-	 * 
-	 * @var \App\Repositories\ServerRepository
-	 */
-	private $serverRepo;
-
-	/**
-	 * Subnet repository class container
-	 * 
-	 * @var \App\Repositories\SubnetRepository
-	 */
-	private $subnetRepo;
-
-	/**
 	 * Repository constructor method
 	 * 
 	 * @return void
@@ -61,10 +40,6 @@ class ContainerRepository extends BaseRepository
 	public function __construct()
 	{
 		$this->setInitModel((new Container));
-		
-		$this->amqpRepo = new AmqpRepository;
-		$this->serverRepo = new ServerRepository;
-		$this->subnetRepo = new SubnetRepository;
 	}
 
 	/**
@@ -94,6 +69,17 @@ class ContainerRepository extends BaseRepository
 		}
 
 		return $this->getModel();
+	}
+
+	/**
+	 * Create container from pre-created container
+	 * 
+	 * @param \App\Models\PrecreatedContainer $meta
+	 * @return \App\Models\Container
+	 */
+	public function createFromMeta(PrecreatedContainer $meta)
+	{
+		//
 	}
 
 	/**

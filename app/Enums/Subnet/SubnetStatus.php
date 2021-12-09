@@ -21,6 +21,13 @@ final class SubnetStatus extends Enum
     const Active = 1;
 
     /**
+     * Subnet status is forbidden to be used
+     * 
+     * @var int
+     */
+    const Forbidden = 2;
+
+    /**
      * Get badge HTML class for status <span> class
      * 
      * @return string
@@ -34,6 +41,10 @@ final class SubnetStatus extends Enum
 
             case self::Active:
                 $labelType = 'label-success';
+                break;
+
+            case self::Forbidden:
+                $labelType = 'label-danger';
                 break;
             
             default:

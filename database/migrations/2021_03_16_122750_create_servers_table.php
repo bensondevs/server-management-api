@@ -18,13 +18,15 @@ class CreateServersTable extends Migration
     {
         Schema::create('servers', function (Blueprint $table) {
             $table->uuid('id')->primary();
+
             $table->uuid('datacenter_id');
             $table->foreign('datacenter_id')
                 ->references('id')
                 ->on('datacenters')
                 ->onDelete('CASCADE');
+
             $table->string('server_name')->unique();
-            $table->string('status')->default('active');
+            $table->tinyInteger('status')->default(1);
 
             $table->timestamps();
         });

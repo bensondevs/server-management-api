@@ -40,6 +40,55 @@ function urlToUsername($urlString)
     return $domainName . $domainExtension;
 }
 
+/**
+ * Check if the string contains certain item
+ * 
+ * @param string  $string
+ * @param string  $find
+ * @param bool  $strict
+ * @return bool
+ */
+if (! function_exists('string_contains')) {
+    function string_contains(string $string, string $find, bool $strict = false)
+    {
+        return ($strict) ? strpos($string, $find) : stripos($string, $find);
+    }
+}
+
+/**
+ * Concat two path (whether it's url or directory) as one
+ * 
+ * @param string  ...$paths
+ * @return string
+ */
+if (! function_exists('concat_paths')) {
+    function concat_paths(...$paths) {
+        $paths = array_map(function ($path) {
+            if (first_character($path) == '/') {
+                $path = substr($path, 1);
+            }
+
+            if (last_character($path) == '/') {
+                $path = substr($path, -1);
+            }
+        }, $paths);
+
+        return implode('/', $paths);
+    }
+}
+
+/**
+ * Check the first character of a string
+ * 
+ * @param string  $string
+ * @return string
+ */
+if (! function_exists('first_character')) {
+    function first_character(string $string) {
+        return substr($string, 1);
+    }
+}
+
 function last_character(string $string)
 {
     return substr($string, -1);

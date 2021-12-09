@@ -22,12 +22,13 @@ class CreateSebPaymentsTable extends Migration
                 ->on('payments')
                 ->onDelete('CASCADE');
 
-            $table->longText('payment_reference')->nullable();
-            $table->char('payment_state');
-            $table->double('amount', 20, 2)->default(0);
+            $table->tinyInteger('method')->default(1);
+            $table->tinyInteger('state')->default(1);
 
-            $table->json('billing_address');
-            $table->json('api_response')->nullable();
+            $table->longText('order_reference')->nullable();
+            $table->string('email')->nullable();
+            $table->double('amount', 20, 2)->default(0);
+            $table->json('billing_address')->nullable();
 
             $table->timestamps();
         });

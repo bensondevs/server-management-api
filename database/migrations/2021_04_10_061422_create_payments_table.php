@@ -22,15 +22,13 @@ class CreatePaymentsTable extends Migration
                 ->on('users')
                 ->onDelete('CASCADE');
 
-            $table->uuidMorphs('paymentable');
-
             $table->uuid('order_id')->nullable();
             $table->foreign('order_id')
                 ->references('id')
                 ->on('orders')
                 ->onDelete('CASCADE');
 
-            $table->tinyInteger('methods')->default(1);
+            $table->tinyInteger('method')->default(1);
 
             $table->tinyInteger('currency')->default(1);
             $table->double('amount', 10, 2);

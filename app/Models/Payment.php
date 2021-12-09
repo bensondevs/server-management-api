@@ -62,21 +62,9 @@ class Payment extends Model
         'user_id',
         'order_id',
 
-        'payment_reference',
-
-        'methods',
+        'method',
         'amount',
         'status',
-    ];
-
-    /**
-     * Columns that should be casted
-     * 
-     * @var array
-     */
-    protected $casts = [
-        'billing_address' => 'array',
-        'vendor_api_response' => 'array',
     ];
 
     /**
@@ -93,90 +81,108 @@ class Payment extends Model
             $payment->id = Uuid::generate()->string;
     	});
     }
-    public function setVendorApiResponseAttribute(array $response)
-    {
-        if (isset($response['payment_state'])) {
-            if ($response['payment_state'] == 'settled') {
-                $this->attributes['status'] = 'paid';
-            }
-        }
 
-        $json = json_encode($response);
-        $this->attributes['vendor_api_response'] = $json;
-    }
-
-    public function getVendorApiResponseAttribute()
-    {
-        $json = $this->attributes['vendor_api_response'];
-        $vendorApiResponse = json_decode($json, true);
-
-        return $vendorApiResponse;
-    }
-
-    public function setBillingAddressAttribute($address)
-    {
-        $json = json_encode($address);
-        $this->attributes['billing_address'] = $json;
-    }
-
-    public function getBillingAddressAttribute()
-    {
-        $json = $this->attributes['billing_address'];
-        $billingAddress = json_decode($json, true);
-
-        return $billingAddress;
-    }
-
+    /**
+     * Create callable "status_description" attribute
+     * This callable attribute will return enum description
+     * of the column value of status
+     * 
+     * @return string
+     */
     public function getStatusDescriptionAttribute()
     {
         $status = $this->attributes['status'];
         return Status::getDescription($status);
     }
 
-    public function getMethodsDescriptionAttribute()
+    /**
+     * Create callable "methods_descrption" attribute
+     * This callable attribute will return enum description
+     * of the column value of method
+     * 
+     * @return string
+     */
+    public function getMethodDescriptionAttribute()
     {
-        $method = $this->attributes['methods'];
+        $method = $this->attributes['method'];
         return Method::getDescription($method);
     }
 
+    /**
+     * Create callable "formatted_amount" attribute
+     * This callable attribute will return the currency formatted form
+     * 
+     * @return string
+     */
     public function getFormattedAmountAttribute()
     {
         $amount = $this->attributes['amount'];
         return currency_format($amount);
     }
 
-    public function syncPaymentState()
-    {
-        $apiResponse = $this->attributes['vendor_api_response']; 
-        if (! $response = json_decode($apiResponse, true)) {
-            $this->attributes['status'] = Status::Unpaid;
-            return $this->save();
-        }
-
-        $state = $response['payment_state'];
-        if ($state == 'settled') {
-            $this->attributes['status'] = Status::Settled;
-        } else if ($state == 'failed') {
-            $this->attributes['status'] = Status::Failed;
-        } else {
-            $this->attributes['status'] = Status::Unpaid;
-        }
-
-        return $this->save();
-    }
-
-    public function order()
-    {
-        return $this->hasOne(Order::class);
-    }
-
+    /**
+     * Get the user of the payment
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public static function findOrder(Order $order)
+    /**
+     * Get order paid by this payment
+     */
+    public function order()
     {
-        return self::where('order_id', $order->id)->first();
+        return $this->belongsTo(Order::class);
+    }
+
+    /**
+     * Guess what payment method model is attached
+     */
+    public function vendorPayment()
+    {
+        switch ($this->attributes['method']) {
+            case Method::SEB:
+                $model = SebPayment::class;
+                break;
+            
+            case Method::Paypal:
+                $model = PaypalPayment::class;
+                break;
+
+            case Method::Stripe:
+                $model = StripePayment::class;
+                break;
+
+            default:
+                $model = SebPayment::class;
+                break;
+        }
+
+        return $this->hasOne($model);
+    }
+
+    /**
+     * Get seb payment model
+     */
+    public function sebPayment()
+    {
+        return $this->hasOne(SebPayment::class);
+    }
+
+    /**
+     * Get stripe payment model
+     */
+    public function stripePayment()
+    {
+        return $this->hasOne(StripePayment::class);
+    }
+
+    /**
+     * Get Paypal payment model
+     */
+    public function paypalPayment()
+    {
+        return $this->hasOne(PaypalPayment::class);
     }
 }

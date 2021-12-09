@@ -35,18 +35,6 @@ class PaymentResource extends JsonResource
             'created_at' => $this->created_at,
         ];
 
-        if ($this->vendor_api_response) {
-            $structure['vendor_api_response'] = $this->vendor_api_response;
-        }
-
-        if ($this->payment_reference) {
-            $structure['payment_reference'] = $this->payment_reference;
-        }
-
-        if ($this->billing_address) {
-            $structure['billing_address'] = $this->billing_address;
-        }
-
         if ($this->relationLoaded('user')) {
             $structure['user'] = new UserResource($this->user);
         }
@@ -55,8 +43,20 @@ class PaymentResource extends JsonResource
             $structure['order'] = new OrderResource($this->order);
         }
 
-        if ($this->relationLoaded('servicePlan')) {
-            $structure['service_plan'] = new ServidePlan($this->servicePlan);
+        if ($this->relationLoaded('vendorPayment')) {
+            $vendorPayment = $this->vendorPayment;
+
+            switch (get_class($vendorPayment)) {
+                case SebPayment::class:
+                    
+                    break;
+                
+                default:
+                    // code...
+                    break;
+            }
+
+            $structure['vendor_payment'] = $vendorPayment;
         }
 
         return $structure;

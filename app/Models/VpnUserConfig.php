@@ -22,16 +22,12 @@ class VpnUserConfig extends Model
         'config_content',
     ];
 
-    protected $hidden = [
-        
-    ];
-
     protected static function boot()
     {
     	parent::boot();
 
-    	self::creating(function ($vpnUserConfig) {
-            $vpnUserConfig->id = Uuid::generate()->string;
+    	self::creating(function ($config) {
+            $config->id = Uuid::generate()->string;
     	});
     }
 
@@ -43,7 +39,7 @@ class VpnUserConfig extends Model
 
     public function container()
     {
-        return $this->belongsTo('App\Models\Container', 'container_id', 'id');
+        return $this->belongsTo(Container::class);
     }
 
     public static function findInContainer(Container $container, string $username)

@@ -14,17 +14,53 @@ class Datacenter extends Model
 {
     use Searchable;
 
+    /**
+     * Model table name
+     * 
+     * @var string
+     */
     protected $table = 'datacenters';
+
+    /**
+     * Model primary key
+     * 
+     * @var string
+     */
     protected $primaryKey = 'id';
+
+    /**
+     * Model timestamp marking enability
+     * Set to TRUE to set the value of `created_at` upon model create 
+     * and `updated_at` upon model updating event 
+     * 
+     * @var bool 
+     */
     public $timestamps = true;
+
+    /**
+     * Model primary key incrementing. 
+     * Set to TRUE if `id` is int, otherwise let it be FALSE
+     * 
+     * @var bool
+     */
     public $incrementing = false;
 
+    /**
+     * Column that searchable
+     * 
+     * @var array
+     */
     protected $searchable = [
         'datacenter_name',
         'client_datacenter_name',
         'location',
     ];
 
+    /**
+     * Model fillable columns
+     * 
+     * @var array
+     */
     protected $fillable = [
         'region_id',
         
@@ -34,6 +70,13 @@ class Datacenter extends Model
         'status',
     ];
 
+    /**
+     * Model boot static method
+     * This method handles event and hold event listener and observer
+     * This is where Observer and Event Listener Class should be put
+     * 
+     * @return void
+     */
     protected static function boot()
     {
     	parent::boot();
@@ -43,30 +86,38 @@ class Datacenter extends Model
     	});
     }
 
+    /**
+     * Create callable attribute of "status_description"
+     * This callable attribute will return the status description
+     * from the enum
+     * 
+     * @return string
+     */
     public function getStatusDescriptionAttribute()
     {
         $status = $this->attributes['status'];
         return DatacenterStatus::getDescription($status);
     }
 
-    public function switchStatus()
-    {
-        $status = (bool) $this->attributes['status'];
-        $this->attributes['status'] = (! $status);
-
-        return $this->save();
-    }
-
+    /**
+     * Get region of the datacenter
+     */
     public function region()
     {
         return $this->belongsTo(Region::class);
     }
 
+    /**
+     * Get list of subnets of the datacenter
+     */
     public function subnets()
     {
         return $this->hasMany(Subnet::class);
     }
 
+    /**
+     * Get servers of the datacenter
+     */
     public function servers()
     {
         return $this->hasMany(Server::class);

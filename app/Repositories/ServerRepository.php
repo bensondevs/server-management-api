@@ -2,77 +2,38 @@
 
 namespace App\Repositories;
 
-use \Illuminate\Support\Facades\DB;
-use \Illuminate\Database\QueryException;
-
-use App\Models\Server;
-use App\Models\Datacenter;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
 use App\Repositories\Base\BaseRepository;
+
+use App\Models\{ Server, Datacenter };
 
 class ServerRepository extends BaseRepository
 {
+	/**
+	 * Repository constructor method
+	 * 
+	 * @return void
+	 */
 	public function __construct()
 	{
 		$this->setModel(new Server());
 	}
 
-	public function find($id)
-	{
-		$this->setModel(Server::findOrFail($id));
-		return $this->getModel();
-	}
-
-	public function findWith($id, $relation = '')
-	{
-		$this->setModel(
-			Server::with($relation)->findOrFail($id)
-		);
-
-		return $this->getModel();
-	}
-
-	public function mostSelectedOf(Datacenter $datacenter)
-	{
-		// Select least chosen server
-		$server = Server::withCount('containers')
-			->where('datacenter_id', $datacenter->id)
-			->get()
-			->sortByDesc('containers_count')
-			->first();
-
-		$this->setModel($server);
-
-		return $this->getModel();
-	}
-
-	public function leastSelectedOf(Datacenter $datacenter)
-	{
-		// Select least chosen server
-		return Server::withCount('containers')
-			->where('datacenter_id', $datacenter->id)
-			->get()
-			->sortBy('containers_count')
-			->first();
-	}
-
-	public function allWithData()
-	{
-		$servers = Server::with(['datacenter.region'])
-			->withCount(['containers'])
-			->get();
-		$this->setCollection($servers);
-
-		return $this->getCollection();
-	}
-
-	public function save($serverData)
+	/**
+	 * Save server data
+	 * 
+	 * @param array  $serverData
+	 * @return \App\Models\Server
+	 */
+	public function save(array $serverData)
 	{
 		try {
 			$server = $this->getModel();
 			$server->fill($serverData);
 			$server->ip_address = $serverData['ip_address'];
 			$server->save();
+			
 			$this->setModel($server);
 
 			$this->setSuccess('Successfully save server data.');

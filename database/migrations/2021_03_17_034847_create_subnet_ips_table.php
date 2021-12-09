@@ -22,14 +22,13 @@ class CreateSubnetIpsTable extends Migration
                 ->on('subnets')
                 ->onDelete('CASCADE');
 
-            $table->tinyInteger('is_forbidden')->default(0);
-            $table->tinyInteger('is_assigned')->default(0);
-
-            $table->uuid('assigned_user_id')->nullable();
-            $table->foreign('assigned_user_id')
+            $table->uuid('user_id')->nullable();
+            $table->foreign('user_id')
                 ->references('id')
                 ->on('users')
                 ->onDelete('CASCADE');
+
+            $table->tinyInteger('status')->default(1);
 
             $table->text('comment');
 
@@ -47,7 +46,6 @@ class CreateSubnetIpsTable extends Migration
     public function down()
     {
         DB::statement('ALTER TABLE `subnet_ips` DROP COLUMN `ip_binary`');
-
         Schema::dropIfExists('subnet_ips');
     }
 }

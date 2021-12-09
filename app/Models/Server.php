@@ -7,91 +7,149 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 
-use App\Models\Datacenter;
-
 use App\Observers\ServerObserver;
+use App\Enums\Server\ServerStatus;
 
 class Server extends Model
 {
+    /**
+     * Model database table
+     * 
+     * @var string
+     */
     protected $table = 'servers';
+
+    /**
+     * Model database primary key column name
+     * 
+     * @var string
+     */
     protected $primaryKey = 'id';
+
+    /**
+     * Model timestamp marking enability
+     * Set to TRUE to set the value of `created_at` upon model create 
+     * and `updated_at` upon model updating event 
+     * 
+     * @var bool 
+     */
     public $timestamps = true;
+
+    /**
+     * Model primary key incrementing. 
+     * Set to TRUE if `id` is int, otherwise let it be FALSE
+     * 
+     * @var bool
+     */
     public $incrementing = false;
 
+    /**
+     * Model massive fillable column
+     * 
+     * @var array
+     */
     protected $fillable = [
         'server_name',
         'datacenter_id',
         'status',
     ];
 
+    /**
+     * Model hidden column value
+     * 
+     * @var arra
+     */
     protected $hidden = [
         'ip_binary'
     ];
 
+    /**
+     * Model boot static method
+     * This method handles event and hold event listener and observer
+     * This is where Observer and Event Listener Class should be put
+     * 
+     * @return void
+     */
     protected static function boot()
     {
     	parent::boot();
         self::observe(ServerObserver::class);
-
-        self::retrieved(function ($server) {
-            $server->complete_server_name = $server->complete_server_name;
-        });
-
-    	self::creating(function ($server) {
-            $server->id = Uuid::generate()->string;
-    	});
     }
 
+    /**
+     * Create settable attribute of "ip_address"
+     * This settable attribute will set "ip_binary" using IP address
+     * of string
+     * 
+     * @param string  $ipAddress
+     * @return void
+     */
     public function setIpAddressAttribute(string $ipAddress)
     {
         $this->attributes['ip_binary'] = inet_pton($ipAddress);
     }
 
+    /**
+     * Create callable attribute of "ip_address"
+     * This callable attribute will get "ip_binary" value as string
+     * which contain the value of IP Address
+     * 
+     * @return string
+     */
     public function getIpAddressAttribute()
     {
         return inet_ntop($this->attributes['ip_binary']);
     }
 
-    public function getCompleteServerNameAttribute()
+    /**
+     * Create callable attribute of "full_server_name"
+     * This callable attribute will return full name of the server
+     * with addition to it's prefix with datacenter name and region name
+     * 
+     * @return string
+     */
+    public function getFullServerNameAttribute()
     {
-        $datacenter = Datacenter::with('region')->find(
-            $this->attributes['datacenter_id']
-        );
-        $region = $datacenter->region;
+        $fullName = $this->attributes['server_name'];
 
-        $completeName = '';
-        if ($region) 
-            $completeName .= $region->region_name . '-';
+        if ($datacenter = $this->datacenter) {
+            $fullName = $datacenter->datacenter_name . '|' . $fullName;
+        }
 
-        if ($datacenter)
-            $completeName .= $datacenter->datacenter_name . '-';
-        $completeName .= $this->attributes['server_name'];
+        if ($region = $datacenter->region) {
+            $fullName = $region->region_name . '|' . $fullName;
+        }
 
-        return $completeName;
+        return $fullName;
     }
 
-    public function toggleStatus()
-    {
-        $this->attributes['status'] = ($this->attributes['status'] != 'active') ?
-                'active' : 'inactive';
-        return $this->save();
-    }
-
+    /**
+     * Get datacenter of the server
+     */
     public function datacenter()
     {
-        return $this->belongsTo(
-            'App\Models\Datacenter', 
-            'datacenter_id',
-            'id'
-        );
+        return $this->belongsTo(Datacenter::class);
     }
 
+    /**
+     * Get all containers inside the server
+     */
     public function containers()
     {
-        return $this->hasMany(
-            'App\Models\Container',
-            'server_id',
-            'id'
-        );
+        return $this->hasMany(Container::class);
     }
+
+    /**
+     * Set server status
+     * 
+     * This function will not send any update to the real server
+     * only recorded status in local database
+     * 
+     * @return bool|int
+     */
+    public function setStatus(int $status = 1, bool $save = true)
+    {
+        $this->attributes['status'] = $status;
+        return $save ? $this->save() : $status;
+    }  
 }

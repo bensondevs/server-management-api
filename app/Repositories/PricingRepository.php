@@ -2,28 +2,32 @@
 
 namespace App\Repositories;
 
-use \Illuminate\Support\Facades\DB;
-use \Illuminate\Database\QueryException;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
 use App\Repositories\Base\BaseRepository;
 
 use App\Models\Pricing;
-
-use App\Enums\Pricing\PricingCurrency;
+use App\Enums\Currency;
 
 class PricingRepository extends BaseRepository
 {
+	/**
+	 * Repository constructor method
+	 * 
+	 * @return void
+	 */
 	public function __construct()
 	{
 		$this->setInitModel(new Pricing);
 	}
 
-	public function currencyOptions()
-	{
-		return PricingCurrency::asSelectArray();
-	}
-
-	public function save(array $pricingData = [])
+	/**
+	 * Save pricing data
+	 * 
+	 * @param array  $pricingData
+	 * @return \App\Models\Pricing
+	 */
+	public function save(array $pricingData)
 	{
 		try {
 			$pricing = $this->getModel();
@@ -44,13 +48,16 @@ class PricingRepository extends BaseRepository
 		return $this->getModel();
 	}
 
-	public function delete(bool $force = false)
+	/**
+	 * Delete pricing data
+	 * 
+	 * @return bool
+	 */
+	public function delete()
 	{
 		try {
 			$pricing = $this->getModel();
-			$force ?
-				$pricing->forceDelete() :
-				$pricing->delete();
+			$pricing->delete();
 
 			$this->destroyModel();
 

@@ -14,7 +14,19 @@ use Spatie\Permission\Models\Role as SpatieRole;
 class Role extends SpatieRole
 {
     use UuidTrait;
+
+    /**
+     * Model table primary key
+     * 
+     * @var  string
+     */
     protected $primaryKey = 'id';
+
+    /**
+     * Model primary key type
+     * 
+     * @var  string
+     */
     protected $keyType = 'string';
 
     /**

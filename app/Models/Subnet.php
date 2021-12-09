@@ -3,42 +3,78 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
 use Webpatser\Uuid\Uuid;
 use App\Traits\Searchable;
 
 use App\Models\SubnetIp;
-
 use App\Observers\SubnetObserver;
-
 use App\Enums\Subnet\SubnetStatus;
-
 use IPTools\Network;
 
 class Subnet extends Model
 {
     use Searchable;
 
+    /**
+     * Model database table
+     * 
+     * @var string
+     */
     protected $table = 'subnets';
+
+    /**
+     * Model database primary key column name
+     * 
+     * @var string
+     */
     protected $primaryKey = 'id';
+
+    /**
+     * Model timestamp marking enability
+     * Set to TRUE to set the value of `created_at` upon model create 
+     * and `updated_at` upon model updating event 
+     * 
+     * @var bool 
+     */
     public $timestamps = true;
+
+    /**
+     * Model primary key incrementing. 
+     * Set to TRUE if `id` is int, otherwise let it be FALSE
+     * 
+     * @var bool
+     */
     public $incrementing = false;
 
+    /**
+     * Model massive fillable columns
+     * Put column names which can be assigned massively
+     * 
+     * @var array 
+     */
     protected $fillable = [
         'datacenter_id',
         'status',
         'subnet_mask',
     ];
 
+    /**
+     * Model searchable columns
+     * 
+     * @var array
+     */
     protected $searchable = [
         'subnet_mask',
     ];
 
-    protected $hidden = [
-        
-    ];
-
+    /**
+     * Model boot static method
+     * This method handles event and hold event listener and observer
+     * This is where Observer and Event Listener Class should be put
+     * 
+     * @return void
+     */
     protected static function boot()
     {
     	parent::boot();
@@ -49,51 +85,71 @@ class Subnet extends Model
     	});
     }
 
-    public function scopeActive($query)
+    /**
+     * Create callable function of "active()"
+     * This callable function will query only subnet with status of
+     * active
+     * 
+     * @param \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeActive(Builder $query)
     {
         return $query->where('status', SubnetStatus::Active);
     }
 
-    public function scopeWithCountIps($query)
-    {
-        return $query->withCount([
-            'ips', 
-            'ips as total_available_ips' => function ($ip) {
-                $ip->whereNull('assigned_user_id');
-            }
-        ]);
-    }
-
+    /**
+     * Create callable attribute of "status_description"
+     * This callable function will return enum description of the status
+     * 
+     * @return string
+     */
     public function getStatusDescriptionAttribute()
     {
         $status = $this->attributes['status'];
         return SubnetStatus::getDescription($status);
     }
 
+    /**
+     * Get IPs under this subnet
+     */
     public function ips()
     {
         return $this->hasMany(SubnetIp::class);
     }
 
+    /**
+     * Get free IPs under this subnet
+     */
     public function freeIps()
     {
         return $this->hasMany(SubnetIp::class)->whereNull('assigned_user_id');
     }
 
+    /**
+     * Get the datacenter of the subnet
+     */
     public function datacenter()
     {
         return $this->belongsTo(Datacenter::class);
     }
 
+    /**
+     * Get the containers under the subnet
+     */
     public function containers()
     {
         return $this->hasMany(Container::class);
     }
 
+    /**
+     * Create IPs of the subnet according to network parse
+     * 
+     * @return bool
+     */
     public function createIps()
     {
         $subnetMask = $this->attributes['subnet_mask'];
-
         $hosts = Network::parse($subnetMask)->hosts;
         $availableIps = [];
         foreach ($hosts as $ip) {
@@ -109,9 +165,16 @@ class Subnet extends Model
         return SubnetIp::insert($availableIps);
     }
 
-    public function switchForbidden()
+    /**
+     * Set the subnet as forbidden.
+     * 
+     * This will prohibit the subnet to be used.
+     * 
+     * @return bool
+     */
+    public function setForbidden()
     {
-        $this->attributes['is_forbidden'] = (! $this->attributes['is_forbidden']);
+        $this->attributes['status'] = SubnetStatus::Forbidden;
         return $this->save();
     }
 }

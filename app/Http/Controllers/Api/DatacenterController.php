@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Http\Resources\DatacenterResource;
-
 use App\Repositories\DatacenterRepository;
 
 class DatacenterController extends Controller
@@ -39,6 +38,18 @@ class DatacenterController extends Controller
     	$datacenters = $this->datacenter->all();
     	return response()->json([
             'datacenters' => DatacenterResource::collection($datacenters)
+        ]);
+    }
+
+    /**
+     * Show datacenter data
+     * 
+     * @return Illuminate\Support\Facades\Response
+     */
+    public function show(Datacenter $datacenter)
+    {
+        return response()->json([
+            'datacenter' => new DatacenterResource($datacenter)
         ]);
     }
 }

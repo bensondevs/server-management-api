@@ -123,6 +123,12 @@ class BaseRepository
 		return $this->parentModel;
 	}
 
+	/**
+	 * Set Collection of the repository
+	 * 
+	 * @param  Illuminate\Support\Collection  $collection
+	 * @return Illuminate\Support\Collection
+	 */
 	public function setCollection(Collection $collection)
 	{
 		return $this->collection = $collection;

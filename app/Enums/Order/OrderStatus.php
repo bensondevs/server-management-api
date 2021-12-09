@@ -21,26 +21,11 @@ final class OrderStatus extends Enum
     const Paid = 1;
 
     /**
-     * Order is already activated and 
-     * service container should be running
+     * Order is expired and order is cancelled
      * 
      * @var int
      */
-    const Activated = 2;
-
-    /**
-     * Order is expired and service container should be off
-     * 
-     * @var int
-     */
-    const Expired = 3;
-
-    /**
-     * Order is destoryed and service container should be destoryed
-     * 
-     * @var int
-     */
-    const Destroyed = 4;
+    const Expired = 2;
 
     /**
      * Get badge HTML class for status <span> class
@@ -71,12 +56,6 @@ final class OrderStatus extends Enum
             case self::Expired:
                 
                 $labelType = 'label-warning';
-                
-                break;
-
-            case self::Destroyed:
-                
-                $labelType = 'label-danger';
                 
                 break;
             

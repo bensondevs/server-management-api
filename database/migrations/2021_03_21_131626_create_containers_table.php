@@ -16,17 +16,11 @@ class CreateContainersTable extends Migration
         Schema::create('containers', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            $table->uuid('order_id')->nullable();
-            $table->foreign('order_id')
+            $table->uuid('subscription_id');
+            $table->foreign('subscription_id')
                 ->references('id')
-                ->on('orders')
-                ->onDelete('SET NULL');
-
-            $table->uuid('service_plan_id')->nullable();
-            $table->foreign('service_plan_id')
-                ->references('id')
-                ->on('service_plans')
-                ->onDelete('SET NULL');
+                ->on('subscriptions')
+                ->onDelete('CASCADE');
 
             $table->uuid('user_id')->nullable();
             $table->foreign('user_id')

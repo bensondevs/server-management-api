@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use App\Http\Requests\Auth\LoginRequest;
 
-use App\Repositories\SettingRepository;
+use App\Repositories\AuthApiRepository;
 
 use App\Models\User;
 
@@ -28,6 +28,13 @@ class LoginController extends Controller
     use AuthenticatesUsers;
 
     /**
+     * Authentication repository container
+     * 
+     * @var \App\Repositories\AuthApiRepository
+     */
+    private $auth;
+
+    /**
      * Where to redirect users after login.
      *
      * @var string
@@ -39,41 +46,24 @@ class LoginController extends Controller
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(AuthApiRepository $auth)
     {
         $this->middleware('guest')->except('logout');
+        $this->auth = $auth;
     }
 
+    /**
+     * Login execution function
+     * 
+     * @param  App\Http\Requests\Auth\LoginRequest  $request
+     * @return  \Illuminate\Support\Facades\Redirect
+     */
     public function authenticate(LoginRequest $request)
     {
-        $credentials = $request->onlyInRules();
+        $credentials = $request->validated();
+        $this->auth->login($credentials);
 
-        $logginInUser = db('users')
-            ->where('username', $credentials['identity'])
-            ->orWhere('email', $credentials['identity'])
-            ->first();
-
-        // Attempt login
-        $attempt = auth()->attempt([
-            'email' => $logginInUser->email, 
-            'password' => $credentials['password'],
-        ]);
-
-        if ($attempt) {
-            activity()
-                ->causedBy(auth()->user())
-                ->log(auth()->user()->anchorName() . ' had logged in to administrator dashboard.');
-
-            // Load Site Settings
-            $settingRepository = new SettingRepository;
-            $settings = $settingRepository->allSettings();
-
-            // Save in session
-            foreach ($settings as $key => $value)
-                $request->session()->put($key, $value);
-        }
-
-        return $attempt ?
+        return $this->auth->status == 'success' ?
             redirect()->intended('dashboard') :
             redirect()->back()->with('error', 'Login attempt failed.');
     }

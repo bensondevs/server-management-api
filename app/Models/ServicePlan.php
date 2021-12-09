@@ -6,125 +6,108 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
-use Stevebauman\Location\Facades\Location;
-
-use App\Enums\ServicePlan\ServicePlanStatus;
-use App\Enums\ServicePlan\ServicePlanTimeUnit;
-
-use App\Enums\Pricing\PricingCurrency;
 
 class ServicePlan extends Model
 {
+    /**
+     * The model table name
+     * 
+     * @var string
+     */
     protected $table = 'service_plans';
+
+    /**
+     * The model primary key
+     * 
+     * @var string
+     */
     protected $primaryKey = 'id';
+
+    /**
+     * Model timestamp marking enability
+     * Set to TRUE to set the value of `created_at` upon model create 
+     * and `updated_at` upon model updating event 
+     * 
+     * @var bool 
+     */
     public $timestamps = true;
+
+    /**
+     * Model primary key incrementing. 
+     * Set to TRUE if `id` is int, otherwise let it be FALSE
+     * 
+     * @var bool
+     */
     public $incrementing = false;
 
+    /**
+     * Model massive fillable columns
+     * Put column names which can be assigned massively
+     * 
+     * @var array 
+     */
     protected $fillable = [
+        'is_hidden',
         'plan_name',
         'plan_code',
-        'status',
-
-        'time_quantity',
-        'time_unit',
         'description',
     ];
 
+    /**
+     * Model boot static method
+     * This method handles event and hold event listener and observer
+     * This is where Observer and Event Listener Class should be put
+     * 
+     * @return void
+     */
     protected static function boot()
     {
     	parent::boot();
 
     	self::creating(function ($servicePlan) {
             $servicePlan->id = Uuid::generate()->string;
+
+            if (! $servicePlan->plan_code) {
+                $servicePlan->plan_code = random_string(5);
+            }
     	});
     }
 
-    public function getDurationAttribute()
+    /**
+     * Get list of plan items
+     */
+    public function items()
     {
-        $quantity = $this->attributes['time_quantity'];
-        $unit = ServicePlanTimeUnit::getDescription($this->attributes['time_unit']);
-
-        return $quantity . ' ' . $unit;
+        return $this->hasMany(ServicePlanItem::class);
     }
 
-    public function getDurationInDaysAttribute()
-    {
-        $quantity = (int) $this->attributes['time_quantity'];
-        $unit = $this->attributes['time_unit'];
-
-        if ($unit == ServicePlanTimeUnit::Year) {
-            $quantity = $quantity * 365;
-        } else if ($unit == ServicePlanTimeUnit::Month) {
-            $quantity = $quantity * 30;
-        }
-
-        return $quantity;
-    }
-
-    public function setDurationAttribute(string $duration)
-    {
-        $explode = explode(' ', $duration);
-
-        if (count($explode) == 2) {
-            $this->attributes['time_quantity'] = $explode[0];
-            $this->attributes['time_unit'] = $explode[1];
-        }
-    }
-
-    public function getPricingAttribute()
-    {
-        if (! ($this->pricings)) {
-            $this->pricings = $this->pricings();
-        }
-
-        // Get continent
-        $continent = 'EU';
-        $geoIp = geoip(request()->ip());
-        if (isset($geoIp['continent'])) {
-            $continent = $geoIp['continent'];
-        }
-
-
-        if ($continent == 'EU') {
-            return $this->pricing = $this->pricings
-                ->where('currency', PricingCurrency::EUR)
-                ->first();
-        }
-
-        return $this->pricing = $this->pricings()
-            ->where('currency', PricingCurrency::USD)
-            ->first();
-    }
-
-    public function getSubscriptionFeeAttribute()
-    {
-        if (! isset($this->pricing)) {
-            $this->pricing = $this->getPricingAttribute();
-        }
-
-        return $this->pricing ? $this->pricing->price : 0;
-    }
-
-    public function getCurrencyAttribute()
-    {
-        if (! isset($this->pricing)) {
-            $this->pricing = $this->getPricingAttribute();
-        }
-        
-        return $this->pricing ? $this->pricing->currency_code : 'EUR';
-    }
-
+    /**
+     * Get pricing of the plan
+     */
     public function pricings()
     {
-        return $this->morphMany(Pricing::class, 'priceable');
+        return $this->morphMany(Pricing::class, 'pricingable');
     }
 
-    public function addPricing(array $pricingData = [])
+    /**
+     * Hide service plan from the users
+     * 
+     * @return bool
+     */
+    public function hide()
     {
-        $pricing = new Pricing();
-        $pricing->fill($pricingData);
-        $pricing->priceable_type = get_class($this);
-        $pricing->priceable_id = $this->attributes['id'];
-        return $pricing->save();
+        $this->attributes['is_hidden'] = true;
+        return $this->save();
+    }
+
+    /**
+     * Unhide service plan from the users
+     * 
+     * @return bool
+     */
+    public function unhide()
+    {
+        $this->attributes['is_hidden'] = false;
+        return $this->save();
     }
 }

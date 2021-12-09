@@ -14,7 +14,19 @@ use Spatie\Permission\Models\Permission as SpatiePermission;
 class Permission extends SpatiePermission
 {
     use UuidTrait;
+
+    /**
+     * Model database primary key
+     * 
+     * @var string
+     */
     protected $primaryKey = 'id';
+
+    /**
+     * Define the model key type
+     * 
+     * @var string
+     */
     protected $keyType = 'string';
 
     /**

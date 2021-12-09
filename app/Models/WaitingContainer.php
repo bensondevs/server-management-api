@@ -20,10 +20,6 @@ class WaitingContainer extends Model
         'waiting_since',
     ];
 
-    protected $hidden = [
-        
-    ];
-
     protected static function boot()
     {
     	parent::boot();

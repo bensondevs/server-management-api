@@ -16,12 +16,10 @@ class CreateServicePlansTable extends Migration
         Schema::create('service_plans', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
+            $table->tinyInteger('status')->default(1);
+
             $table->string('plan_name')->unique();
             $table->string('plan_code')->unique();
-
-            $table->integer('time_quantity')->default(1);
-            $table->tinyInteger('time_unit')->default(1);
-
             $table->longText('description')->nullable();
 
             $table->timestamps();

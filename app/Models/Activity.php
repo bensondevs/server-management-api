@@ -28,6 +28,7 @@ class Activity extends SpatieActivity
 
     public function getCreatedTimeAttribute()
     {
-        return carbon($this->attributes['created_at'])->format('[H:i:s] M d, Y');
+        $createdAt = $this->attributes['created_at'];
+        return carbon($createdAt)->format('[H:i:s] M d, Y');
     }
 }

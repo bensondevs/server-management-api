@@ -17,24 +17,22 @@ class CreateOrdersTable extends Migration
             $table->uuid('id')->primary();
             $table->integer('order_number');
 
-            $table->tinyInteger('status')->default(1);
+            $table->tinyInteger('status')->default(0);
 
-            $table->uuid('customer_id');
-            $table->foreign('customer_id')
+            $table->uuid('user_id');
+            $table->foreign('user_id')
                 ->references('id')
                 ->on('users')
                 ->onDelete('CASCADE');
 
-            $table->double('amount')->default(0);
+            $table->tinyInteger('currency')->default(1);
+            $table->double('total')->default(0);
             $table->float('vat_size_percentage')->default(0);
-            $table->double('total_amount', 20, 2)->default(0);
-
-            /* Save pre-created container */
-            $table->json('meta_container')->nullable();
-
-            $table->datetime('expired_at')->nullable();
+            $table->double('grand_total', 20, 2)->default(0);
 
             $table->timestamps();
+            $table->datetime('paid_at')->nullable();
+            $table->datetime('expired_at')->nullable();
         });
     }
 

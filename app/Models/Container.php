@@ -9,11 +9,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Webpatser\Uuid\Uuid;
 
-use App\Traits\Searchable;
-use App\Traits\TrackInQueue;
-
 use App\Observers\ContainerObserver;
 
+use App\Traits\{ Searchable, TrackInQueue };
 use App\Traits\Container\{
     VpnTrait,
     NfsTrait,
@@ -23,9 +21,7 @@ use App\Traits\Container\{
 
 class Container extends Model
 {
-    use Searchable;
-    use TrackInQueue;
-
+    use Searchable, TrackInQueue;
     use VpnTrait, NfsTrait, SambaTrait, NginxTrait;
 
     /**
@@ -76,7 +72,7 @@ class Container extends Model
 
         'service_plan_id',
         
-        'customer_id',
+        'user_id',
         'server_id',
         'subnet_id',
         'subnet_ip_id',

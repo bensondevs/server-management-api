@@ -2,15 +2,15 @@
 
 namespace App\Observers;
 
+use App\Repositories\Payments\{
+    SebRepository, PaypalRepository, StripeRepository
+};
+
 use App\Models\Payment;
-
-use App\Enums\Payment\PaymentStatus;
-use App\Enums\Order\OrderStatus;
-
-use App\Jobs\SendMail;
-use App\Jobs\Order\ProcessOrder;
-
-use App\Mail\Orders\OrderPaidMail;
+use App\Enums\Payment\{
+    PaymentStatus as Status,
+    PaymentMethod as Method
+};
 
 class PaymentObserver
 {
@@ -22,20 +22,17 @@ class PaymentObserver
      */
     public function created(Payment $payment)
     {
-        if ($payment->status == PaymentStatus::Settled) {
-            $order = $payment->order;
-            $order->status = OrderStatus::Paid;
-            $order->save();
-
-            /*$mail = new OrderPaidMail($order);
-            $send = new SendMail($mail, $order->customer->email);
-            $send->delay(1);
-            dispatch($send);*/
-
-            $process = new ProcessOrder($order);
-            $process->delay(1);
-            dispatch($process);
+        switch ($payment->status) {
+            case Method::SEB:
+                $respository = new SebRepository();
+                break;
+            
+            default:
+                $respository = new SebRepository();
+                break;
         }
+
+        $respository->create($payment);
     }
 
     /**
@@ -46,19 +43,40 @@ class PaymentObserver
      */
     public function updated(Payment $payment)
     {
-        if ($payment->isDirty('status') && $payment->status == PaymentStatus::Settled) {
-            $order = $payment->order;
-            $order->status = OrderStatus::Paid;
-            $order->save();
+        /**
+         * Actions in corresponding status change
+         */
+        if ($payment->isDirty('status')) {
+            /**
+             * Indicate payment has been paid
+             */
+            if ($payment->status == Status::Settled) {
+                switch ($payment->method) {
+                    case Method::SEB:
+                        // code...
+                        break;
+                    
+                    case Method::Paypal:
+                        // code...
+                        break;
 
-            /*$mail = new OrderPaidMail($order);
-            $send = new SendMail($mail, $order->customer->email);
-            $send->delay(1);
-            dispatch($send);*/
+                    case Method::Stripe:
+                        // code...
+                        break;
 
-            $process = new ProcessOrder($order);
-            $process->delay(1);
-            dispatch($process);
+                    default:
+                        // code...
+                        break;
+                }
+            }
+
+            /**
+             * Indicate payment has been failed
+             * due to late of payment or status change
+             */
+            if ($payment->status == Status::Failed) {
+                //
+            }
         }
     }
 

@@ -2,12 +2,21 @@
 
 namespace App\Observers;
 
-use App\Models\Server;
-
-use App\Models\WaitingContainer;
+use App\Models\{ Server, PrecreatedContainer };
 
 class ServerObserver
 {
+    /**
+     * Handle the Server "creating" event.
+     *
+     * @param  \App\Models\Server  $server
+     * @return void
+     */
+    public function creating(Server $server)
+    {
+        $server->id = generateUuid();
+    }
+
     /**
      * Handle the Server "created" event.
      *
@@ -16,7 +25,7 @@ class ServerObserver
      */
     public function created(Server $server)
     {
-        WaitingContainer::pushBack();
+        //
     }
 
     /**

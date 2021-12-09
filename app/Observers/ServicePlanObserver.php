@@ -7,6 +7,17 @@ use App\Models\ServicePlan;
 class ServicePlanObserver
 {
     /**
+     * Handle the ServicePlan "currency" event.
+     *
+     * @param  \App\Models\ServicePlan  $servicePlan
+     * @return void
+     */
+    public function creating(ServicePlan $servicePlan)
+    {
+        $servicePlan->id = generateUuid();
+    }
+
+    /**
      * Handle the ServicePlan "created" event.
      *
      * @param  \App\Models\ServicePlan  $servicePlan
@@ -14,9 +25,7 @@ class ServicePlanObserver
      */
     public function created(ServicePlan $servicePlan)
     {
-        foreach (PricingCurrency::asSelectArray() as $code => $currency) {
-            $servicePlan->addPricing(['currency' => $code, 'price' => 0]);
-        }
+        //
     }
 
     /**

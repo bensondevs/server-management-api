@@ -5,7 +5,12 @@ namespace App\Http\Controllers\Api\Payments;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
-use App\Repositories\PaymentRepository;
+
+use App\Http\Requests\Payments\{
+    CreatePaymentRequest as CreateRequest
+};
+
+use App\Repositories\Payments\PaymentRepository;
 use App\Models\Payment;
 
 class PaymentController extends Controller
@@ -46,24 +51,44 @@ class PaymentController extends Controller
     }
 
     /**
-     * Set recurring payment
+     * Create payment from the order
      * 
-     * @param 
-     * @return
+     * @param CreateRequest  $request
+     * @param \App\Models\Order  $order
+     * @return 
      */
-    public function setRecurring()
+    public function create(CreateRequest $request, Order $order)
     {
-        //
+        $method = $request->input('method');
+        $payment = $this->payment->create($order, $method);
+
+        return apiResponse($this->payment, ['payment' => $payment]);
     }
 
     /**
-     * Stop recurring payment
+     * Show payment resource
      * 
-     * @param 
-     * @return
+     * @param  \App\Models\Payment  $payment
+     * @return Illuminate\Support\Facades\Response
      */
-    public function stopRecurring()
+    public function show(Payment $payment)
     {
-        //
+        return response()->json([
+            'payment' => new PaymentResource($payment)
+        ]);
+    }
+
+    /**
+     * Report payment
+     * 
+     * @param  ReportPaymentRequest $request
+     * @param  \App\Models\Payment  $payment
+     * @return Illuminate\Support\Facades\Response
+     */
+    public function report(ReportPaymentRequest $request, Payment $payment)
+    {
+        $this->payment->setModel($payment);
+        $this->payment->sendReport($request->validated());
+        return apiResponse($this->payment);
     }
 }

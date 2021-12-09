@@ -6,11 +6,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
-
-use App\Traits\TrackInQueue;
-use App\Enums\Order\OrderStatus;
 use App\Observers\OrderObserver;
-use App\Jobs\Order\ProcessOrder;
+use App\Traits\TrackInQueue;
+
+use App\Enums\Order\OrderStatus as Status;
 
 class Order extends Model
 {
@@ -50,19 +49,22 @@ class Order extends Model
      * @var array
      */
     protected $fillable = [
+        'order_number',
         'status',
-        'customer_id',
-
-        'disk_size',
         
+        'user_id',
+        
+        'currency',
+        'total',
         'vat_size_percentage',
-        'total_amount',
+        'grand_total',
     ];
 
-    protected $casts = [
-        'meta_container' => 'array',
-    ];
-
+    /**
+     * Model event handler function
+     * 
+     * @return void 
+     */
     protected static function boot()
     {
     	parent::boot();
@@ -77,24 +79,22 @@ class Order extends Model
     	});
     }
 
-    public function setMetaContainerAttribute(array $container)
-    {
-        $this->attributes['meta_container'] = json_encode($container);
-    }
-
-    public function getMetaContainerAttribute()
-    {
-        $json = $this->attributes['meta_container'];
-
-        return json_decode($json, true);
-    }
-
+    /**
+     * Get VAT Size Percentage with (%)
+     * 
+     * @return string
+     */
     public function getVatSizePercentageAttribute()
     {
         $vatSize = $this->attributes['vat_size_percentage'];
         return $vatSize . '%';
     }
 
+    /**
+     * Get amount of money in VAT
+     * 
+     * @return float
+     */
     public function getVatAmountAttribute()
     {
         $amount = $this->attributes['amount'];
@@ -103,149 +103,130 @@ class Order extends Model
         return $amount * ($vatPercentage / 100);
     }
 
-    public function getOrderDateAttribute()
-    {
-        $orderCreatedAt = $this->attributes['created_at'];
-
-        return carbon($orderCreatedAt)->format('d/m/Y');
-    }
-
-    public function getExpiredDateAttribute()
-    {
-        $orderExpiredAt = $this->attributes['expired_at'];
-
-        return carbon($orderExpiredAt)->format('d/m/Y');
-    }
-
+    /**
+     * Create callable attribute of `status_description`
+     * This attribute will return the enum description of current status
+     * 
+     * @return string
+     */
     public function getStatusDescriptionAttribute()
     {
         $status = $this->attributes['status'];
         return OrderStatus::getDescription($status);
     }
 
-    public function generateOrderNumber()
-    {
-        return (db('orders')->count() + 1);
-    }
-
-    public function getRawTotalAttribute()
-    {
-        // Ordered Plan
-        $planAmount = 0;
-        if ($orderedPlan = $this->plan) {
-            $planAmount = $orderedPlan->countSubTotal();
-        }
-
-        return $planAmount;
-    }
-
+    /**
+     * Get order items of order
+     */
     public function orderItems()
     {
-        $plan = $this->plan;
-        $addons = $this->addons()->with(['serviceAddon'])->ge();
-
-        $items = [];
-        array_push($items, [
-            'item_name' => $plan->servicePlan->plan_name,
-            'quantity' => $plan->quantity,
-            'unit' => $plan->servicePlan->duration,
-            'currency' => $plan->servicePlan->currency,
-            'price' => $plan->servicePlan->subscription_fee,
-            'sub_total' => $plan->countSubTotal(),
-        ]);
-
-        foreach ($addons as $addon) {
-            array_push($items, [
-                'item_name' => $addon->serviceAddon->addon_name,
-                'quantity' => $addon->quantity,
-                'unit' => $addon->serviceAddon->quantity_unit,
-                'currency' => $addon->serviceAddon->currency,
-                'price' => $addon->serviceAddon->subscription_fee,
-                'sub_total' => $addon->countSubTotal(),
-            ]);
-        }
-
-        return $items;
+        return $this->hasMany(OrderItem::class);
     }
 
-    public function countTotal()
+    /**
+     * Get pre-created container from order
+     */
+    public function precreatedContainer()
     {
-        // Set amount
-        $amount = $this->getRawTotalAttribute();
-        $this->attributes['amount'] = $amount;
-        
-        // Amount with VAT percentage
-        $vatAmount = $this->getVatAmountAttribute();
-        $totalAmount = $amount + $vatAmount;
-        return $this->attributes['total_amount'] = $totalAmount;
+        return $this->hasOne(PrecreatedContainer::class);
     }
 
+    /**
+     * Get generated container of order
+     */
     public function container()
     {
         return $this->hasOne(Container::class);
     }
 
-    public function customer()
+    /**
+     * User who do the order
+     */
+    public function user()
     {
-        return $this->hasOne('App\Models\User', 'id', 'customer_id');
+        return $this->hasOne(User::class);
     }
 
-    public function plan()
-    {
-        return $this->hasOne(OrderPlan::class);
-    }
-
-    public function servicePlan()
-    {
-        return $this->hasOneThrough(ServicePlan::class, OrderPlan::class);
-    }
-
-    public function addons()
-    {
-        return $this->hasMany(OrderAddon::class);
-    }
-
-    public function serviceAddons()
-    {
-        return $this->hasManyThrough(ServiceAddon::class, OrderAddon::class);
-    }
-
-    public function invoices()
-    {
-        return $this->hasMany(Invoice::class);
-    }
-
+    /**
+     * Get payment of the order
+     */
     public function payment()
     {
         return $this->hasOne(Payment::class);
     }
 
-    public function process()
+    /**
+     * Generate order number from the amount of orders
+     * 
+     * @return int
+     */
+    public function generateOrderNumber()
     {
-        $order = $this;
-        $job = new ProcessOrder($this);
-        $order->trackDispatch($job);
+        return (db('orders')->count() + 1);
     }
 
-    public function reprocess()
+    /**
+     * Calculate total from the sum of order items
+     * 
+     * @return double
+     */
+    public function calculateItemsTotal()
     {
-        $this->process();
+        return $this->items()->sum('total');
     }
 
-    public function activate()
+    /**
+     * Count grand total from the order items and VAT
+     * 
+     * @return double
+     */
+    public function countGrandTotal()
     {
-        $this->attributes['status'] = OrderStatus::Activated;
-        $this->save();
+        $total = $this->calculateItemsTotal();
+        $this->attributes['total'] = $total;
+        
+        $vatAmount = $this->getVatAmountAttribute();
+        $grandTotal = $total + $vatAmount;
+        return $this->attributes['grant_total'] = $grandTotal;
     }
 
+    /**
+     * Create payment for the order
+     * 
+     * @return \App\Models\Payment
+     */
     public function createPayment()
     {
         $payment = new Payment();
-        $payment->user_id = $this->attributes['customer_id'];
-        $payment->order_id = $this->attributes['id'];
-        $payment->amount = $this->attributes['total_amount'];
+        $payment->user_id = $this->attributes['user_id'];
+        $payment->amount = $this->attributes['grand_total'];
+        $payment->paymentable = $this;
         $payment->save();
 
         return $payment;
+    }
+
+    /**
+     * Set order status as paid
+     * 
+     * @return bool
+     */
+    public function setPaid()
+    {
+        $this->attributes['status'] = Status::Paid;
+        $this->attributes['paid_at'] = now();
+        return $this->save();
+    }
+
+    /**
+     * Set order status as expired
+     * 
+     * @return bool
+     */
+    public function setExpired()
+    {
+        $this->attributes['status'] = Status::Expired;
+        $this->attributes['expired_at'] = now();
+        return $this->save();
     }
 }

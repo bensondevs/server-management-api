@@ -6,122 +6,147 @@ use Illuminate\Support\Facades\Http;
 
 trait ApiConsumerTrait 
 {
-	protected $headers = [];
-	protected $requestType;
-	protected $url;
-	protected $payloads = [];
-	protected $returnType = 'json';
-	public $response;
+	/**
+	 * Headers of application
+	 * 
+	 * @var array
+	 */
+	protected $headers = [
+		'Accept' => 'application/json',
+		'Content-Type' => 'application/json',
+	];
 
+	/**
+	 * Set headers of the request
+	 * 
+	 * @param array
+	 * @return $this
+	 */
 	public function setHeaders(array $headers)
 	{
-		return $this->headers = $headers;
+		$this->headers = $headers;
+
+		return $this;
 	}
 
-	public function getHeaders()
+	/**
+	 * Merge new headers to the headers array
+	 * 
+	 * @param array
+	 * @return $this
+	 */
+	public function mergeHeaders(array $headers)
 	{
-		return $this->headers;
+		$this->headers = array_merge($this->headers, $headers);
+
+		return $this;
 	}
 
-	public function pushHeaders(array $headers)
+	/**
+	 * Set header according to key and value
+	 * 
+	 * @param string  $key
+	 * @param mixed  $value
+	 * @return $this
+	 */
+	public function setHeader(string $key, $value)
 	{
-		$arrayKeys = array_keys($headers);
-		foreach ($arrayKeys as $arrayKey)
-			$this->headers[$arrayKey] = $headers[$arrayKey];
+		$this->headers[$key] = $value;
 
-		return $this->getHeaders();
+		return $this;
 	}
 
-	public function setHeader($key, $value)
+	/**
+	 * Execute get request and return response as array
+	 * 
+	 * @param string  $url
+	 * @return array
+	 */
+	public function apiGet(string $url)
 	{
-		return $this->headers[$key] = $value;
+		$response = Http::withHeaders($this->headers)->get($url);
+		$this->response = $response;
+
+		return [
+			'body' => $response->body(),
+			'data' => $response->json(),
+			'status' => $response->getStatusCode(),
+		];
 	}
 
-	public function setRequestType(string $type)
+	/**
+	 * Execute post request and return response as array
+	 * 
+	 * @param string $url
+	 * @param array  $parameters
+	 * @return array
+	 */
+	public function apiPost(string $url, array $parameters)
 	{
-		return $this->requestType = strtolower($type);
+		$response = Http::withHeaders($this->headers)->post($url, $parameters);
+		$this->response = $response;
+
+		return [
+			'body' => $response->body(),
+			'data' => $response->json(),
+			'status' => $response->getStatusCode(),
+		];
 	}
 
-	public function getRequestType()
+	/**
+	 * Execute patch request and return response as array
+	 * 
+	 * @param string  $url
+	 * @param array  $parameters
+	 * @return array
+	 */
+	public function apiPatch(string $url, array $parameters)
 	{
-		return $this->requestType;
+		$response = Http::withHeaders($this->headers)->patch($url, $parameters);
+		$this->response = $response;
+
+		return [
+			'body' => $response->body(),
+			'data' => $response->json(),
+			'status' => $response->getStatusCode(),
+		];
 	}
 
-	public function setUrl(string $url)
+	/**
+	 * Execute put request and return response as array
+	 * 
+	 * @param string  $url
+	 * @param array  $parameters
+	 * @return array
+	 */
+	public function apiPut(string $url, array $parameters)
 	{
-		return $this->url = $url;
+		$response = Http::withHeaders($this->headers)->put($url);
+		$this->response = $response;
+
+		return [
+			'body' => $response->body(),
+			'data' => $response->json(),
+			'status' => $response->getStatusCode(),
+		];
 	}
 
-	public function getUrl()
+	/**
+	 * Execute delete request and return response as array
+	 * 
+	 * @param string  $url
+	 * @param array  $parameters
+	 * @return array
+	 */
+	public function apiDelete(string $url, array $parameters)
 	{
-		return $this->url;
-	}
+		$response = Http::withHeaders($this->headers)->delete($url);
+		$this->response = $response;
 
-	public function setParameters(array $parameters)
-	{
-		$this->setPayloads($parameters);
-	}
-
-	public function setParameter(string $parameterKey, $parameterValue)
-	{
-		$this->setPayload($parameterKey, $parameterValue);
-	}
-
-	public function setPayloads(array $payloads)
-	{
-		return $this->payloads = $payloads;
-	}
-
-	public function setPayload(string $payloadName, $payloadValue)
-	{
-		return $this->payloads[$payloadName] = $payloadValue;
-	}
-
-	public function pushPayloads(array $payloads)
-	{
-		$arrayKeys = array_keys($paylods);
-		foreach ($arrayKeys as $arrayKey)
-			$this->payloads[$arrayKey] = $payloads[$arrayKey];
-
-		return $this->getHeaders();
-	}
-
-	public function getPayloads()
-	{
-		return $this->payloads;
-	}
-
-	public function setReturnType(string $type)
-	{
-		return $this->returnType = $type;
-	}
-
-	public function getReturnType()
-	{
-		return $this->returnType;
-	}
-
-	public function getResponse()
-	{
-		// Set headers if exist
-		$client = Http::withHeaders($this->headers);
-
-		// Do request
-		$client = ($this->payloads) ?
-			$client->{$this->getRequestType()}(
-				$this->getUrl(), 
-				$this->getPayloads()
-			) :
-			$client->{$this->getRequestType()}(
-				$this->getUrl()
-			);
-
-		$statusCode = $client->getStatusCode();
-		if ($statusCode >= 200 && $statusCode < 300)
-			$this->response = $client->{$this->getReturnType()}();
-		else
-			abort($statusCode, $client->body());
-
-		return $this->response;
+		return [
+			'body' => $response->body(),
+			'data' => $response->json(),
+			'status' => $response->getStatusCode(),
+		];
 	}
 }

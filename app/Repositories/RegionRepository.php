@@ -2,30 +2,31 @@
 
 namespace App\Repositories;
 
-use \Illuminate\Support\Facades\DB;
-use \Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
+use App\Repositories\Base\BaseRepository;
 
 use App\Models\Region;
 
-use App\Repositories\Base\BaseRepository;
-
 class RegionRepository extends BaseRepository
 {
+	/**
+	 * Repository constructor method
+	 * 
+	 * @param void
+	 */
 	public function __construct()
 	{
-		$region = new Region;
-		$this->setInitModel($region);
+		$this->setInitModel(new Region);
 	}
 
-	public function find($id)
-	{
-		$region = Region::findOrFail($id);
-		$this->setModel($region);
-
-		return $this->getModel();
-	}
-
-	public function save($regionData)
+	/**
+	 * Save region data
+	 * 
+	 * @param  array  $regionData
+	 * @return \App\Models\Region
+	 */
+	public function save(array $regionData)
 	{
 		try {
 			$region = $this->getModel();
@@ -43,6 +44,11 @@ class RegionRepository extends BaseRepository
 		return $this->getModel();
 	}
 
+	/**
+	 * Delete region
+	 * 
+	 * @return bool
+	 */
 	public function delete()
 	{
 		try {

@@ -15,6 +15,7 @@ class CreateDatacentersTable extends Migration
     {
         Schema::create('datacenters', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            
             $table->uuid('region_id');
             $table->foreign('region_id')
                 ->references('id')

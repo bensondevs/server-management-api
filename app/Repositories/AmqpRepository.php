@@ -2,31 +2,51 @@
 
 namespace App\Repositories;
 
-use \Illuminate\Support\Facades\DB;
-use \Illuminate\Database\QueryException;
-
-use Enqueue\AmqpExt\AmqpConnectionFactory;
-use Enqueue\AmqpExt\AmqpContext;
-
-use App\Traits\RabbitMqRepositoryResponseHandler;
-
-use App\Consumers\JsonConsumer;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
 use App\Repositories\Base\BaseRepository;
-
-use App\Models\Server;
-use App\Models\Setting;
+use Enqueue\AmqpExt\{ AmqpConnectionFactory, AmqpContext };
+use App\Traits\RabbitMqRepositoryResponseHandler;
+use App\Consumers\JsonConsumer;
+use App\Models\{ Server, Setting };
 
 class AmqpRepository extends BaseRepository
 {
 	use RabbitMqRepositoryResponseHandler;
 
+	/**
+	 * Configuration for RabbitMQ
+	 * 
+	 * @var array|null
+	 */
 	protected $configurations;
 	
+	/**
+	 * Consumer class container
+	 * 
+	 * @var \App\Consumers\JsonConsumer|null
+	 */
 	protected $consumer;
+
+	/**
+	 * AMQP Connection Context container
+	 * 
+	 * @var \Enqueue\AmqpExt\AmqpContext|null
+	 */
 	protected $context;
+
+	/**
+	 * AMQP Queue Class container
+	 * 
+	 * @var \Interop\Amqp\Impl\AmqpQueue|null
+	 */
 	protected $queue;
 
+	/**
+	 * Request correlation ID
+	 * 
+	 * @return string
+	 */
 	protected $correlationId;
 
 	public function __construct(array $settings = [])
