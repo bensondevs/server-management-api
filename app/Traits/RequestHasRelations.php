@@ -4,6 +4,11 @@ namespace App\Traits;
 
 trait RequestHasRelations 
 {
+    /**
+     * Prepare input to configure the relations
+     * 
+     * @return array
+     */
     protected function prepareRelationInputs()
     {
         if (! isset($this->relationNames)) {
@@ -18,6 +23,11 @@ trait RequestHasRelations
         }
     }
 
+    /**
+     * Get relationship by configurations
+     * 
+     * @return array
+     */
     public function getRelations()
     {
         if (! isset($this->relationNames)) {
@@ -40,11 +50,21 @@ trait RequestHasRelations
         return $relations;
     }
 
+    /**
+     * Shorter version of "getRelations"
+     * 
+     * @return array
+     */
     public function relations()
     {
         return $this->getRelations();
     }
 
+    /**
+     * Get all relation that has types of counts
+     * 
+     * @return array
+     */
     public function getRelationCounts()
     {
         if (isset($this->relationCountNames)) {
@@ -60,8 +80,15 @@ trait RequestHasRelations
                 $relationCounts[] = $relationCountName;
             }
         }
+
+        return $relationCounts;
     }
 
+    /**
+     * Shorter version of "getRelationCounts()"
+     * 
+     * @return array
+     */
     public function relationCounts()
     {
         return $this->getRelationCounts();

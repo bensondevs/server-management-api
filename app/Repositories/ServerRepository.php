@@ -7,6 +7,7 @@ use Illuminate\Database\QueryException;
 use App\Repositories\Base\BaseRepository;
 
 use App\Models\{ Server, Datacenter };
+use App\Enums\Server\ServerStatus;
 
 class ServerRepository extends BaseRepository
 {
@@ -47,19 +48,21 @@ class ServerRepository extends BaseRepository
 		return $this->getModel();
 	}
 
-	public function toggleStatus()
+	/**
+	 * Change status of the server
+	 * 
+	 * @param  int  $status
+	 * @return  \App\Models\Server
+	 */
+	public function changeStatus(int $status = 1)
 	{
 		try {
 			$server = $this->getModel();
+			$server->setStatus($status);
+			
+			$this->setModel($server);
 
-			// Toggle to server
-
-
-			$server->toggleStatus();
-			$server->ip_address = $server->ip_address;
-			$this->model = $server;
-
-			$this->setSuccess('Successfully change server status');
+			$this->setSuccess('Successfully change server status.');
 		} catch (QueryException $qe) {
 			$error = $qe->getMessage();
 			$this->setError('Failed to change server status.', $error);
@@ -68,6 +71,55 @@ class ServerRepository extends BaseRepository
 		return $this->getModel();
 	}
 
+	/**
+	 * Activate the server
+	 * 
+	 * @return  \App\Models\Server
+	 */
+	public function activate()
+	{
+		try {
+			$server = $this->getModel();
+			$server->setStatus(ServerStatus::Active);
+			$server->save();
+
+			$this->setModel($server);
+
+			$this->setSuccess('Successfully activate server.');
+		} catch (QueryException $qe) {
+			$error = $qe->getMessage();
+			$this->setError('Failed to activate the server.', $error);
+		}
+
+		return $this->getModel();
+	}
+
+	/**
+	 * Deactivate the server
+	 * 
+	 * @return  \App\Models\Server
+	 */
+	public function inactivate()
+	{
+		try {
+			$server = $this->getModel();
+			$server->setStatus(ServerStatus::Inactive);
+			$server->save();
+
+			$this->setModel($server);
+
+			$this->setSuccess('Successfully inactivate the server.');
+		} catch (QueryException $qe) {
+			$error = $qe->getMessage();
+			$this->setError('Failed to inactivate the server.', $error);
+		}
+	}
+
+	/**
+	 * Delete the server
+	 * 
+	 * @return bool
+	 */
 	public function delete()
 	{
 		try {
