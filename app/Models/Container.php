@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\{ Model, SoftDeletes, Builder };
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
 
 use App\Observers\ContainerObserver;
+use App\Repositories\ContainerRepository;
 
 use App\Traits\{ Searchable, TrackInQueue };
 use App\Traits\Container\{
@@ -21,6 +21,7 @@ use App\Traits\Container\{
 
 class Container extends Model
 {
+    use HasFactory;
     use Searchable, TrackInQueue;
     use VpnTrait, NfsTrait, SambaTrait, NginxTrait;
 
@@ -68,25 +69,43 @@ class Container extends Model
      * @var array
      */
     protected $fillable = [
-        'order_id',
-
-        'service_plan_id',
-        
         'user_id',
         'server_id',
         'subnet_id',
         'subnet_ip_id',
 
         'hostname',
+        'total_amount',
         'client_email',
 
-        'disk_space',
+        'current',
+        'status',
+        'status_on_server',
+
+        'disk_size',
         'disk_array',
         'breakpoints',
 
-        'order_date',
-        'activation_date',
-        'expiration_date',
+        'created_on_server_at',
+        'system_installed_at',
+
+        'vpn_status',
+        'vpn_pid_numbers',
+        'vpn_enability',
+
+        'samba_smbd_status',
+        'samba_nmbd_status',
+        'samba_pid_numbers',
+        'samba_smbd_enability',
+        'samba_nmbd_enability',
+
+        'nfs_status',
+        'nfs_pid_numbers',
+        'nfs_enability',
+
+        'nginx_status',
+        'nginx_pid_numbers',
+        'nginx_enability',
     ];
 
     /**
@@ -128,7 +147,7 @@ class Container extends Model
      */
     public static function generateId(string $ipAddress) 
     {
-        return $this->generate_id($ipAddress);
+        return self::generate_id($ipAddress);
     }
 
     /**
@@ -238,46 +257,11 @@ class Container extends Model
     }
 
     /**
-     * Check container expired status
-     * 
-     * @return bool
+     * Get user of the container
      */
-    public function isExpired()
+    public function user()
     {
-        $expirationDate = $this->attributes['expiration_date'];
-        $isExpired = carbon()->parse($expirationDate) < carbon()->now();
-
-        return $isExpired;
-    }
-
-    /**
-     * Set model to current container
-     * 
-     * @return bool
-     */
-    public function setCurrent()
-    {
-        $this->attributes['current'] = true;
-        return $this->save();
-    }
-
-    /**
-     * Activate the container
-     * 
-     * @return bool
-     */
-    public function activate()
-    {
-        $this->attributes['status'] = ContainerStatus::Active;
-        return $this->save();
-    }
-
-    /**
-     * Get customer (user) of the container
-     */
-    public function customer()
-    {
-        return $this->belongsTo(User::class, 'customer_id');
+        return $this->belongsTo(User::class);
     }
 
     /**
@@ -321,12 +305,88 @@ class Container extends Model
     }
 
     /**
+     * Get subscription of the container
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasOneMorph
+     */
+    public function subscription()
+    {
+        return $this->morphOne(Subscription::class, 'subscriber');
+    }
+
+    /**
      * Get attached service plan of container
      * 
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function servicePlan()
     {
-        return $this->belongsTo(ServicePlan::class);
+        return $this->hasOneThrough(ServicePlan::class, Subscription::class);
+    }
+
+    /**
+     * Get service plan of the container
+     * 
+     * @return \App\Models\ServicePlan
+     */
+    public function getServicePlan()
+    {
+        $subscription = Subscription::subscribedBy($this)
+            ->active()
+            ->first();
+        if (! $subscription) return ServicePlan::first();
+
+        $servicePlan = ServicePlan::where('subscribeable_type', $subscription->subscribeable_type)
+            ->where('subscribeable_id', $subscription->subscribeable_id)
+            ->first();
+
+        return $servicePlan ?: ServicePlan::first();
+    }
+
+    /**
+     * Check container expired status
+     * 
+     * @return bool
+     */
+    public function isExpired()
+    {
+        $expirationDate = $this->attributes['expiration_date'];
+        $isExpired = carbon()->parse($expirationDate) < carbon()->now();
+
+        return $isExpired;
+    }
+
+    /**
+     * Create container on server
+     * 
+     * @return bool
+     */
+    public function createOnServer()
+    {
+        $repository = new ContainerRepository();
+        $repository->setModel($this);
+        return $repository->createOnServer();
+    }
+
+    /**
+     * Set model to current container
+     * 
+     * @return bool
+     */
+    public function setCurrent()
+    {
+        $this->attributes['current'] = true;
+        return $this->save();
+    }
+
+    /**
+     * Activate the container
+     * 
+     * @return bool
+     */
+    public function activate()
+    {
+        $this->attributes['status'] = ContainerStatus::Active;
+        return $this->save();
     }
 }

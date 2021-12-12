@@ -3,8 +3,9 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use App\Models\Container;
 
-class ServicesSeeder extends Seeder
+class ContainersSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -13,6 +14,6 @@ class ServicesSeeder extends Seeder
      */
     public function run()
     {
-        
+        Container::factory()->create();
     }
 }

@@ -28,6 +28,7 @@ class DeleteNfsFolder extends ContainerBaseJob implements ShouldQueue
     /**
      * Create a new job instance.
      *
+     * @param \App\Models\NfsFolder  $nfsFolder
      * @return void
      */
     public function __construct(NfsFolder $nfsFolder)

@@ -10,44 +10,49 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
 use App\Repositories\AmqpRepository;
-
 use App\Traits\TrackExecution;
-
-use App\Models\Container;
-use App\Models\ServicePlan;
-
+use App\Models\{ Container, ServicePlan };
 use App\Enums\Container\ContainerStatus;
+use App\Jobs\Container\ContainerBaseJob;
 
-class CreateContainerOnServer implements ShouldQueue
+class CreateContainerOnServer extends ContainerBaseJob implements ShouldQueue
 {
     use TrackExecution;
-
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * Amount of seconds to wait on execution
+     * 
+     * @var  int
+     */
     public $timeout = 3600;
 
+    /**
+     * Container that's creating on server
+     * 
+     * @var \App\Models\Container|null
+     */
     private $serverContainer;
-    private $servicePlan;
 
-    private $amqpRepo;
+    /**
+     * Service plan to be attached to the server
+     * 
+     * @var \App\Models\ServicePlan|null
+     */
+    private $servicePlan;
 
     /**
      * Create a new job instance.
      *
+     * @param  \App\Models\Container  $serverContainer
+     * @param  \App\Models\ServicePlan  $plan
      * @return void
      */
-    public function __construct(Container $serverContainer, $servicePlanId = '')
+    public function __construct(Container $serverContainer, ServicePlan $plan)
     {
+        parent::__construct();
         $this->serverContainer = $serverContainer;
-
-        if ($servicePlanId) {
-            $this->servicePlan = ServicePlan::findOrFail($servicePlanId);
-        } else {
-            $order = $serverContainer->order;
-            $this->servicePlan = $order->plan;
-        }
-
-        $this->amqpRepo = new AmqpRepository;
+        $this->servicePlan = $plan;
     }
 
     /**
@@ -68,18 +73,13 @@ class CreateContainerOnServer implements ShouldQueue
             $this->finish();
         }
 
-        $requestId = generateUuid();
-
-        $this->amqpRepo->connectServerQueue($server);
-        $this->amqpRepo->publishJson([
-            'uuid' => $requestId,
+        $response = $this->sendRequest($server, [
             'command' => 'create container',
             'container_id' => $container->id,
             'plan_name' => $servicePlan->plan_code,
             'disk_size' => $container->disk_size,
             'ip_address' => $subnetIp->ip_address,
         ]);
-        $response = $this->amqpRepo->consumeServerResponse($server, $requestId);
 
         if (isset($response['status'])) {
             // Assign subnet IP to certain user

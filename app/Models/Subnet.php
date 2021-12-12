@@ -86,16 +86,16 @@ class Subnet extends Model
     }
 
     /**
-     * Create callable function of "active()"
+     * Create callable function of "available()"
      * This callable function will query only subnet with status of
-     * active
+     * available
      * 
      * @param \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeActive(Builder $query)
+    public function scopeAvailable(Builder $query)
     {
-        return $query->where('status', SubnetStatus::Active);
+        return $query->where('status', SubnetStatus::Available);
     }
 
     /**
@@ -163,6 +163,21 @@ class Subnet extends Model
         }
 
         return SubnetIp::insert($availableIps);
+    }
+
+    /**
+     * Set the subnet as available
+     * 
+     * This will make the subnet assignable to certain user.
+     * This also will retry the creation of pre-created containers
+     * which in waiting list for reason of no subnet available
+     * 
+     * @return  bool
+     */
+    public function setAvailable()
+    {
+        $this->attributes['status'] = SubnetStatus::Available;
+        return $this->save();
     }
 
     /**

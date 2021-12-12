@@ -7,6 +7,17 @@ use App\Models\Pricing;
 class PricingObserver
 {
     /**
+     * Handle the Pricing "creating" event.
+     *
+     * @param  \App\Models\Pricing  $pricing
+     * @return void
+     */
+    public function creating(Pricing $pricing)
+    {
+        $pricing->id = generateUuid();
+    }
+
+    /**
      * Handle the Pricing "created" event.
      *
      * @param  \App\Models\Pricing  $pricing
@@ -14,11 +25,7 @@ class PricingObserver
      */
     public function created(Pricing $pricing)
     {
-        $existedPricings = $pricing->sameCurrencyPricings();
-
-        foreach ($existedPricings as $existedPricing) {
-            $existedPricing->deactivate();
-        }
+        //
     }
 
     /**
@@ -29,13 +36,7 @@ class PricingObserver
      */
     public function updated(Pricing $pricing)
     {
-        if ($pricing->isDirty('status')) {
-            $existedPricings = $pricing->sameCurrencyPricings();
-
-            foreach ($existedPricings as $existedPricing) {
-                $existedPricing->deactivate();
-            }
-        }
+        //
     }
 
     /**
@@ -46,9 +47,7 @@ class PricingObserver
      */
     public function deleted(Pricing $pricing)
     {
-        if ($otherPricings = $pricing->sameCurrencyPricings()) {
-            $otherPricings->first()->activate();
-        }
+        //
     }
 
     /**
@@ -59,11 +58,7 @@ class PricingObserver
      */
     public function restored(Pricing $pricing)
     {
-        $existedPricings = $pricing->sameCurrencyPricings();
-
-        foreach ($existedPricings as $existedPricing) {
-            $existedPricing->deactivate();
-        }
+        //
     }
 
     /**
@@ -74,8 +69,6 @@ class PricingObserver
      */
     public function forceDeleted(Pricing $pricing)
     {
-        if ($otherPricings = $pricing->sameCurrencyPricings()) {
-            $otherPricings->first()->activate();
-        }
+        //
     }
 }

@@ -5,10 +5,15 @@ namespace App\Models;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
+
+use App\Enums\{ Currency, Container\ContainerProperty };
 
 class ServicePlan extends Model
 {
+    use HasFactory;
+
     /**
      * The model table name
      * 
@@ -109,5 +114,54 @@ class ServicePlan extends Model
     {
         $this->attributes['is_hidden'] = false;
         return $this->save();
+    }
+
+    /**
+     * Set disk size in mega byte to the service plan
+     * 
+     * @param  int  $diskSize
+     * @return bool
+     */
+    public function setDiskSize(int $diskSizeMb = 100)
+    {
+        $item = ServicePlanItem::firstOrNew([
+            'property_type' => ContainerProperty::DiskSize,
+            'service_plan_id' => $this->attributes['id'],
+        ]);
+        $item->property_unit_quantity = $diskSizeMb;
+        return $item->save();
+    }
+
+    /**
+     * Set duration in days of the service plan
+     * 
+     * @param  int  $days
+     * @return bool
+     */
+    public function setDuration(int $days = 30)
+    {
+        $item = ServicePlanItem::firstOrNew([
+            'property_type' => ContainerProperty::Duration,
+            'service_plan_id' => $this->attributes['id'],
+        ]);
+        $item->property_unit_quantity = $days;
+        return $item->save();
+    }
+
+    /**
+     * Set pricing for current service plan
+     * 
+     * @param  float  $price
+     * @param  int  $currency
+     */
+    public function setPrice(float $price = 0, int $currency = Currency::EUR)
+    {
+        $pricing = Pricing::firstOrNew([
+            'priceable_type' => get_class($this),
+            'priceable_id' => $this->attributes['id'],
+            'currency' => $currency,
+        ]);
+        $pricing->price = $price;
+        return $pricing->save();
     }
 }

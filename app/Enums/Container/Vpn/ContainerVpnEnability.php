@@ -19,4 +19,14 @@ final class ContainerVpnEnability extends Enum
      * @var int
      */
     const Enabled = 1;
+
+    /**
+     * Container VPN is unknown
+     * 
+     * This can be due to the container is not yet created
+     * at the server
+     * 
+     * @var int
+     */
+    const Unknown = 2;
 }

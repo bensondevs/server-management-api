@@ -106,9 +106,9 @@ class ContainerNfsController extends Controller
     public function enable(Container $container)
     {
         $this->nfs->setModel($container);
-        $enabilityStatus = $this->nfs->enable();
+        $enability = $this->nfs->enable();
         return apiResponse($this->nfs, [
-            'nfs_enability_status' => $enabilityStatus
+            'nfs_enability' => $enability
         ]);
     }
 
@@ -121,9 +121,9 @@ class ContainerNfsController extends Controller
     public function disable(Container $container)
     {
         $this->nfs->setModel($container);
-        $enabilityStatus = $this->nfs->disable();
+        $enability = $this->nfs->disable();
         return apiResponse($this->nfs, [
-            'nfs_enability_status' => $enabilityStatus
+            'nfs_enability' => $enability
         ]);
     }
 }

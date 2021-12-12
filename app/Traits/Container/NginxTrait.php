@@ -43,6 +43,11 @@ trait NginxTrait
 	 */
 	public function setNginxStatusAttribute(string $nginxStatus)
 	{
+		if (is_numeric($nginxStatus)) {
+			$this->attributes['nginx_status'] = (int) $nginxStatus;
+			return;
+		}
+
 		$nginxStatus = preg_replace('~[\r\n]~', '', $nginxStatus);
 		$nginxStatus = str_replace('\n', '', $nginxStatus);
 		$enum = (Status::fromKey(ucfirst($sambaStatus)));
@@ -112,6 +117,11 @@ trait NginxTrait
 	 */
 	public function setNginxEnabilityAttribute(string $enability)
 	{
+		if (is_numeric($enability)) {
+			$this->attributes['nginx_enability'] = (int) $enability;
+			return;
+		}
+
 		$statusKey = ucfirst($enability);
 		$enability = (Enability::fromKey($statusKey))->value;
         $this->attributes['nginx_enability'] = $enability;

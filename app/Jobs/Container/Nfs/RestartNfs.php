@@ -29,6 +29,7 @@ class RestartNfs extends ContainerBaseJob implements ShouldQueue
     /**
      * Create a new job instance.
      *
+     * @param \App\Models\Container  $serverContainer
      * @return void
      */
     public function __construct(Container $serverContainer)

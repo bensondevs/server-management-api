@@ -4,21 +4,11 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
-use App\Repositories\ServicePlanRepository;
-
 use App\Models\ServicePlan;
+use App\Enums\Currency;
 
 class ServicePlansSeeder extends Seeder
 {
-	protected $plan;
-
-	public function __construct(
-        ServicePlanRepository $servicePlanRepository
-    )
-	{
-		$this->plan = $servicePlanRepository;
-	}
-
     /**
      * Run the database seeds.
      *
@@ -26,40 +16,43 @@ class ServicePlansSeeder extends Seeder
      */
     public function run()
     {
-    	$this->plan->save([
+    	/**
+    	 * Configure free plan
+    	 */
+    	$freePlan = ServicePlan::factory()->create([
+    		'plan_name' => 'Free',
     		'plan_code' => 'free',
-			'plan_name' => 'free',
-	        'time_quantity' => 1,
-	        'time_unit' => 2,
-	        'description' => 'Random created plan.',
+    		'description' => 'Lorem ipsum dolor sit amet',
     	]);
-    	$this->plan->setModel(new ServicePlan);
+    	$freePlan->setDiskSize(100);
+    	$freePlan->setDuration(30);
+    	$freePlan->setPrice(0, Currency::EUR);
+    	$freePlan->setPrice(0, Currency::USD);
 
-    	$this->plan->save([
+    	/**
+    	 * Configure standard plan
+    	 */
+    	$standardPlan = ServicePlan::factory()->create([
+    		'plan_name' => 'Standard',
     		'plan_code' => 'standard',
-			'plan_name' => 'standard',
-	        'time_quantity' => 1,
-	        'time_unit' => 2,
-	        'description' => 'Random created plan.',
+    		'description' => 'Lorem ipsum dolor sit amet',
     	]);
-    	$this->plan->setModel(new ServicePlan);
+    	$standardPlan->setDiskSize(1000);
+    	$standardPlan->setDuration(30);
+    	$freePlan->setPrice(10, Currency::EUR);
+    	$freePlan->setPrice(12, Currency::USD);
 
-    	$this->plan->save([
+    	/**
+    	 * Configure advanced plan
+    	 */
+    	$advancedPlan = ServicePlan::factory()->create([
+    		'plan_name' => 'Advanced',
     		'plan_code' => 'advanced',
-			'plan_name' => 'advanced',
-	        'time_quantity' => 1,
-	        'time_unit' => 2,
-	        'description' => 'Random created plan.',
+    		'description' => 'Lorem ipsum dolor sit amet',
     	]);
-    	$this->plan->setModel(new ServicePlan);
-
-    	$this->plan->save([
-    		'plan_code' => 'custom',
-			'plan_name' => 'custom',
-	        'time_quantity' => 1,
-	        'time_unit' => 2,
-	        'description' => 'Random created plan.',
-    	]);
-    	$this->plan->setModel(new ServicePlan);
+    	$advancedPlan->setDiskSize(3000);
+    	$advancedPlan->setDuration(30);
+    	$freePlan->setPrice(30, Currency::EUR);
+    	$freePlan->setPrice(35, Currency::USD);
     }
 }

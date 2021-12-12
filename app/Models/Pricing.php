@@ -65,11 +65,11 @@ class Pricing extends Model
     {
     	parent::boot();
         self::observe(PricingObserver::class);
-
-    	self::creating(function ($pricing) {
-            $pricing->id = Uuid::generate()->string;
-    	});
     }
+
+    /**
+     * Create callable method of 
+     */
 
     /**
      * Any item that can be priced
@@ -89,5 +89,18 @@ class Pricing extends Model
     {
         $status = $this->attributes['status'];
         return PricingStatus::getKey($status);
+    }
+
+    /**
+     * Get the sambe currency pricing with the same currency
+     * 
+     * @return  Illuminate\Support\Collection
+     */
+    public function sameCurrencyPricings()
+    {
+        return self::where('currency', $this->attributes['currency'])
+            ->where('priceable_type', $this->attributes['priceable_type'])
+            ->where('priceable_id', $this->attributes['priceable_id'])
+            ->get();
     }
 }

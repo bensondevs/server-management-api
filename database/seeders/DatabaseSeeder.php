@@ -14,8 +14,19 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
     	$this->call([
+            SettingsSeeder::class,
             CountriesSeeder::class,
             UsersSeeder::class,
+
+            RegionsSeeder::class,
+            DatacentersSeeder::class,
+            ServersSeeder::class,
+            SubnetsSeeder::class,
+            
+            ServicePlansSeeder::class,
+            ServiceAddonsSeeder::class,
+
+            ContainersSeeder::class,
         ]);
     }
 }

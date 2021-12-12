@@ -16,7 +16,8 @@ use App\Jobs\Container\Nfs\{
 	ReloadNfs as Reload,
 	StartNfs as Start,
 	StopNfs as Stop,
-	ToggleNfsStartOnBoot as ToggleStartOnBoot
+	EnableNfs as Enable,
+	DisableNfs as Disable
 };
 use App\Http\Resources\{
 	NfsExportResource, 
@@ -94,7 +95,6 @@ class ContainerNfsRepository extends BaseRepository
 	 */
 	public function restart()
 	{
-
 		try {
 			$container = $this->getModel();
 			$job = new Restart($container);
@@ -158,7 +158,18 @@ class ContainerNfsRepository extends BaseRepository
 	 */
 	public function enable()
 	{
-		//
+		try {
+			$container = $this->getModel();
+			$job = new Enable($container);
+			$container->trackDispatch($job);
+			
+			$this->setSuccess('Enabling NFS star on boot...');		
+		} catch (Exception $e) {
+			$error = $e->getMessage();
+			$this->setError('Failed enabling NFS start on boot', $error);
+		}
+
+		return $container->current_nfs_enability;
 	}
 
 	/**
@@ -168,24 +179,17 @@ class ContainerNfsRepository extends BaseRepository
 	 */
 	public function disable()
 	{
-		//
-	}
-
-	public function toggleStartOnBoot()
-	{
 		try {
 			$container = $this->getModel();
-			$status = ($container->nfs_start_on_boot_status == ContainerNfsStartOnBootStatus::Enabled) ? 
-				$this->disable() : $this->enable();
-			$job = new ToggleStartOnBoot($container, $status);
+			$job = new Disable($container);
 			$container->trackDispatch($job);
-
-			$this->setSuccess('Toggling start on boot NFS...');
+			
+			$this->setSuccess('Enabling NFS star on boot...');		
 		} catch (Exception $e) {
 			$error = $e->getMessage();
-			$this->setError('Failed togglong start on boot NFS.', $error);
+			$this->setError('Failed enabling NFS start on boot', $error);
 		}
 
-		return $container->current_nfs_start_on_boot_status;
+		return $container->current_nfs_enability;
 	}
 }

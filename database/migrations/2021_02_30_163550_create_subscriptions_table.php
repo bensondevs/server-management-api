@@ -23,7 +23,7 @@ class CreateSubscriptionsTable extends Migration
                 ->onDelete('CASCADE');
 
             $table->uuidMorphs('subscribeable'); // Service plan or addon
-            $table->uuidMorphs('subscriber');
+            $table->uuidMorphs('subscriber'); // Container or any services
 
             $table->tinyInteger('status')->default(1);
             $table->datetime('start');

@@ -4,11 +4,8 @@ namespace App\Observers;
 
 use Illuminate\Support\Facades\Cache;
 
-use App\Models\Container;
-use App\Models\SubnetIp;
-
+use App\Models\{ Container, SubnetIp };
 use App\Jobs\Container\DestroyContainer;
-
 use App\Repositories\ContainerRepository;
 
 class ContainerObserver
@@ -21,7 +18,7 @@ class ContainerObserver
      */
     public function created(Container $container)
     {
-        $containerRepo = new ContainerRepository;
+        /*$containerRepo = new ContainerRepository;
         $containerRepo->setModel($container);
         $containerRepo->createOnServer();
 
@@ -30,12 +27,16 @@ class ContainerObserver
             $order->activate();
         }
 
-        $subnetIp = $container->subnetIp;
-        $subnetIp->assignTo($container->customer);
-
         if ($user = auth()->user()) {
             record_activity($user->anchorName() . ' had created a new container.', $user, $container);
-        }
+        }*/
+
+        // Create on server
+        $container->createOnServer();
+
+        // Assign user to Subnet IP
+        $subnetIp = $container->subnetIp;
+        $subnetIp->assignTo($container->user);
     }
 
     /**

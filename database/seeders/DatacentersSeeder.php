@@ -4,19 +4,11 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
-use App\Models\Region;
-use App\Models\Datacenter;
-use App\Repositories\DatacenterRepository;
+use App\Models\{ Region, Datacenter };
+use App\Enums\Datacenter\DatacenterStatus;
 
 class DatacentersSeeder extends Seeder
 {
-	protected $datacenter;
-
-	public function __construct(DatacenterRepository $datacenter)
-	{
-		$this->datacenter = $datacenter;
-	}
-
     /**
      * Run the database seeds.
      *
@@ -24,13 +16,12 @@ class DatacentersSeeder extends Seeder
      */
     public function run()
     {
-        $region = Region::all()->first();
-
-        $this->datacenter->save([
-            'region_id' => $region->id,
-        	'datacenter_name' => 'Lithuania',
-	        'client_datacenter_name' => 'Lithuania',
-	        'location' => 'Lithuania',
+        Datacenter::create([
+            'region_id' => Region::first()->id,
+            'datacenter_name' => 'Lithuania',
+            'client_datacenter_name' => 'Lithuania',
+            'location' => 'Lithuania',
+            'status' => DatacenterStatus::Active,
         ]);
     }
 }

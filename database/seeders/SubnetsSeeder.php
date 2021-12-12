@@ -4,19 +4,10 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
-use App\Models\Datacenter;
-use App\Models\Subnet;
-use App\Repositories\SubnetRepository;
+use App\Models\{ Datacenter, Subnet };
 
 class SubnetsSeeder extends Seeder
 {
-	protected $subnet;
-
-	public function __construct(SubnetRepository $subnetRepository)
-	{
-		$this->subnet = $subnetRepository;
-	}
-
     /**
      * Run the database seeds.
      *
@@ -24,11 +15,10 @@ class SubnetsSeeder extends Seeder
      */
     public function run()
     {
-    	$datacenter = Datacenter::all()->first();
-
-        $subnet = $this->subnet->save([
-        	'datacenter_id' => $datacenter->id,
-        	'subnet_mask' => '185.111.182.1/24',
+    	$datacenter = Datacenter::first();
+        $subnet = Subnet::create([
+            'datacenter_id' => $datacenter->id,
+            'subnet_mask' => '185.111.182.1/24',
         ]);
         foreach ($subnet->ips as $ip) {
             $ipAddress = $ip->ip_address;
@@ -38,11 +28,5 @@ class SubnetsSeeder extends Seeder
                 $ip->setForbidden();
             }
         }
-
-        $this->subnet->setModel(new Subnet);
-        $this->subnet->save([
-        	'datacenter_id' => $datacenter->id,
-        	'subnet_mask' => '127.0.0.1/24',
-        ]);
     }
 }

@@ -4,17 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
-use App\Repositories\PermissionRepository;
-
 class PermissionsSeeder extends Seeder
 {
-	protected $permission;
-
-	public function __construct(PermissionRepository $permissionRepository)
-	{
-		$this->permission = $permissionRepository;
-	}
-
     /**
      * Run the database seeds.
      *
@@ -134,7 +125,7 @@ class PermissionsSeeder extends Seeder
     	];
 
     	foreach ($permissions as $permission) {
-    		$permission = $this->permission->createPermission($permission);
+    		$permission = Permission::create(['name' => $permission]);
     		$permission->assignRole('administrator');
     	}
     }

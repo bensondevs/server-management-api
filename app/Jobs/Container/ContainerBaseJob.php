@@ -34,12 +34,11 @@ class ContainerBaseJob implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param \App\Models\Container  $serverContainer
      * @return void
      */
     public function __construct()
     {
-        $this->amqpRepo =  new AmqpRepository();
+        $this->amqpRepo = new AmqpRepository();
     }
 
     /**
@@ -53,6 +52,10 @@ class ContainerBaseJob implements ShouldQueue
     {
         if (! isset($input['uuid'])) {
             $input['uuid'] = generateUuid();
+        }
+
+        if (! $this->amqpRepo) {
+            $this->amqpRepo = new AmqpRepository();
         }
 
         $this->amqpRepo->connectServerQueue($server);

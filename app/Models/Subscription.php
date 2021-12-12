@@ -3,14 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
 use App\Enums\Subscription\SubscriptionStatus as Status;
 
 class Subscription extends Model
 {
+    use HasFactory;
+
     /**
      * Model table name
      * 
@@ -49,7 +50,12 @@ class Subscription extends Model
      * @var array 
      */
     protected $fillable = [
-        'container_id',
+        'subscribeable_type',
+        'subscribeable_id',
+
+        'subscriber_type',
+        'subscriber_id',
+
         'status',
         'start',
         'end',
@@ -69,6 +75,33 @@ class Subscription extends Model
     	self::creating(function ($subscription) {
             $subscription->id = Uuid::generate()->string;
     	});
+    }
+
+    /**
+     * Create callable method of "subscribedBy($subscriber)"
+     * This method will query only subscription with subscriber
+     * of specified subscriber
+     * 
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  mixed  $subscriber
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSubscribedBy(Builder $query, $subscriber)
+    {
+        return $query->where('subscriber_type', get_class($subscriber))
+            ->where('subscriber_id', $subscriber->id);
+    }
+
+    /**
+     * Create callable method of "active()"
+     * This method will query only subscription with status of active
+     * 
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeActive(Builder $query)
+    {
+        return $query->where('status', Status::Active);
     }
 
     /**
@@ -103,22 +136,33 @@ class Subscription extends Model
      */
     public function getGracePeriodDurationAttribute()
     {
-        //
+        $destroy = $this->attributes['destroy_at'];
+        $end = $this->attributes['end'];
+
+        return carbon($end)->diffInDays($destroy);
     }
 
     /**
-     * Get container of the subscription
+     * Get user of the subscription
      */
-    public function container()
+    public function user()
     {
-        return $this->belongsTo(Container::class);
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get subscriber of the subscription
+     */
+    public function subscriber()
+    {
+        return $this->morphTo('subscriber');
     }
 
     /**
      * Current subscription services attached
      */
-    public function services()
+    public function subscribeable()
     {
-        return $this->hasMany(SubscriptionService::class);
+        return $this->morphTo('subscribeable');
     }
 }

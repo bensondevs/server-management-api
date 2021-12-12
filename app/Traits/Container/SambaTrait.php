@@ -99,6 +99,11 @@ trait SambaTrait
 	 */
 	public function setSambaSmbdStatusAttribute(string $smbdStatus)
 	{
+		if (is_numeric($smbdStatus)) {
+			$this->attributes['samba_smbd_status'] = (int) $smbdStatus;
+			return;
+		}
+
 		$smbdStatus = preg_replace('~[\r\n]~', '', $smbdStatus);
 		$smbdStatus = str_replace('\n', '', $smbdStatus);
 		$enum = (SmbdStatus::fromKey(ucfirst($smbdStatus)));
@@ -114,6 +119,11 @@ trait SambaTrait
 	 */
 	public function setSambaNmbdStatusAttribute(string $nmbdStatus)
 	{
+		if (is_numeric($nmbdStatus)) {
+			$this->attributes['samba_nmbd_status'] = (int) $nmbdStatus;
+			return;
+		}
+
 		$nmbdStatus = preg_replace('~[\r\n]~', '', $nmbdStatus);
 		$nmbdStatus = str_replace('\n', '', $nmbdStatus);
 		$enum = (NmbdStatus::fromKey(ucfirst($nmbdStatus)));
@@ -203,6 +213,11 @@ trait SambaTrait
 	 */
 	public function setSambaSmbdEnabilityAttribute(string $status)
 	{
+		if (is_numeric($status)) {
+			$this->attributes['samba_smbd_enability'] = (int) $status;
+			return;
+		}
+
 		$statusKey = ucfirst($status);
 		$status = (SmbdEnability::fromKey($statusKey))->value;
 		$this->attributes['samba_smbd_enability'] = $status;
@@ -216,6 +231,11 @@ trait SambaTrait
 	 */
 	public function setSambaNmbdEnabilityAttribute(string $status)
 	{
+		if (is_numeric($status)) {
+			$this->attributes['samba_nmbd_enability'] = (int) $status;
+			return;
+		}
+
 		$statusKey = ucfirst($status);
 		$status = (NmbdEnability::fromKey($statusKey))->value;
 		$this->attributes['samba_nmbd_enability'] = $status;

@@ -16,12 +16,6 @@ class CreateContainersTable extends Migration
         Schema::create('containers', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            $table->uuid('subscription_id');
-            $table->foreign('subscription_id')
-                ->references('id')
-                ->on('subscriptions')
-                ->onDelete('CASCADE');
-
             $table->uuid('user_id')->nullable();
             $table->foreign('user_id')
                 ->references('id')
@@ -60,11 +54,6 @@ class CreateContainersTable extends Migration
             $table->integer('disk_size')->default(50);
             $table->integer('disk_array')->default(1);
             $table->integer('breakpoints')->default(1);
-
-            // Order and Expirations
-            $table->date('order_date')->nullable();
-            $table->date('activation_date')->nullable();
-            $table->date('expiration_date')->nullable();
 
             // Services Timestamps
             $table->timestamp('created_on_server_at')->nullable();

@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Meta;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-use App\Enums\Payment\PaymentMethod as Method;
-use App\Enums\Payment\PaymentStatus as Status;
+use App\Enums\Payment\{
+    PaymentMethod as Method,
+    PaymentStatus as Status
+};
 
 class PaymentController extends Controller
 {

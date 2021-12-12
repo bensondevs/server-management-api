@@ -52,6 +52,11 @@ trait NfsTrait
      */
     public function setNfsStatusAttribute(string $nfsStatus)
     {
+        if (is_numeric($nfsStatus)) {
+            $this->attributes['nfs_status'] = (int) $nfsStatus;
+            return;
+        }
+
         $nfsStatus = preg_replace('~[\r\n]~', '', $nfsStatus);
         $nfsStatus = str_replace('\n', '', $nfsStatus);
         $enum = (Status::fromKey(ucfirst($nfsStatus)));
@@ -121,6 +126,11 @@ trait NfsTrait
      */
     public function setNfsEnabilityAttribute(string $enability)
     {
+        if (is_numeric($enability)) {
+            $this->attributes['nfs_enability'] = (int) $enability;
+            return;
+        }
+
         $statusKey = ucfirst($status);
         $status = (Enability::fromKey($statusKey))->value;
         $this->attributes['nfs_enability'] = $status;

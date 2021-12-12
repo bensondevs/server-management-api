@@ -4,50 +4,29 @@ namespace App\Repositories;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
-
 use App\Repositories\Base\BaseRepository;
 
 use App\Models\Setting;
 
 class SettingRepository extends BaseRepository
 {
+	/**
+	 * Repository constructor method
+	 * 
+	 * @return void
+	 */
 	public function __construct()
 	{
 		$this->setInitModel(new Setting);
 	}
 
-	public function refreshSessions()
-	{
-		$settings = $this->allSettings();
-
-		foreach ($settings as $key => $value)
-			session()->put($key, $value);
-	}
-
-	public function allSettings()
-	{
-		$rawSettings = $this->all();
-		$settings = [];
-
-		foreach ($rawSettings as $rawSetting)
-			$settings[$rawSetting['key']] = $rawSetting['value'];
-
-		return collect($settings);
-	}
-
-	public function findKey($key)
-	{
-		$setting = $this->getModel();
-
-		if (! $setting = $setting->where('key', $key)->first())
-			return null;
-
-		$this->setModel($setting);
-
-		return $this->getModel();
-	}
-
-	public function save($settingData)
+	/**
+	 * Save setting
+	 * 
+	 * @param  array  $settingData
+	 * @return \App\Models\Setting
+	 */
+	public function save(array $settingData)
 	{
 		try {
 			$setting = $this->getModel();
@@ -61,8 +40,16 @@ class SettingRepository extends BaseRepository
 			$error = $qe->getMessage();
 			$this->setError('Failed to save setting.', $error);
 		}
+
+		return $this->getModel();
 	}
 
+	/**
+	 * Save settings
+	 * 
+	 * @param  array  $settings
+	 * @return Collection
+	 */
 	public function saveSettings(array $settings)
 	{
 		try {

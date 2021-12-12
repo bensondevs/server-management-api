@@ -49,21 +49,45 @@ class AmqpRepository extends BaseRepository
 	 */
 	protected $correlationId;
 
+	/**
+	 * Repository constructor method
+	 * 
+	 * @param  array  $settings
+	 * @return void
+	 */
 	public function __construct(array $settings = [])
 	{
 		$this->configurations = $settings ?: Setting::rabbitMQSettings();
 	}
 
-	public function setConfiguration($key, $value)
+	/**
+	 * Set configuration of the connection factory
+	 * 
+	 * @param  string  $key
+	 * @param  mixed  $value
+	 * @return void
+	 */
+	public function setConfiguration(string $key, $value)
 	{
-		return $this->configurations[$key] = $value;
+		$this->configurations[$key] = $value;
 	}
 
+	/**
+	 * Set multiple configuration
+	 * 
+	 * @param  array  $configurations
+	 * @return void
+	 */
 	public function setConfigurations(array $configurations)
 	{
-		return $this->configurations = $configurations;
+		$this->configurations = $configurations;
 	}
 
+	/**
+	 * Execute connect using connection factory
+	 * 
+	 * @return Enqueue\AmqpExt\AmqpContext
+	 */
 	public function connect()
 	{
 		if ($this->context) return true;
@@ -73,6 +97,12 @@ class AmqpRepository extends BaseRepository
 		return $this->context = $connection->createContext();
 	}
 
+	/**
+	 * Create or select queue
+	 * 
+	 * @param  string  $queueName
+	 * @return void
+	 */
 	public function createQueue(string $queueName)
 	{
 		$this->queue = $this->context->createQueue('Response.' . $queueName);
@@ -82,17 +112,35 @@ class AmqpRepository extends BaseRepository
 		$this->context->declareQueue($this->queue);
 	}
 
+	/**
+	 * Connect to queue
+	 * 
+	 * @param  string  $queueName
+	 * @return void
+	 */
 	public function connectQueue(string $queueName)
 	{
 		$this->connect();
 		$this->createQueue($queueName);
 	}
 
+	/**
+	 * Connect to server using server model
+	 * 
+	 * @param  \App\Models\Server  $server
+	 * @return Enqueue\AmqpExt\AmqpQueue
+	 */
 	public function connectServerQueue(Server $server)
 	{
-		return $this->connectQueue($server->complete_server_name);
+		return $this->connectQueue($server->full_server_name);
 	}
 
+	/**
+	 * Publish message as string
+	 * 
+	 * @param  string  $message
+	 * @return void
+	 */
 	public function publish(string $message)
 	{
 		$_message = $this->context->createMessage($message);
@@ -100,6 +148,13 @@ class AmqpRepository extends BaseRepository
 			->send($this->queue, $_message);
 	}
 
+	/**
+	 * Consume JSON
+	 * 
+	 * @param  string  $responseQueue
+	 * @param  string  $uuid
+	 * @return array
+	 */
 	public function consumeJson(string $responseQueue, string $uuid = '')
 	{
 		$consumer = new JsonConsumer($responseQueue);
@@ -109,12 +164,25 @@ class AmqpRepository extends BaseRepository
 		return $consumer->getResponse();
 	}
 
+	/**
+	 * Consume server response after sending message
+	 * 
+	 * @param  \App\Models\Server  $server
+	 * @param  string  $uuid
+	 * @return array
+	 */
 	public function consumeServerResponse(Server $server, string $uuid = '')
 	{
-		$queue = 'Response.' . $server->complete_server_name;
+		$queue = 'Response.' . $server->full_server_name;
 		return $this->consumeJson($queue, $uuid);
 	}
 
+	/**
+	 * Publish array as JSON
+	 * 
+	 * @param  array  $data
+	 * @return string
+	 */
 	public function publishJson(array $data)
 	{
 		if (! isset($data['uuid']))
@@ -125,12 +193,26 @@ class AmqpRepository extends BaseRepository
 		return $this->correlationId = $data['uuid'];
 	}
 
+	/**
+	 * Create queue and send message directly
+	 * 
+	 * @param  string  $queueName
+	 * @param  string  $message
+	 * @return void
+	 */
 	public function produce(string $queueName, string $message)
 	{
 		$this->createQueue($queueName);
 		$this->publish($message);
 	}
 
+	/**
+	 * Directly publish message to queue
+	 * 
+	 * @param  string  $queueName
+	 * @param  string  $message
+	 * @return void
+	 */
 	public function directPublish(string $queueName, string $message)
 	{
 		$this->connect();

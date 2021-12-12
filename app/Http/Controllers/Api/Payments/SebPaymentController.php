@@ -78,6 +78,7 @@ class SebPaymentController extends Controller
      */
     public function show(SebPayment $sebPayment)
     {
-        //
+        $sebPayment = new SebPaymentResource($sebPayment);
+        return response()->json(['seb_payment' => $sebPayment]);
     }
 }

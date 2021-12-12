@@ -48,8 +48,7 @@ class DatacenterController extends Controller
      */
     public function show(Datacenter $datacenter)
     {
-        return response()->json([
-            'datacenter' => new DatacenterResource($datacenter)
-        ]);
+        $datacenter = new DatacenterResource($datacenter);
+        return response()->json(['datacenter' => $datacenter]);
     }
 }

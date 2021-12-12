@@ -35,6 +35,16 @@ final class ContainerStatus extends Enum
     const Stopped = 3;
 
     /**
+     * Service container is currently unknown
+     * 
+     * This can be due to container is not yet created
+     * at the server
+     * 
+     * @var int
+     */
+    const Unknown = 4;
+
+    /**
      * Get badge HTML class for status <span> class
      * 
      * @return string

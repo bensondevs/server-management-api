@@ -16,7 +16,7 @@ class CreatePricingsTable extends Migration
         Schema::create('pricings', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            $table->nullableUuidMorphs('pricingable');
+            $table->nullableUuidMorphs('priceable');
             $table->tinyInteger('currency');
             $table->double('price', 20, 2)->default(0);
 

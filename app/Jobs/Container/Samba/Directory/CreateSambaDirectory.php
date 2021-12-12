@@ -35,6 +35,8 @@ class CreateSambaDirectory extends ContainerBaseJob implements ShouldQueue
     /**
      * Create a new job instance.
      *
+     * @param  \App\Models\Container  $serverContainer
+     * @param  string  $directoryName
      * @return void
      */
     public function __construct(Container $serverContainer, string $directoryName)

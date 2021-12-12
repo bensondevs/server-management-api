@@ -5,16 +5,24 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 
 use App\Models\Setting;
-
 use App\Repositories\SettingRepository;
 
 class SettingsSeeder extends Seeder
 {
-	protected $setting;
+    /**
+     * Setting Repository variable container
+     * 
+     * @var \App\Models\SettingRepository|null
+     */
+	private $setting;
 
-	public function __construct(
-		SettingRepository $settingRepository
-	)
+    /**
+     * Seeder constructor method
+     * 
+     * @param  \App\Repositories\SettingRepository  $settingRepository
+     * @return void
+     */
+	public function __construct(SettingRepository $settingRepository)
 	{
 		$this->setting = $settingRepository;
 	}

@@ -49,6 +49,11 @@ trait VpnTrait
 	 */
 	public function setVpnStatusAttribute(string $vpnStatus)
 	{
+		if (is_numeric($vpnStatus)) {
+			$this->attributes['vpn_status'] = (int) $vpnStatus;
+			return;
+		}
+
 		$vpnStatus = preg_replace('~[\r\n]~', '', $vpnStatus);
         $vpnStatus = str_replace('\n', '', $vpnStatus);
         $status = (Status::fromKey(ucfirst($vpnStatus)))->value;
@@ -112,10 +117,15 @@ trait VpnTrait
 	 * @param string  $status
 	 * @return void
 	 */
-	public function setVpnStartOnBootStatusAttribute(string $status)
+	public function setVpnEnabilityAttribute(string $status)
 	{
+		if (is_numeric($status)) {
+			$this->attributes['vpn_enability'] = (int) $status;
+			return;
+		}
+
 		$statusKey = ucfirst($status);
         $status = (Enability::fromKey($statusKey))->value;
-        $this->attributes['vpn_start_on_boot_status'] = $status;
+        $this->attributes['vpn_enability'] = $status;
 	}
 }

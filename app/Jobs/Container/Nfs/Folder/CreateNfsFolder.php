@@ -35,10 +35,14 @@ class CreateNfsFolder extends ContainerBaseJob implements ShouldQueue
     /**
      * Create a new job instance.
      *
+     * @param  \App\Models\Container  $serverContainer
+     * @param  string  $folderName
      * @return void
      */
-    public function __construct(Container $serverContainer, string $folderName)
-    {
+    public function __construct(
+        Container $serverContainer, 
+        string $folderName
+    ) {
         parent::__construct();
 
         $this->serverContainer = $serverContainer;
@@ -69,6 +73,5 @@ class CreateNfsFolder extends ContainerBaseJob implements ShouldQueue
                 'folder_name' => $folderName,
             ]);
         }
-
     }
 }

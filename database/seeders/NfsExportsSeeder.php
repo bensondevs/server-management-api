@@ -4,8 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
-use App\Models\Container;
-use App\Models\NfsExport;
+use App\Models\{ Container, NfsExport };
 
 class NfsExportsSeeder extends Seeder
 {
@@ -16,19 +15,6 @@ class NfsExportsSeeder extends Seeder
      */
     public function run()
     {
-        $rawNfsExports = [];
-        foreach (Container::all() as $key => $container) {
-            for ($index = 0; $index < rand(5, 10); $index++) {
-                $rawNfsExports[] = [
-                    'id' => generateUuid(),
-                    'container_id' => $container->id,
-                    'target_folder' => 'exporter/test',
-                    'permissions' => 'rw,sync,no_root_squash',
-                    'created_at' => carbon()->now(),
-                    'updated_at' => carbon()->now(),
-                ];
-            }
-        }
-        NfsExport::insert($rawNfsExports);
+        //
     }
 }

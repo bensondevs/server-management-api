@@ -35,6 +35,16 @@ class Role extends SpatieRole
      * @var array
      */
     protected $casts = [
-        'id' => 'string'
+        'id' => 'string',
+    ];
+
+    /**
+     * Model fillable column
+     * 
+     * @var array
+     */
+    protected $fillable = [
+        'name',
+        'guard_name',
     ];
 }

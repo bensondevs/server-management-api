@@ -224,11 +224,9 @@ class ContainerRepository extends BaseRepository
 	{
 		try {
 			$container = $this->getModel();
-			if (! $plan = $container->servicePlan) {
-				abort(500, 'This container does not have service plan.');
-			}
 
-			$job = new CreateContainerOnServer($container, $plan->id);
+			$plan = $container->getServicePlan();
+			$job = new CreateContainerOnServer($container, $plan);
 			$container->trackDispatch($job);
 			
 			$this->setSuccess('Creating in server...');
@@ -247,7 +245,6 @@ class ContainerRepository extends BaseRepository
 	 */
 	public function installSystem()
 	{
-
 		try {
 			$container = $this->getModel();
 			$job = new InstallSystemOnServer($container);

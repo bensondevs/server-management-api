@@ -73,9 +73,8 @@ class PaymentController extends Controller
      */
     public function show(Payment $payment)
     {
-        return response()->json([
-            'payment' => new PaymentResource($payment)
-        ]);
+        $payment = new PaymentResource($payment);
+        return response()->json(['payment' => $payment]);
     }
 
     /**

@@ -27,7 +27,7 @@
         "s1lentium/iptools": "^1.1",
         "sentry/sentry-laravel": "^2.8",
         "spatie/laravel-activitylog": "^3.17",
-        "spatie/laravel-newsletter": "^4.9",
+        "spatie/laravel-newsletter": "^4.10",
         "spatie/laravel-permission": "^4.0",
         "spatie/laravel-query-builder": "^4.0",
         "stevebauman/location": "^6.1",

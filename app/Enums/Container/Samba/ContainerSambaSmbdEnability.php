@@ -19,4 +19,14 @@ final class ContainerSambaSmbdEnability extends Enum
      * @var int
      */
     const Disabled = 2;
+
+    /**
+     * Container Samba SMBD is unknown
+     * 
+     * This can be due to the container is not yet created
+     * at the server
+     * 
+     * @var  int
+     */
+    const Unknown = 3;
 }

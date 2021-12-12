@@ -4,19 +4,10 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
-use App\Repositories\RegionRepository;
+use App\Models\Region;
 
 class RegionsSeeder extends Seeder
 {
-	protected $region;
-
-	public function __construct(
-		RegionRepository $regionRepository
-	)
-	{
-		$this->region = $regionRepository;
-	}
-
     /**
      * Run the database seeds.
      *
@@ -24,8 +15,6 @@ class RegionsSeeder extends Seeder
      */
     public function run()
     {
-        $this->region->save(['region_name' => 'Europe']);
-        /*$this->region->setModel(new \App\Models\Region());
-        $this->region->save(['region_name' => 'Asia']);*/
+        Region::create(['region_name' => 'Europe']);
     }
 }

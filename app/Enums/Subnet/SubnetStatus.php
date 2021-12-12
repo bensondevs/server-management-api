@@ -11,14 +11,14 @@ final class SubnetStatus extends Enum
      * 
      * @var int
      */
-    const Inactive = 0;
+    const Unavailable = 0;
 
     /**
      * Subnet status active
      * 
      * @var int
      */
-    const Active = 1;
+    const Available = 1;
 
     /**
      * Subnet status is forbidden to be used
@@ -35,11 +35,11 @@ final class SubnetStatus extends Enum
     public function badgeHtmlClass()
     {
         switch ($this->value) {
-            case self::Inactive:
+            case self::Unavailable:
                 $labelType = 'label-secondary';
                 break;
 
-            case self::Active:
+            case self::Available:
                 $labelType = 'label-success';
                 break;
 
