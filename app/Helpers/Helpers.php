@@ -293,3 +293,19 @@ if (! function_exists('uppercaseArray')) {
         return array_map('strtoupper', $array);
     }
 }
+
+/**
+ * Get current currency of the authenticated user
+ * 
+ * @return  int
+ */
+if (! function_exists('current_currency')) {
+    function current_currency()
+    {
+        if ($user = auth()->user()) {
+            return $user->currency;
+        }
+
+        return \App\Enums\Currency::EUR;
+    }
+}

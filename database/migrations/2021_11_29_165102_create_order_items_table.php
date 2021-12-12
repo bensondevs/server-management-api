@@ -28,7 +28,7 @@ class CreateOrderItemsTable extends Migration
             $table->double('price', 20, 2)->default(0);
             $table->double('discount')->default(0);
             $table->double('total')->default(0);
-            $table->text('note');
+            $table->longText('note')->nullable();
 
             $table->timestamps();
         });

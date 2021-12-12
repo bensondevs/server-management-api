@@ -9,8 +9,7 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use Illuminate\Support\Facades\Queue;
 
-use App\Models\User;
-use App\Models\Container;
+use App\Models\{ User, Container };
 
 class NfsTest extends TestCase
 {
@@ -32,7 +31,7 @@ class NfsTest extends TestCase
         ];
         $container = $user->containers()->first();
         $url = '/api/containers/nfs?container_id=' . $container->id;
-        /*$response = $this->withHeaders($headers)->get($url);
+        $response = $this->json('GET', $url);
 
         $response->assertStatus(200);
         $response->assertJson(function (AssertableJson $json) {
@@ -40,7 +39,7 @@ class NfsTest extends TestCase
             $json->has('nfs_informations.status');
             $json->has('nfs_informations.pid_numbers');
             $json->has('nfs_informations.exports');
-        });*/
+        });
     }
 
     /**

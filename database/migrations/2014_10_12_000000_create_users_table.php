@@ -35,6 +35,7 @@ class CreateUsersTable extends Migration
             $table->string('company_name')->nullable();
 
             $table->tinyInteger('subscribe_newsletter')->default(1);
+            $table->tinyInteger('currency')->default(1);
 
             $table->rememberToken();
             $table->timestamps();

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Container;
+namespace App\Http\Controllers\Api\Container\Samba;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;

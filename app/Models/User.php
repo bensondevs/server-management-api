@@ -13,6 +13,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\Traits\CausesActivity;
 use App\Traits\UuidTrait;
 
+use App\Enums\Currency;
 use App\Enums\User\UserAccountType;
 
 class User extends Authenticatable
@@ -148,6 +149,19 @@ class User extends Authenticatable
     }
 
     /**
+     * Create callable attribute of "default_currency"
+     * This callable attribute will return enum description of
+     * user selection of default currency
+     * 
+     * @return string
+     */
+    public function getDefaultCurrencyAttribute()
+    {
+        $currency = $this->attributes['default_currency'];
+        return Currency::getDescription($currency);
+    }
+
+    /**
      * Create settable `unhashed_password` attribute
      * This settable attribute will allow insertion of plain string
      * and convert it as hashed password
@@ -158,6 +172,14 @@ class User extends Authenticatable
     public function setUnhashedPasswordAttribute(string $password)
     {
         $this->attributes['password'] = bcrypt($password);
+    }
+
+    /**
+     * Get user carts
+     */
+    public function carts()
+    {
+        return $this->hasMany(Cart::class);
     }
 
     /**

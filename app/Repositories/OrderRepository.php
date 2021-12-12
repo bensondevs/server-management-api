@@ -45,6 +45,28 @@ class OrderRepository extends BaseRepository
 	}
 
 	/**
+	 * Add order item
+	 * 
+	 * @param  array  $orderItemData
+	 * @return \App\Models\OrderItem
+	 */
+	public function addItem(array $orderItem)
+	{
+		//
+	}
+
+	/**
+	 * Remove order item
+	 * 
+	 * @param  \App\Models\OrderItem  $item
+	 * @return bool
+	 */
+	public function removeItem(OrderItem $item)
+	{
+		//
+	}
+
+	/**
 	 * Delete order
 	 *
 	 * @return bool

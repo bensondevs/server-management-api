@@ -1,27 +1,54 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Repositories\Base;
 
 use Illuminate\Http\Response;
 
 trait RepositoryResponse 
 {
-	public $status;
 	public $httpStatus = 200;
+	
+	public $status;
+	public $statuses = [];
+
 	public $message;
+	public $messages = [];
+
 	public $queryError;
+	public $queryErrors = [];
 
 	public function flash()
 	{
 		session()->flash($this->status, $this->message);
 	}
 
+	public function setStatus($status = 'error')
+	{
+		$this->status = $status;
+		$this->statuses[] = $status;
+	}
+
+	public function setHttpStatusCode(int $code)
+	{
+		return $this->httpStatus = $code;
+	}
+
+	public function setMessage($message = 'Unknown')
+	{
+		$this->message = $message;
+		$this->messages[] = $message;
+	}
+
+	public function setQueryError(string $queryError = '')
+	{
+		$this->queryError = $queryError;
+		$this->queryErrors[] = $queryError;
+	}
+
 	public function setUnprocessedInput($message = 'Wrong input')
 	{
-		$this->status = 'error';
-		$this->message = $message;
+		$this->setStatus('error');
+		$this->setMessage($message);
 		$this->httpStatus = 422;
 
 		return null;
@@ -29,8 +56,8 @@ trait RepositoryResponse
 
 	public function setForbidden($message = 'Forbidden')
 	{
-		$this->status = 'error';
-		$this->message = $message;
+		$this->setStatus('error');
+		$this->setMessage($message);
 		$this->httpStatus = 403;
 
 		return null;
@@ -38,8 +65,8 @@ trait RepositoryResponse
 
 	public function setNotFound($message = 'Not found')
 	{
-		$this->status = 'error';
-		$this->message = $message;
+		$this->setStatus('error');
+		$this->setMessage($message);
 		$this->httpStatus = 404;
 
 		return null;
@@ -47,36 +74,43 @@ trait RepositoryResponse
 
 	public function setSuccess($message = 'Success')
 	{
-		$this->status = 'success';
+		$this->setStatus('success');
+		$this->setMessage($message);
 		$this->httpStatus = 200;
-		$this->message = $message;
+
+		if (request()->isMethod('POST')) {
+			$this->httpStatus = 201;
+		}
+
+		if (request()->isMethod('PUT')) {
+			$this->httpStatus = 204;
+		}
 
 		return null;
 	}
 
-	public function setError($message = 'Error', $queryError)
+	public function setError(string $message = 'Error', string $queryError)
 	{
-		$this->status = 'error';
-		$this->message = $message;
+		$this->setStatus('error');
+		$this->setMessage($message);
 		$this->httpStatus = 500;
-		$this->queryError = $queryError;
+		$this->setQueryError($queryError);
 
 		return null;
 	}
 
-	public function setCustomError($message, $errorCode)
+	public function setCustomError(string $message, int $errorCode, string $queryError = '')
 	{
-		$this->status = 'error';
-		$this->message = $message;
+		$this->setStatus('error');
+		$this->setMessage($message);
 		$this->httpStatus = $errorCode;
-		$this->queryError = null;
+		$this->setQueryError($queryError);
 
 		return null;
 	}
 
 	public function returnResponse($data = true)
 	{
-		return ($this->status == 'success') ?
-			$data : false;
+		return ($this->status == 'success') ? $data : false;
 	}
 }

@@ -3,8 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\{
+	AuthController,
 	UserController,
 	OrderController,
 	ContainerController,
@@ -20,7 +20,8 @@ use App\Http\Controllers\Api\{
 			Container\Vpn\ContainerVpnSubnetController as VpnSubnetController,
 	RegionController,
 	DatacenterController,
-	PaymentController,
+	CartController,
+	Payments\PaymentController,
 	ServerController,
 	ServicePlanController
 };
@@ -66,35 +67,49 @@ Route::group(['as' => 'api.'], function () {
 		Authenticated and Verified Groups
 	*/
 	Route::group(['middleware' => ['auth:sanctum', 'verified']], function () {
-		/*
-			Region API Module
-		*/
-		Route::group(['prefix' => 'regions', 'as' => 'regions.'], function () {
+		/**
+		 * Region API Module
+		 */
+		Route::group(['prefix' => '/regions'], function () {
 			Route::get('/', [RegionController::class, 'regions']);
 		});
 
-		/*
-			Datacenter API Module
-		*/
-		Route::group(['prefix' => 'datacenters', 'as' => 'datacenters.'], function () {
+		/**
+		 * Datacenter API Module
+		 */
+		Route::group(['prefix' => '/datacenters'], function () {
 			Route::get('/', [DatacenterController::class, 'datacenters']);
 		});
 
-		/*
-			Server API Module
-		*/
-		Route::group(['prefix' => 'servers', 'as' => 'servers.'], function () {
+		/**
+		 * Server API Module
+		 */
+		Route::group(['prefix' => '/servers'], function () {
 			Route::get('/', [ServerController::class, 'servers']);
 		});
 
-		/*
-			Orders API Module
-		*/
-		Route::group(['prefix' => 'orders', 'as' => 'orders.'], function () {
+		/**
+		 * Cart API Module
+		 */
+		Route::group(['prefix' => '/carts'], function () {
+			Route::get('/', [CartController::class, 'carts']);
+			Route::post('add', [CartController::class, 'add']);
+			
+			Route::group(['prefix' => '/{cart}'], function () {
+				Route::match(['PUT', 'PATCH'], 'set_quantity', [CartController::class, 'setQuantity']);
+				Route::delete('remove', [CartController::class, 'remove']);
+			});
+
+			Route::post('checkout', [CartController::class, 'checkout']);
+		});
+
+		/**
+		 * Order API Module
+		 */
+		Route::group(['prefix' => '/orders'], function () {
 			Route::get('/', [OrderController::class, 'orders']);
 			Route::post('place', [OrderController::class, 'place'])->name('place');
-			Route::get('view', [OrderController::class, 'view'])->name('view');
-			
+			Route::get('show', [OrderController::class, 'show'])->name('show');
 		});
 
 		/**
@@ -125,7 +140,7 @@ Route::group(['as' => 'api.'], function () {
 					Route::post('/restart', [NfsController::class, 'restart']);
 					Route::post('/reload', [NfsController::class, 'reload']);
 					Route::post('/stop', [NfsController::class, 'stop']);
-					Route::post('/enable', NfsController::class, 'enable');
+					Route::post('/enable', [NfsController::class, 'enable']);
 					Route::post('/disable', [NfsController::class, 'disable']);
 
 					/**
@@ -181,7 +196,7 @@ Route::group(['as' => 'api.'], function () {
 					Route::post('/restart', [SambaController::class, 'restart']);
 					Route::post('/reload', [SambaController::class, 'reload']);
 					Route::post('/stop', [SambaController::class, 'stop']);
-					Route::post('/enable', SambaController::class, 'enable');
+					Route::post('/enable', [SambaController::class, 'enable']);
 					Route::post('/disable', [SambaController::class, 'disable']);
 
 					/**
@@ -257,7 +272,7 @@ Route::group(['as' => 'api.'], function () {
 					 * Container VPN Subnet Module
 					 */
 					Route::group(['prefix' => '/subnet'], function () {
-						Route::get('ips', VpnSubnetController::class, 'ips');
+						Route::get('ips', [VpnSubnetController::class, 'ips']);
 						Route::post('change', [VpnSubnetController::class, 'change']);
 					});
 
@@ -272,30 +287,29 @@ Route::group(['as' => 'api.'], function () {
 							Route::get('show', [VpnUserController::class, 'show']);
 							Route::delete('delete', [VpnUserController::class, 'delete']);
 							Route::post('change_subnet_ip', [VpnUserController::class, 'change_subnet_ip']);
-							Route::get('download_config', VpnUserController::class, 'downloadConfig');
+							Route::get('download_config', [VpnUserController::class, 'downloadConfig']);
 						});
 					});
 				});
 			});
 		});
 
-		/*
-			Payment API Module
-		*/
-		Route::group(['prefix' => 'payments', 'as' => 'payments.'], function () {
-			Route::get('all', [PaymentController::class, 'all'])->name('all');
-			Route::get('check_payment', [PaymentController::class, 'checkPayment'])->name('check_payment');
-			Route::get('view', [PaymentController::class, 'view'])->name('view');
+		/**
+		 *	Payment API Module
+		 */
+		Route::group(['prefix' => 'payments'], function () {
+			Route::get('/', [PaymentController::class, 'payments']);
+			Route::post('create/{order}', [PaymentController::class, 'create']);
 
-			// Route::post('pay_order', [PaymentController::class, 'payOrder'])->name('pay_order');
-			Route::group(['prefix' => 'pay_order', 'as' => 'pay_order'], function () {
-				Route::post('seb', [PaymentController::class, 'payWithSeb']);
+			Route::group(['prefix' => '/{payment}'], function () {
+				Route::get('/', [PaymentController::class, 'show']);
+				Route::post('report', [PaymentController::class, 'report']);
 			});
 		});
 
-		/*
-			User API Module
-		*/
+		/**
+		 * User API Module
+		 */
 		Route::group(['prefix' => 'users', 'as' => 'users.'], function () {
 			Route::get('current', [UserController::class, 'current'])->name('current');
 		});

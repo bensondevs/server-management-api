@@ -10,7 +10,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-use App\Traits\RepositoryResponse;
+use App\Repositories\Base\RepositoryResponse;
 
 class BaseRepository 
 {

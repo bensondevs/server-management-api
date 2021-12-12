@@ -69,14 +69,6 @@ class Order extends Model
     {
     	parent::boot();
         self::observe(OrderObserver::class);
-
-    	self::creating(function ($order) {
-            $order->id = isset($order->id) ?
-                $order->id : 
-                Uuid::generate()->string;
-            $order->order_number = $order->generateOrderNumber();
-            $order->expired_at = carbon()->now()->addDays(3);
-    	});
     }
 
     /**
@@ -97,10 +89,10 @@ class Order extends Model
      */
     public function getVatAmountAttribute()
     {
-        $amount = $this->attributes['amount'];
+        $total = $this->attributes['total'];
         $vatPercentage = $this->attributes['vat_size_percentage'];
 
-        return $amount * ($vatPercentage / 100);
+        return $total * ($vatPercentage / 100);
     }
 
     /**
@@ -121,6 +113,14 @@ class Order extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * Alias for "orderItems()"
+     */
+    public function items()
+    {
+        return $this->orderItems();
     }
 
     /**
@@ -187,7 +187,7 @@ class Order extends Model
         
         $vatAmount = $this->getVatAmountAttribute();
         $grandTotal = $total + $vatAmount;
-        return $this->attributes['grant_total'] = $grandTotal;
+        return $this->attributes['grand_total'] = $grandTotal;
     }
 
     /**
@@ -228,5 +228,16 @@ class Order extends Model
         $this->attributes['status'] = Status::Expired;
         $this->attributes['expired_at'] = now();
         return $this->save();
+    }
+
+    /**
+     * Add item to order
+     * 
+     * @param  array  $itemData
+     * @return self
+     */
+    public function addItem(array $itemData)
+    {
+        //
     }
 }

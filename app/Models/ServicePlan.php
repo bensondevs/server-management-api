@@ -59,6 +59,14 @@ class ServicePlan extends Model
     ];
 
     /**
+     * Relationships that should be loaded
+     * whenever the model is retrieved from database
+     * 
+     * @var array
+     */
+    protected $with = ['pricings'];
+
+    /**
      * Model boot static method
      * This method handles event and hold event listener and observer
      * This is where Observer and Event Listener Class should be put
@@ -91,7 +99,7 @@ class ServicePlan extends Model
      */
     public function pricings()
     {
-        return $this->morphMany(Pricing::class, 'pricingable');
+        return $this->morphMany(Pricing::class, 'priceable');
     }
 
     /**
@@ -114,6 +122,25 @@ class ServicePlan extends Model
     {
         $this->attributes['is_hidden'] = false;
         return $this->save();
+    }
+
+    /**
+     * Get price of the service plan
+     * 
+     * @return  float
+     */
+    public function getPrice()
+    {
+        if (! $pricings = $this->pricings) {
+            return 0;
+        }
+
+        $currency = current_currency();
+        if (! $pricing = $pricings->where('currency', $currency)->first()) {
+            return 0;
+        }
+
+        return $pricing->price;
     }
 
     /**

@@ -8,6 +8,19 @@ use App\Enums\Order\OrderStatus as Status;
 class OrderObserver
 {
     /**
+     * Handle the Order "creating" event.
+     *
+     * @param  \App\Models\Order  $order
+     * @return void
+     */
+    public function creating(Order $order)
+    {
+        $order->id = isset($order->id) ? $order->id : generateUuid();
+        $order->order_number = $order->generateOrderNumber();
+        $order->expired_at = now()->addDays(3);
+    }
+
+    /**
      * Handle the Order "created" event.
      *
      * @param  \App\Models\Order  $order
