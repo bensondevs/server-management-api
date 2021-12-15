@@ -8,7 +8,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
 
-use App\Enums\{ Currency, Container\ContainerProperty };
+use App\Observers\ServicePlanObserver as Observer;
+use App\Enums\{ 
+    Currency, 
+    ContainerProperty\ContainerPropertyType 
+};
 
 class ServicePlan extends Model
 {
@@ -52,10 +56,13 @@ class ServicePlan extends Model
      * @var array 
      */
     protected $fillable = [
-        'is_hidden',
         'plan_name',
         'plan_code',
         'description',
+
+        'status',
+
+        'duration_days',
     ];
 
     /**
@@ -76,14 +83,7 @@ class ServicePlan extends Model
     protected static function boot()
     {
     	parent::boot();
-
-    	self::creating(function ($servicePlan) {
-            $servicePlan->id = Uuid::generate()->string;
-
-            if (! $servicePlan->plan_code) {
-                $servicePlan->plan_code = random_string(5);
-            }
-    	});
+        self::observe(Observer::class);
     }
 
     /**
@@ -144,34 +144,71 @@ class ServicePlan extends Model
     }
 
     /**
-     * Set disk size in mega byte to the service plan
+     * Set duration in certain unit of the service plan
+     * 
+     * @param  int    $count
+     * @param  string $unit
+     * @return bool
+     */
+    public function setDuration(int $count = 30, string $unit = 'days')
+    {
+        switch (strtolower($unit)) {
+            case 'day':
+                $days = $count;
+                break;
+            case 'days':
+                $days = $count;
+                break;
+
+            case 'week':
+                $days = $count * 7;
+                break;
+            case 'weeks':
+                $days = $count * 7;
+                break;
+
+            case 'months':
+                $days = $count * 30;
+                break;
+            case 'month':
+                $dats = $count * 30;
+
+            case 'year':
+                $days = $count * 365;
+                break;
+            case 'years':
+                $days = $count * 365;
+                break;
+
+            case 'decade':
+                $days = $count * 3650;
+                break;
+            case 'decades':
+                $days = $count * 3650;
+                break;
+            
+            default:
+                $days = $count;
+                break;
+        }
+
+        $this->attributes['duration_days'] = $days;
+        return $this->save();
+    }
+
+    /**
+     * Set disk size in giga byte to the service plan
      * 
      * @param  int  $diskSize
      * @return bool
      */
-    public function setDiskSize(int $diskSizeMb = 100)
+    public function setDiskSize(int $diskSizeGb = 100)
     {
         $item = ServicePlanItem::firstOrNew([
-            'property_type' => ContainerProperty::DiskSize,
+            'property_type' => ContainerPropertyType::DiskSize,
             'service_plan_id' => $this->attributes['id'],
         ]);
-        $item->property_unit_quantity = $diskSizeMb;
-        return $item->save();
-    }
-
-    /**
-     * Set duration in days of the service plan
-     * 
-     * @param  int  $days
-     * @return bool
-     */
-    public function setDuration(int $days = 30)
-    {
-        $item = ServicePlanItem::firstOrNew([
-            'property_type' => ContainerProperty::Duration,
-            'service_plan_id' => $this->attributes['id'],
-        ]);
-        $item->property_unit_quantity = $days;
+        $item->property_value = $diskSizeGb;
         return $item->save();
     }
 

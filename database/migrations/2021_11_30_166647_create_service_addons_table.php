@@ -4,6 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+use App\Enums\ServiceAddon\ServiceAddonStatus as Status;
+
 class CreateServiceAddonsTable extends Migration
 {
     /**
@@ -17,10 +19,14 @@ class CreateServiceAddonsTable extends Migration
             $table->uuid('id')->primary();
 
             $table->string('addon_name');
+            $table->string('addon_code')->unique();
+            $table->longText('description')->nullable();
 
-            // How many property is added to container
-            $table->integer('property_unit_quantity')->default(1);
+            $table->tinyInteger('status')->default(Status::Active);
+            $table->integer('duration_days')->default(1);
+
             $table->tinyInteger('property_type')->default(1);
+            $table->integer('property_value')->default(1);
 
             $table->timestamps();
         });

@@ -9,6 +9,17 @@ use App\Models\WaitingContainer;
 class SubnetObserver
 {
     /**
+     * Handle the Subnet "creating" event.
+     *
+     * @param  \App\Models\Subnet  $subnet
+     * @return void
+     */
+    public function creating(Subnet $subnet)
+    {
+        $subnet->id = generateUuid();
+    }
+
+    /**
      * Handle the Subnet "created" event.
      *
      * @param  \App\Models\Subnet  $subnet
@@ -16,16 +27,9 @@ class SubnetObserver
      */
     public function created(Subnet $subnet)
     {
-        // Create all IP(s)
-        $subnet->createIps();
+        $subnet->generateIps(); // Generate IPs
 
-        // Try to push back
-        WaitingContainer::pushBack();
-
-        if ($user = auth()->user()) {
-            $message = $user->anchorName() . ' has created a subnet.';
-            record_activity($message, $user, $subnet);
-        }
+        //
     }
 
     /**
@@ -36,17 +40,7 @@ class SubnetObserver
      */
     public function updated(Subnet $subnet)
     {
-        if ($user = auth()->user()) {
-            $message = $user->anchorName() . ' has updated subnet.';
-            record_activity($message, $user, $subnet);
-
-            if ($subnet->isDirty('status')) {
-                $latestStatus = $subnet->status_description;
-                $message = $user->anchorName() . ' has switched subnet status to ' . $latestStatus . '.';
-                record_activity($message, $user, $subnet);
-            }
-        }
-
+        //
     }
 
     /**
@@ -57,12 +51,7 @@ class SubnetObserver
      */
     public function deleted(Subnet $subnet)
     {
-        if ($user = auth()->user()) {
-            $anchorName = $user->anchorName();
-
-            $message = $anchorName . ' has deleted a subnet.';
-            record_activity($message, $user, $subnet);
-        }
+        //
     }
 
     /**

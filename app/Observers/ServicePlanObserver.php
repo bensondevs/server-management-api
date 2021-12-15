@@ -15,6 +15,10 @@ class ServicePlanObserver
     public function creating(ServicePlan $servicePlan)
     {
         $servicePlan->id = generateUuid();
+
+        if (! $servicePlan->plan_code) {
+            $servicePlan->plan_code = random_string(5);
+        }
     }
 
     /**

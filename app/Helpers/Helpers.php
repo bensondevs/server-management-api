@@ -228,6 +228,19 @@ if (! function_exists('random_phone')) {
 }
 
 /**
+ * Decode JSON string directly to array
+ * 
+ * @param  string  $json
+ * @return array|null
+ */
+if (! function_exists('json_decode_array')) {
+    function json_decode_array(string $json)
+    {
+        return json_decode($json, true);
+    }
+}
+
+/**
  * Shorter version for laravel response json
  * 
  * @param  array  $response

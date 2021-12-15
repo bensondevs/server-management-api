@@ -7,6 +7,17 @@ use App\Models\Region;
 class RegionObserver
 {
     /**
+     * Handle the Region "creating" event.
+     *
+     * @param  \App\Models\Region  $region
+     * @return void
+     */
+    public function creating(Region $region)
+    {
+        $region->id = generateUuid();
+    }
+
+    /**
      * Handle the Region "created" event.
      *
      * @param  \App\Models\Region  $region
@@ -14,8 +25,7 @@ class RegionObserver
      */
     public function created(Region $region)
     {
-        $user = auth()->user();
-        activity()->performedOn($region)->causedBy($user)->log($user->anchorName() . ' had created a new region.');
+        //
     }
 
     /**
@@ -26,8 +36,7 @@ class RegionObserver
      */
     public function updated(Region $region)
     {
-        $user = auth()->user();
-        activity()->performedOn($region)->causedBy($user)->log($user->anchorName() . ' had updated a region.');
+        //
     }
 
     /**

@@ -3,20 +3,22 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
 
-use App\Observers\RegionObserver;
+use App\Observers\ContainerAdditionalPropertyObserver as Observer;
 
-class Region extends Model
+class ContainerAdditionalProperty extends Model
 {
+    use HasFactory;
+
     /**
      * Model table name
      * 
      * @var string
      */
-    protected $table = 'regions';
+    protected $table = 'container_additional_properties';
 
     /**
      * Model primary key
@@ -49,7 +51,9 @@ class Region extends Model
      * @var array 
      */
     protected $fillable = [
-        'region_name',
+        'container_id',
+        'container_property_id',
+        'additional_value',
     ];
 
     /**
@@ -62,35 +66,22 @@ class Region extends Model
     protected static function boot()
     {
     	parent::boot();
-        self::observe(RegionObserver::class);
+        self::observe(Observer::class);
     }
 
     /**
-     * Get datacenters of current region
+     * Get container that posses this additional property
      */
-    public function datacenters()
+    public function container()
     {
-        return $this->hasMany(Datacenter::class);
+        return $this->belongsTo(Container::class);
     }
 
     /**
-     * Get servers of region through datacenters
+     * Get container property supported by this additional property
      */
-    public function servers()
+    public function property()
     {
-        return $this->hasManyThrough(Server::class, Datacenter::class);
-    }
-
-    /**
-     * Select the best datacenter for the user.
-     * The best datacenter can be decided by examining the amount of users
-     * for each datacenter. This method will pick datacenter with the least users
-     * and return it.
-     * 
-     * @return \App\Models\Datacenter
-     */
-    public function selectBestDatacenter()
-    {
-        //
+        return $this->belongsTo(ContainerProperty::class);
     }
 }

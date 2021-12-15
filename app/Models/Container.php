@@ -8,15 +8,23 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
 
-use App\Observers\ContainerObserver;
+use App\Observers\ContainerObserver as Observer;
 use App\Repositories\ContainerRepository;
-
+use App\Models\{
+    ContainerProperty as Property,
+    ContainerAdditionalProperty as AdditionalProp
+};
 use App\Traits\{ Searchable, TrackInQueue };
 use App\Traits\Container\{
     VpnTrait,
     NfsTrait,
     SambaTrait,
     NginxTrait
+};
+use App\Enums\Container\{
+    ContainerStatus as Status,
+    ContainerOnServerStatus as StatusOnServer,
+    ContainerProperty as PropertyType
 };
 
 class Container extends Model
@@ -82,10 +90,6 @@ class Container extends Model
         'status',
         'status_on_server',
 
-        'disk_size',
-        'disk_array',
-        'breakpoints',
-
         'created_on_server_at',
         'system_installed_at',
 
@@ -116,12 +120,7 @@ class Container extends Model
     protected static function boot()
     {
     	parent::boot();
-        self::observe(ContainerObserver::class);
-
-        self::creating(function ($serverContainer) {
-            $subnetIp = SubnetIp::findOrFail($serverContainer->subnet_ip_id);
-            $serverContainer->id = $serverContainer->generate_id($subnetIp->ip_address);
-        });
+        self::observe(Observer::class);
     }
 
     /**
@@ -204,7 +203,7 @@ class Container extends Model
     public function getStatusDescriptionAttribute()
     {
         $status = $this->attributes['status'];
-        return ContainerStatus::getDescription($status);
+        return Status::getDescription($status);
     }
 
     /**
@@ -253,7 +252,7 @@ class Container extends Model
         $subnetIpId = $this->attributes['subnet_ip_id'];
         $ip = SubnetIp::where('subnet_ip_id', $subnetIpId)->first();
 
-        return $ip->ip_address;
+        return $ip ? $ip->ip_address : null;
     }
 
     /**
@@ -292,6 +291,16 @@ class Container extends Model
     public function subnetIp()
     {
         return $this->belongsTo(SubnetIp::class);
+    }
+
+    /**
+     * Get container properties
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function properties()
+    {
+        return $this->hasMany(ContainerProperty::class);
     }
 
     /**
@@ -380,13 +389,159 @@ class Container extends Model
     }
 
     /**
+     * Check is container alive on server
+     * 
+     * @return bool
+     */
+    public function isCreatedOnServer()
+    {
+        $statusOnServer = $this->attributes['status_on_server'];
+
+        return 
+            ($statusOnServer >= StatusOnServer::Created) && 
+            ($statusOnServer <= StatusOnServer::Inactive);
+    }
+
+    /**
+     * Set property for container
+     * 
+     * @param  int  $propertyType
+     * @param  mixed  $value
+     * @return $this
+     */
+    public function setProperty(int $propertyType, $value)
+    {
+        $property = Property::of($this)
+            ->withType($propertyType)
+            ->first();
+        if (! $property) {
+            $property = new Property([
+                'container_id' => $this->attributes['id'],
+                'property_type' => $propertyType,
+            ]);
+        }
+        $property->property_value = $value;
+        $property->save();
+
+        return $this;
+    }
+
+    /**
+     * Get property of container
+     * 
+     * @param  int  $propertyType
+     * @return \App\Models\ContainerProperty
+     */
+    public function getProperty(int $propertyType)
+    {
+        $property = Property::of($this)
+            ->withType($propertyType)
+            ->first();
+        if (! $property) {
+            $property = Property::create([
+                'container_id' => $this->attributes['id'],
+                'property_type' => $propertyType,
+                'property_value' => 0,
+            ]);
+        }
+
+        return $property;
+    }
+
+    /**
+     * Set disk size of container
+     * 
+     * @param  float  $diskSize
+     * @return $this
+     */
+    public function setDiskSize(float $diskSize)
+    {
+        $type = PropertyType::DiskSize;
+        return $this->setProperty($type, $diskSize);
+    }
+
+    /**
+     * Get disk size of container
+     * 
+     * @return float
+     */
+    public function getDiskSize()
+    {
+        $type = PropertyType::DiskSize;
+        return $this->getProperty($type);
+    }
+
+    /**
+     * Set disk array of container
+     * 
+     * @param  int  $diskArray
+     * @return $this
+     */
+    public function setDiskArray(int $diskArray)
+    {
+        $type = PropertyType::DiskArray;
+        return $this->setProperty($type, $diskArray);
+    }
+
+    /**
+     * Get disk array of container
+     * 
+     * @return int
+     */
+    public function getDiskArray()
+    {
+        $type = PropertyType::DiskArray;
+        return $this->getProperty($type);
+    }
+
+    /**
+     * Set breakpoints of container
+     * 
+     * @param  int  $breakpoints
+     * @return $this
+     */
+    public function setBreakpoints(int $breakpoints)
+    {
+        $type = PropertyType::Breakpoints;
+        return $this->setProperty($type, $breakpoints);
+    }
+
+    /**
+     * Get breakpoints of container
+     * 
+     * @return int
+     */
+    public function getBreakpoints()
+    {
+        $type = PropertyType::Breakpoints;
+        return $this->setProperty($type);
+    }
+
+    /**
+     * Set additional property to container
+     * 
+     * This will add the value of property
+     * 
+     * @param  int   $propertyType
+     * @param  mixed $value
+     * @return \App\Models\ContainerAdditionalProperty
+     */
+    public function setAdditionalProperty(int $propertyType, $value)
+    {
+        $property = $this->getProperty($propertyType);
+        $additionalProp = $property->addAdditional($value);
+
+        return $additionalProp;
+    }
+
+    /**
      * Activate the container
      * 
      * @return bool
      */
     public function activate()
     {
-        $this->attributes['status'] = ContainerStatus::Active;
+        $this->attributes['status'] = Status::Active;
         return $this->save();
     }
 }

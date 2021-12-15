@@ -11,7 +11,6 @@ final class PrecreatedContainerStatus extends Enum
      * from user input and selections. 
      * This status will stay until the payment of order is settled
      * 
-     * @static
      * @var int
      */
     const Prepared = 1;
@@ -19,7 +18,6 @@ final class PrecreatedContainerStatus extends Enum
     /**
      * The container has been created through this model
      * 
-     * @static
      * @var int
      */
     const Created = 2;
@@ -29,7 +27,6 @@ final class PrecreatedContainerStatus extends Enum
      * The reason can be various, most of them because selected 
      * server might be full or the selected server does not have free subnet
      * 
-     * @static
      * @var int
      */
     const Waiting = 3;

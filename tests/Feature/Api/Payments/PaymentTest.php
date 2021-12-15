@@ -2,21 +2,72 @@
 
 namespace Tests\Feature\Api\Payments;
 
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
+use Laravel\Sanctum\Sanctum;
+
+use App\Enums\Payment\PaymentMethod as Method;
+use App\Models\{ User, Cart, ServicePlan, Order };
 
 class PaymentTest extends TestCase
 {
     /**
-     * A basic feature test example.
+     * Populate all payments test.
      *
      * @return void
      */
-    public function test_example()
+    public function test_view_all_payments()
     {
-        $response = $this->get('/');
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $url = '/api/payments';
+        $response = $this->json('GET', $url);
 
         $response->assertStatus(200);
+        $response->assertJson(function (AssertableJson $json) {
+            $json->has('payments');
+        });
+    }
+
+    /**
+     * Create payment from order test
+     * 
+     * @return void
+     */
+    public function test_create_payment()
+    {
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $order = Order::factory()
+            ->for($user)
+            ->create();
+
+        $url = '/api/payments/create/' . $order->id;
+        $response = $this->json('POST', $url, ['method' => Method::SEB]);
+    }
+
+    /**
+     * Show payment data test
+     * 
+     * @return void
+     */
+    public function test_show_payment()
+    {
+        //
+    }
+
+    /**
+     * Send report about payment
+     * 
+     * @return void
+     */
+    public function test_report_payment()
+    {
+        //
     }
 }

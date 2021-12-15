@@ -72,17 +72,6 @@ class ContainerRepository extends BaseRepository
 	}
 
 	/**
-	 * Create container from pre-created container
-	 * 
-	 * @param \App\Models\PrecreatedContainer $meta
-	 * @return \App\Models\Container
-	 */
-	public function createFromMeta(PrecreatedContainer $meta)
-	{
-		//
-	}
-
-	/**
 	 * Get current container of the user
 	 * 
 	 * @param \App\Models\User  $user
@@ -137,60 +126,6 @@ class ContainerRepository extends BaseRepository
 		} catch (QueryException $qe) {
 			$error = $qe->getMessage();
 			$this->setError('Failed to set container as current container.', $error);
-		}
-
-		return $this->getModel();
-	}
-
-	/**
-	 * Save pre-created container in waiting list
-	 * If the pre-created container is already in waiting list
-	 * This function will return the model only
-	 * 
-	 * @param  \App\Models\Order
-	 * @return \App\Models\WaitingContainer
-	 */
-	public function saveInWaitingList(Order $order)
-	{
-		if ($waitingContainer = WaitingContainer::findOrder($order->id)) {
-			$this->setSuccess('This order has been in waiting list.');
-			return $waitingContainer;
-		}
-
-		try {
-			$waitingContainer = WaitingContainer::create([
-				'order_id' => $order->id,
-				'duration_days' => $order->plan->duration_days,
-				'waiting_since' => carbon()->now(),
-			]);
-			
-			$this->setSuccess('Successfully put container creation in waiting list.');
-		} catch (QueryException $qe) {
-			$error = $qe->getMessage();
-			$this->setError('Failed to put container creation in waiting list', $error);
-		}
-
-		return $waitingContainer;
-	}
-
-	/**
-	 * Set container service plan
-	 * 
-	 * @param \App\Models\ServicePlan  $plan
-	 * @return \App\Models\Container
-	 */
-	public function setPlan(ServicePlan $plan)
-	{
-		try {
-			$container = $this->getModel();
-			$container->servicePlan()->associate($plan);
-
-			$this->setModel($container);
-
-			$this->setSuccess('Successfully set service plan to container.');
-		} catch (QueryException $qe) {
-			$error = $qe->getMessage();
-			$this->setError('Failed to set service plan to the container');
 		}
 
 		return $this->getModel();

@@ -22,6 +22,12 @@ class CreateContainersTable extends Migration
                 ->on('users')
                 ->onDelete('SET NULL');
 
+            $table->uuid('region_id');
+            $table->foreign('region_id')
+                ->references('id')
+                ->on('regions')
+                ->onDelete('CASCADE');
+
             $table->uuid('server_id');
             $table->foreign('server_id')
                 ->references('id')
@@ -49,11 +55,6 @@ class CreateContainersTable extends Migration
             $table->tinyInteger('current')->default(0);
             $table->tinyInteger('status')->default(1);
             $table->tinyInteger('status_on_server')->default(0);
-
-            // Spesifications
-            $table->integer('disk_size')->default(50);
-            $table->integer('disk_array')->default(1);
-            $table->integer('breakpoints')->default(1);
 
             // Services Timestamps
             $table->timestamp('created_on_server_at')->nullable();

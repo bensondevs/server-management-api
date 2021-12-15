@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Enums\Container;
+namespace App\Enums\ContainerProperty;
 
 use BenSampo\Enum\Enum;
 
-final class ContainerProperty extends Enum
+final class ContainerPropertyType extends Enum
 {
     /**
      * The disk size of the container
@@ -14,16 +14,16 @@ final class ContainerProperty extends Enum
     const DiskSize = 1;
 
     /**
-     * Operating system of the container
+     * Disk array of the container
      * 
      * @var int
      */
-    const OperatingSystem = 2;
+    const DiskArray = 2;
 
     /**
-     * Duration of the container validity
+     * Breakpoints of the container
      * 
      * @var int
      */
-    const Duration = 3;
+    const Breakpoints = 3;
 }

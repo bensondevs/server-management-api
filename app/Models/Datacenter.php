@@ -122,4 +122,14 @@ class Datacenter extends Model
     {
         return $this->hasMany(Server::class);
     }
+
+    /**
+     * Select server with least amount of users.
+     * 
+     * @return \App\Models\Server
+     */
+    public function selectBestServer()
+    {
+        //
+    }
 }

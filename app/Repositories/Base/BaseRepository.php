@@ -134,31 +134,63 @@ class BaseRepository
 		return $this->collection = $collection;
 	}
 
+	/**
+	 * Get collection attached inside repository
+	 * 
+	 * @return Illuminate\Support\Collection
+	 */
 	public function getCollection()
 	{
 		return $this->collection;
 	}
 
+	/**
+	 * Destory collection attached to repository
+	 * 
+	 * @return Illuminate\Support\Collection
+	 */
 	public function destroyCollection()
 	{
 		$this->collection = collect();
 	}
 
+	/**
+	 * Set pagination to repository
+	 * 
+	 * @param  Illuminate\Pagination\LengthAwarePaginator  $paginations
+	 */
 	public function setPagination(LengthAwarePaginator $paginations)
 	{
 		return $this->paginations = $paginations;
 	}
 
+	/**
+	 * Get pagination attached to repository
+	 * 
+	 * @return Illuminate\Pagination\LengthAwarePaginator
+	 */
 	public function getPagination()
 	{
 		return $this->paginations;
 	}
 
+	/**
+	 * Destroy pagination
+	 * 
+	 * @return null
+	 */
 	public function destroyPagination()
 	{
 		return $this->paginations = null;
 	}
 
+	/**
+	 * Query all collection with options and pagination
+	 * 
+	 * @param  array  $options
+	 * @param  array  $pagination
+	 * @return Illuminate\Support\Collection
+	 */
 	public function all(array $options = [], bool $pagination = false)
 	{
 		$models = $this->getModel();
@@ -288,7 +320,7 @@ class BaseRepository
 
 		return ($pagination) ? $this->paginate() : $models;
 	}
-
+	
 	public function trasheds(array $options = [], bool $pagination = false)
 	{
 		$model = $this->getModel();

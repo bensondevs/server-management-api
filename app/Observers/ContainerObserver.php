@@ -11,6 +11,18 @@ use App\Repositories\ContainerRepository;
 class ContainerObserver
 {
     /**
+     * Handle the Container "creating" event.
+     *
+     * @param  \App\Models\Container  $container
+     * @return void
+     */
+    public function creating(Container $container)
+    {
+        $subnetIp = SubnetIp::findOrFail($container->subnet_ip_id);
+        $container->id = $container->generate_id($subnetIp->ip_address);
+    }
+
+    /**
      * Handle the Container "created" event.
      *
      * @param  \App\Models\Container  $container

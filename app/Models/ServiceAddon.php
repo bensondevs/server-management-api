@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 
+use App\Observers\ServiceAddonObserver;
+
 class ServiceAddon extends Model
 {
     /**
@@ -48,8 +50,14 @@ class ServiceAddon extends Model
      */
     protected $fillable = [
         'addon_name',
-        'property_unit_quantity',
+        'addon_code',
+        'description',
+
+        'status',
+        'duration_days',
+
         'property_type',
+        'property_value',
     ];
 
     /**
@@ -62,10 +70,7 @@ class ServiceAddon extends Model
     protected static function boot()
     {
     	parent::boot();
-
-    	self::creating(function ($addon) {
-            $addon->id = Uuid::generate()->string;
-    	});
+        self::observe(Observer::class);
     }
 
     /**

@@ -7,9 +7,8 @@ use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
 use Webpatser\Uuid\Uuid;
 use App\Traits\Searchable;
 
-use App\Models\SubnetIp;
-use App\Observers\SubnetObserver;
-use App\Enums\Subnet\SubnetStatus;
+use App\Observers\SubnetObserver as Observer;
+use App\Enums\Subnet\SubnetStatus as Status;
 use IPTools\Network;
 
 class Subnet extends Model
@@ -78,7 +77,7 @@ class Subnet extends Model
     protected static function boot()
     {
     	parent::boot();
-        self::observe(SubnetObserver::class);
+        self::observe(Observer::class);
 
     	self::creating(function ($subnet) {
             $subnet->id = Uuid::generate()->string;
@@ -95,7 +94,7 @@ class Subnet extends Model
      */
     public function scopeAvailable(Builder $query)
     {
-        return $query->where('status', SubnetStatus::Available);
+        return $query->where('status', Status::Available);
     }
 
     /**
@@ -107,7 +106,7 @@ class Subnet extends Model
     public function getStatusDescriptionAttribute()
     {
         $status = $this->attributes['status'];
-        return SubnetStatus::getDescription($status);
+        return Status::getDescription($status);
     }
 
     /**
@@ -143,11 +142,11 @@ class Subnet extends Model
     }
 
     /**
-     * Create IPs of the subnet according to network parse
+     * Genearte IPs of the subnet according to network parse
      * 
      * @return bool
      */
-    public function createIps()
+    public function generateIps()
     {
         $subnetMask = $this->attributes['subnet_mask'];
         $hosts = Network::parse($subnetMask)->hosts;
@@ -166,6 +165,40 @@ class Subnet extends Model
     }
 
     /**
+     * Select one free ip of the current subnet's children.
+     * 
+     * If not found, this method will return NULL as result
+     * 
+     * @return \App\Models\SubnetIp|null 
+     */
+    public function selectFreeIp()
+    {
+        return SubnetIp::of($this)->free()->first();
+    }
+
+    /**
+     * Check if subnet status is unavailable
+     * 
+     * @return bool
+     */
+    public function isUnavailable()
+    {
+        $status = $this->attributes['status'];
+        return $status === Status::Unavailable;
+    }
+
+    /**
+     * Check if subnet status is forbidden
+     * 
+     * @return bool
+     */
+    public function isForbidden()
+    {
+        $status = $this->attributes['status'];
+        return $status === Status::Forbidden;
+    }
+
+    /**
      * Set the subnet as available
      * 
      * This will make the subnet assignable to certain user.
@@ -176,7 +209,7 @@ class Subnet extends Model
      */
     public function setAvailable()
     {
-        $this->attributes['status'] = SubnetStatus::Available;
+        $this->attributes['status'] = Status::Available;
         return $this->save();
     }
 
@@ -189,7 +222,7 @@ class Subnet extends Model
      */
     public function setForbidden()
     {
-        $this->attributes['status'] = SubnetStatus::Forbidden;
+        $this->attributes['status'] = Status::Forbidden;
         return $this->save();
     }
 }

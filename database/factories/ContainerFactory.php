@@ -23,6 +23,7 @@ use App\Enums\Container\{
     Nfs\ContainerNfsStatus as NfsStatus,
     Nfs\ContainerNfsEnability as NfsEnability,
 };
+use App\Enums\ContainerProperty\ContainerPropertyType as PropType;
 
 class ContainerFactory extends Factory
 {
@@ -77,6 +78,18 @@ class ContainerFactory extends Factory
             }
         })->afterCreating(function (Container $container) {
             $user = $container->user;
+
+            /**
+             * Assign the properties
+             */
+            $faker = $this->faker;
+            $container->setProperty(PropType::DiskSize, $faker->randomNumber(2, true));
+            $container->setProperty(PropType::DiskArray, $faker->randomNumber(1, true));
+            $container->setProperty(PropType::Breakpoints, $faker->randomNumber(1, true));
+
+            /**
+             * Set subscription to container
+             */
             $subscription = Subscription::factory()
                 ->for($user)
                 ->subscriber($container)

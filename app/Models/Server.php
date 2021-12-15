@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 
-use App\Observers\ServerObserver;
-use App\Enums\Server\ServerStatus;
+use App\Observers\ServerObserver as Observer;
+use App\Enums\Server\ServerStatus as Status;
 
 class Server extends Model
 {
@@ -73,7 +73,7 @@ class Server extends Model
     protected static function boot()
     {
     	parent::boot();
-        self::observe(ServerObserver::class);
+        self::observe(Observer::class);
     }
 
     /**
@@ -137,6 +137,28 @@ class Server extends Model
     public function containers()
     {
         return $this->hasMany(Container::class);
+    }
+
+    /**
+     * Check if status of the server active
+     * 
+     * @return bool
+     */
+    public function isActive()
+    {
+        $status = $this->attributes['status'];
+        return $status === Status::Active;
+    }
+
+    /**
+     * Check if status of the server is inactive
+     * 
+     * @return bool
+     */
+    public function isInactive()
+    {
+        $status = $this->attributes['status'];
+        return $status === Status::Inactive;
     }
 
     /**

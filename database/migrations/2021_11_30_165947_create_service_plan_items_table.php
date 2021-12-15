@@ -4,6 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+use App\Enums\ContainerProperty\ContainerPropertyType;
+
 class CreateServicePlanItemsTable extends Migration
 {
     /**
@@ -22,8 +24,9 @@ class CreateServicePlanItemsTable extends Migration
                 ->on('service_plans')
                 ->onDelete('CASCADE');
 
-            $table->tinyInteger('property_type')->default(1);
-            $table->integer('property_unit_quantity')->default(1);
+            $table->tinyInteger('property_type')
+                ->default(ContainerPropertyType::DiskSize);
+            $table->integer('property_value')->default(0);
             $table->longText('description')->nullable();
 
             $table->timestamps();

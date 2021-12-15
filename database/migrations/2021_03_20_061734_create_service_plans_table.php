@@ -4,6 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+use App\Enums\ServicePlan\ServicePlanStatus as Status;
+
 class CreateServicePlansTable extends Migration
 {
     /**
@@ -16,11 +18,13 @@ class CreateServicePlansTable extends Migration
         Schema::create('service_plans', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            $table->tinyInteger('status')->default(1);
-
             $table->string('plan_name')->unique();
             $table->string('plan_code')->unique();
             $table->longText('description')->nullable();
+
+            $table->tinyInteger('status')->default(Status::Active);
+
+            $table->integer('duration_days')->default(1);
 
             $table->timestamps();
         });

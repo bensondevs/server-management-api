@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
 use App\Enums\Subscription\SubscriptionStatus as Status;
+use App\Observers\SubscriptionObserver as Observer;
 
 class Subscription extends Model
 {
@@ -50,6 +51,8 @@ class Subscription extends Model
      * @var array 
      */
     protected $fillable = [
+        'user_id',
+
         'subscribeable_type',
         'subscribeable_id',
 
@@ -71,10 +74,7 @@ class Subscription extends Model
     protected static function boot()
     {
     	parent::boot();
-
-    	self::creating(function ($subscription) {
-            $subscription->id = Uuid::generate()->string;
-    	});
+        self::observe(Observer::class);
     }
 
     /**
@@ -88,8 +88,11 @@ class Subscription extends Model
      */
     public function scopeSubscribedBy(Builder $query, $subscriber)
     {
-        return $query->where('subscriber_type', get_class($subscriber))
-            ->where('subscriber_id', $subscriber->id);
+        $type = get_class($subscriber);
+        $id = $subscriber->id;
+
+        return $query->where('subscriber_type', $type)
+            ->where('subscriber_id', $id);
     }
 
     /**
@@ -102,6 +105,20 @@ class Subscription extends Model
     public function scopeActive(Builder $query)
     {
         return $query->where('status', Status::Active);
+    }
+
+    /**
+     * Create callable method of "mainatainable()"
+     * This method will query only subscription which is maintainable.
+     * The maintainable subscriptions are those subscriptions that
+     * is not "Terminated" yet.
+     * 
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeMaintainable(Builder $query)
+    {
+        return $query->where('status', '!=', Status::Terminated);
     }
 
     /**
@@ -164,5 +181,95 @@ class Subscription extends Model
     public function subscribeable()
     {
         return $this->morphTo('subscribeable');
+    }
+
+    /**
+     * Check if status is still active
+     * 
+     * @return bool
+     */
+    public function isActive()
+    {
+        return $this->attributes['status'] == Status::Active;
+    }
+
+    /**
+     * Check if status is still grace period
+     * 
+     * @return bool
+     */
+    public function isInGracePeriod()
+    {
+        return $this->attributes['status'] == Status::InGracePeriod;
+    }
+
+    /**
+     * Check if status is expired
+     * 
+     * @return bool
+     */
+    public function isExpired()
+    {
+        return $this->attributes['status'] == Status::Expired;
+    }
+
+    /**
+     * Check if the subscription should be ended by now
+     * 
+     * @return bool
+     */
+    public function shouldBeEndedNow()
+    {
+        return now() >= $this->attributes['end'];
+    }
+
+    /**
+     * Check if the subscription should be expired by now
+     * 
+     * @return bool
+     */
+    public function shouldBeExpiredNow()
+    {
+        //
+    }
+
+    /**
+     * Check if the subscription should be terminated by now
+     * 
+     * @return bool
+     */
+    public function shouldBeTerminatedNow()
+    {
+        //
+    }
+
+    /**
+     * Terminate subscription and send it to grace period
+     * 
+     * @return bool
+     */
+    public function setIntoGracePeriod()
+    {
+        //
+    }
+
+    /**
+     * Set subscription status to expired.
+     * 
+     * @return bool
+     */
+    public function setExpired()
+    {
+        //
+    }
+
+    /**
+     * Set subscription status to terminated
+     * 
+     * @return bool
+     */
+    public function setTerminated()
+    {
+        //
     }
 }

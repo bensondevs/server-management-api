@@ -4,6 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+use App\Enums\Subscription\SubscriptionStatus as Status;
+
 class CreateSubscriptionsTable extends Migration
 {
     /**
@@ -23,14 +25,16 @@ class CreateSubscriptionsTable extends Migration
                 ->onDelete('CASCADE');
 
             $table->uuidMorphs('subscribeable'); // Service plan or addon
-            $table->uuidMorphs('subscriber'); // Container or any services
+            $table->nullableUuidMorphs('subscriber'); // Container or any services
 
-            $table->tinyInteger('status')->default(1);
+            $table->tinyInteger('status')->default(Status::Active);
+
             $table->datetime('start');
             $table->datetime('end');
-            $table->datetime('destroy_at')->nullable();
 
             $table->timestamps();
+            $table->timestamp('expired_at');
+            $table->timestamp('terminated_at');
         });
     }
 
