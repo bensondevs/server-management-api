@@ -246,7 +246,6 @@ class ContainerRepository extends BaseRepository
 	 */
 	public function destroyInServer()
 	{
-
 		try {
 			$container = $this->getModel();
 

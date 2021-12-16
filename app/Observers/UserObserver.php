@@ -4,12 +4,19 @@ namespace App\Observers;
 
 use App\Models\User;
 
-use App\Mail\Users\RegisterConfirmationMail;
-
-use App\Jobs\SendMail;
-
 class UserObserver
 {
+    /**
+     * Handle the User "creating" event.
+     *
+     * @param  \App\Models\User  $user
+     * @return void
+     */
+    public function creating(User $user)
+    {
+        $user->id = generateUuid();
+    }
+
     /**
      * Handle the User "created" event.
      *
@@ -18,18 +25,9 @@ class UserObserver
      */
     public function created(User $user)
     {
-        if (! $user->email_verified_at) {
-            $verificationMail = new RegisterConfirmationMail($user);
-            $send = new SendMail($verificationMail, $user->email);
-            $send->delay(1);
-            dispatch($send);
+        if (! $user->emailIsVerified()) {
+            $user->sendEmailVerification();
         }
-
-        $executorUser = auth()->user(); 
-        activity()
-            ->performedOn($user)
-            ->causedBy($executorUser)
-            ->log($user->anchorName() . '\'s account has been created by ' . $executorUser->anchorName());
     }
 
     /**
@@ -40,25 +38,7 @@ class UserObserver
      */
     public function updated(User $user)
     {
-        $userAnchor = $user->anchorName();
-
-        $executorUser = auth()->user();
-        $executorAnchor = $executorUser->anchorName();
-
-        if ($usernameUpdated = $user->isDirty('username')) {
-            $message = $userAnchor . '\'s username has been updated by ' . $executorAnchor; 
-            activity()->performedOn($user)->causedBy($executorUser)->log($message);
-        }
-
-        if ($emailUpdated = $user->isDirty('email')) {
-            $message = $userAnchor . '\'s email has been updated by ' . $executorAnchor;
-            activity()->performedOn($user)->causedBy($executorUser)->log($message);
-        }
-
-        if ($passwordUpdated = $user->isDirty('password')) {
-            $message = $userAnchor . '\'s password has been updated by ' . $executorAnchor;
-            activity()->performedOn($user)->causedBy($executorUser)->log($message);
-        }
+        //
     }
 
     /**
@@ -69,13 +49,7 @@ class UserObserver
      */
     public function deleted(User $user)
     {
-        $userAnchor = $user->anchorName();
-
-        $executorUser = auth()->user();
-        $executorAnchor = $executorUser->anchorName();
-
-        $message = $userAnchor . '\'s has been deleted by ' . $executorAnchor;
-        activity()->performedOn($user)->causedBy($executorUser)->log($message);
+        //
     }
 
     /**

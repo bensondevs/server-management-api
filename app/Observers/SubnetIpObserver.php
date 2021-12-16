@@ -9,6 +9,17 @@ use App\Models\WaitingContainer;
 class SubnetIpObserver
 {
     /**
+     * Handle the SubnetIp "creating" event.
+     *
+     * @param  \App\Models\SubnetIp  $subnetIp
+     * @return void
+     */
+    public function creating(SubnetIp $subnetIp)
+    {
+        $subnetIp->id = generateUuid();
+    }
+
+    /**
      * Handle the SubnetIp "created" event.
      *
      * @param  \App\Models\SubnetIp  $subnetIp

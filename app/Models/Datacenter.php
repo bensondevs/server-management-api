@@ -130,6 +130,16 @@ class Datacenter extends Model
      */
     public function selectBestServer()
     {
-        //
+        return Server::leastSelected()->of($this)->first();
+    }
+
+    /**
+     * Select subnet with least amount of users
+     * 
+     * @return \App\Models\Subnet
+     */
+    public function selectBestSubnet()
+    {
+        return Subnet::leastSelected()->of($this)->first();
     }
 }

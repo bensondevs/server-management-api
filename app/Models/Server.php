@@ -77,6 +77,33 @@ class Server extends Model
     }
 
     /**
+     * Create callable method of "leastSelected()"
+     * This callable methid will order result by amount of
+     * container relation attached with this server.
+     * 
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeLeastSelected(Builder $query)
+    {
+        return $query->withCount('containers')
+            ->orderByDesc('containers_count');
+    }
+
+    /**
+     * Creata callable method of "of(Datacenter $datacenter)"
+     * This callable method will query only server under specified datacenter
+     * 
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  \App\Models\Datacenter  $datacenter
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOf(Builder $query, Datacenter $datacenter)
+    {
+        return $query->where('datacenter_id', $datacenter->id);
+    }
+
+    /**
      * Create settable attribute of "ip_address"
      * This settable attribute will set "ip_binary" using IP address
      * of string

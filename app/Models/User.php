@@ -13,8 +13,11 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\Traits\CausesActivity;
 use App\Traits\UuidTrait;
 
+use App\Mail\Users\RegisterConfirmationMail;
+use App\Jobs\SendMail;
+
 use App\Enums\Currency;
-use App\Enums\User\UserAccountType;
+use App\Enums\User\UserAccountType as AccountType;
 
 class User extends Authenticatable
 {
@@ -53,6 +56,14 @@ class User extends Authenticatable
      * @var bool
      */
     public $timestamps = true;
+
+    /**
+     * Model primary key incrementing. 
+     * Set to TRUE if `id` is int, otherwise let it be FALSE
+     * 
+     * @var bool
+     */
+    public $incrementing = false;
 
     /**
      * The attributes that are mass assignable.
@@ -107,11 +118,7 @@ class User extends Authenticatable
     protected static function boot()
     {
         parent::boot();
-
-        self::creating(function ($user) {
-            $user->incrementing = false;
-            $user->id = Uuid::generate()->string;
-        });
+        self::observe(UserObserver::class);
     }
 
     /**
@@ -145,7 +152,7 @@ class User extends Authenticatable
     public function getAccountTypeDescryptionAttribute()
     {
         $type = $this->attributes['account_type'];
-        return UserAccountType::getDescription($type);
+        return AccountType::getDescription($type);
     }
 
     /**
@@ -191,6 +198,16 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if user has verified their email
+     * 
+     * @return bool
+     */
+    public function emailIsVerified()
+    {
+        return $this->attributes['email_verified_at'] !== null;
+    }
+
+    /**
      * Generate token for the user
      * 
      * @return string
@@ -214,6 +231,19 @@ class User extends Authenticatable
     {
         $this->attributes['email_verified_at'] = now();
         return $this->save();
+    }
+
+    /**
+     * Send email verification for user to verify
+     * their email
+     * 
+     * @return void
+     */
+    public function sendEmailVerification()
+    {
+        $mail = new RegisterConfirmationMail($this);
+        $send = new SendMail($mail, $this->attributes['email']);
+        dispatch($send);
     }
 
     /**

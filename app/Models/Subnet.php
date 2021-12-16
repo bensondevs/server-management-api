@@ -78,10 +78,19 @@ class Subnet extends Model
     {
     	parent::boot();
         self::observe(Observer::class);
+    }
 
-    	self::creating(function ($subnet) {
-            $subnet->id = Uuid::generate()->string;
-    	});
+    /**
+     * Create callable method of "leastSelected()"
+     * This callable method will order the subnet with least number of container
+     * 
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeLeastSelected()
+    {
+        return $query->withCount('containers')
+            ->orderByDesc('containers_count');
     }
 
     /**

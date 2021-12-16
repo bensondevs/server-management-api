@@ -230,7 +230,7 @@ class Subscription extends Model
      */
     public function shouldBeExpiredNow()
     {
-        //
+        return now() >= $this->attributes['expired_at'];
     }
 
     /**
@@ -240,7 +240,7 @@ class Subscription extends Model
      */
     public function shouldBeTerminatedNow()
     {
-        //
+        return now() >= $this->attributes['terminated_at'];
     }
 
     /**
@@ -250,7 +250,8 @@ class Subscription extends Model
      */
     public function setIntoGracePeriod()
     {
-        //
+        $this->attributes['status'] = Status::InGracePeriod;
+        return $this->save();
     }
 
     /**
@@ -258,18 +259,33 @@ class Subscription extends Model
      * 
      * @return bool
      */
-    public function setExpired()
+    public function setAsExpired()
     {
-        //
+        $this->attributes['status'] = Status::Expired;
+        return $this->save();
     }
 
     /**
-     * Set subscription status to terminated
+     * Set subscription status to Terminated
      * 
      * @return bool
      */
-    public function setTerminated()
+    public function setAsTerminated()
     {
-        //
+        $this->attributes['status'] = Status::Terminated;
+        return $this->save();
+    }
+
+    /**
+     * Terminate the subscription and set as terminated
+     * 
+     * @return bool
+     */
+    public function terminate()
+    {
+        $subscriber = $this->subscriber;
+        $subscriber->delete();
+
+        return $this->setAsTerminated();
     }
 }
