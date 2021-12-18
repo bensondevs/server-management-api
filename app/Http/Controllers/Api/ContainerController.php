@@ -4,16 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
 use App\Http\Requests\Containers\{
     PopulateContainersRequest as PopulateRequest,
     FindContainerRequest as FindRequest
 };
-
 use App\Http\Resources\ContainerResource;
 
 use App\Models\{ User, Container };
-
 use App\Repositories\ContainerRepository;
 
 class ContainerController extends Controller
@@ -23,16 +20,17 @@ class ContainerController extends Controller
      * 
      * @var ContainerRepository
      */
-    protected $container;
+    private $container;
 
     /**
      * Controller constructor function
      * 
+     * @param \App\Repositories\ContainerRepository  $container
      * @return void
      */
-    public function __construct(ContainerRepository $containerRepository)
+    public function __construct(ContainerRepository $container)
     {
-    	$this->container = $containerRepository;
+    	$this->container = $container;
     }
 
     /**
@@ -43,9 +41,7 @@ class ContainerController extends Controller
     public function exists()
     {
         $user = auth()->user();
-        $exists = $user->containers()
-            ->active()
-            ->exists();
+        $exists = $user->containers()->active()->exists();
         return response()->json(['exists' => $exists]);
     }
 

@@ -7,9 +7,8 @@ use Illuminate\Database\Eloquent\{ Model, SoftDeletes, Builder };
 use Webpatser\Uuid\Uuid;
 use App\Traits\Searchable;
 
-use App\Enums\SubnetIp\SubnetIpStatus;
-
-use App\Observers\SubnetIpObserver;
+use App\Observers\SubnetIpObserver as Observer;
+use App\Enums\SubnetIp\SubnetIpStatus as Status;
 
 class SubnetIp extends Model
 {
@@ -78,11 +77,7 @@ class SubnetIp extends Model
     protected static function boot()
     {
     	parent::boot();
-        self::observe(SubnetIpObserver::class);
-
-    	self::creating(function ($subnetIP) {
-            $subnetIP->id = Uuid::generate()->string;
-    	});
+        self::observe(Observer::class);
     }
 
     /**
@@ -110,7 +105,7 @@ class SubnetIp extends Model
      */
     public function scopeFree(Builder $query)
     {
-        return $query->where('status', SubnetIpStatus::Free);
+        return $query->where('status', Status::Free);
     }
 
     /**
@@ -147,7 +142,7 @@ class SubnetIp extends Model
      */
     public function getIsUsableAttribute()
     {
-        return $this->attributes['status'] == SubnetIpStatus::Free;
+        return $this->attributes['status'] == Status::Free;
     }
 
     /**
@@ -172,7 +167,7 @@ class SubnetIp extends Model
     public function revokeUser()
     {
         $this->attributes['user_id'] = null;
-        $this->attributes['status'] = SubnetIpStatus::Free;
+        $this->attributes['status'] = Status::Free;
         return $this->save();
     }
 
@@ -183,7 +178,7 @@ class SubnetIp extends Model
      */
     public function setForbidden()
     {
-        $this->attributes['status'] = SubnetIpStatus::Forbidden;
+        $this->attributes['status'] = Status::Forbidden;
         return $this->save();
     }
 
@@ -195,8 +190,8 @@ class SubnetIp extends Model
     public function setUnforbidden()
     {
         $this->attributes['status'] = ($this->attributes['user_id']) ?
-            SubnetIpStatus::Assigned :
-            SubnetIpStatus::Free;
+            Status::Assigned :
+            Status::Free;
             
         return $this->save();
     }

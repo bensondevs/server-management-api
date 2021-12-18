@@ -3,8 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
 use Webpatser\Uuid\Uuid;
 
 use App\Observers\ServerObserver as Observer;
@@ -133,18 +132,19 @@ class Server extends Model
      * This callable attribute will return full name of the server
      * with addition to it's prefix with datacenter name and region name
      * 
+     * @param  string  $__SEPARATOR__
      * @return string
      */
-    public function getFullServerNameAttribute()
+    public function getFullServerNameAttribute(string $__SEPARATOR__ = '|')
     {
         $fullName = $this->attributes['server_name'];
 
         if ($datacenter = $this->datacenter) {
-            $fullName = $datacenter->datacenter_name . '|' . $fullName;
+            $fullName = $datacenter->datacenter_name . $__SEPARATOR__ . $fullName;
         }
 
         if ($region = $datacenter->region) {
-            $fullName = $region->region_name . '|' . $fullName;
+            $fullName = $region->region_name . $__SEPARATOR__ . $fullName;
         }
 
         return $fullName;
@@ -200,5 +200,5 @@ class Server extends Model
     {
         $this->attributes['status'] = $status;
         return $save ? $this->save() : $status;
-    }  
+    }
 }

@@ -4,45 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
-use App\Repositories\{ 
-    ServicePlanRepository, 
-    ServiceAddonRepository 
-};
 use App\Http\Resources\ServicePlanResource;
 
 class ServicePlanController extends Controller
 {
-    /**
-     * Service plan repository class container
-     * 
-     * @var \App\Repositories\ServicePlanRepository
-     */
-    private $plan;
-
-    /**
-     * Service addon repository class container
-     * 
-     * @var \App\Repositories\ServiceAddonRepository
-     */
-    private $addon;
-
-    /**
-     * Controller constructor method
-     * 
-     * @param \App\Repositories\ServicePlanRepository
-     * @param \App\Repositories\ServiceAddonRepository
-     * @return void
-     */
-    public function __construct(
-    	ServicePlanRepository $servicePlanRepository,
-    	ServiceAddonRepository $serviceAddonRepository
-    )
-    {
-    	$this->plan = $servicePlanRepository;
-    	$this->addon = $serviceAddonRepository;
-    }
-
     /**
      * Populate available service plans
      * 
@@ -52,19 +17,18 @@ class ServicePlanController extends Controller
     {
         $plans = ServicePlan::all();
         $plans = ServicePlanResource::collection($plans);
-    	return response()->json(['plans' => $plans]);
+    	return response()->json(['service_plans' => $plans]);
     }
 
     /**
      * Show selected service plan
      * 
-     * @param \App\Models\ServicePlan  $plan
+     * @param  \App\Models\ServicePlan  $plan
      * @return \Illuminate\Support\Facades\Response
      */
     public function show(ServicePlan $plan)
     {
-        return response()->json([
-            'selected_plan' => new ServicePlanResource($plan)
-        ]);
+        $plan = new ServicePlanResource($plan);
+        return response()->json(['service_plan' => $plan]);
     }
 }

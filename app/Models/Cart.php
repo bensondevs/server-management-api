@@ -3,11 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
+
+use App\Observers\CartObserver as Observer;
 
 class Cart extends Model
 {
@@ -52,9 +52,8 @@ class Cart extends Model
      */
     protected $fillable = [
         'user_id',
-        'cartable_type',
-        'cartable_id',
-        'quantity',
+        'total',
+        'discount',
     ];
 
     /**
@@ -67,10 +66,7 @@ class Cart extends Model
     protected static function boot()
     {
     	parent::boot();
-
-    	self::creating(function ($cart) {
-            $cart->id = Uuid::generate()->string;
-    	});
+        self::observe(Observer::class);
     }
 
     /**
@@ -92,52 +88,5 @@ class Cart extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Get cartable model
-     */
-    public function cartable()
-    {
-        return $this->morphTo('cartable');
-    }
-
-    /**
-     * Guess the cartable type inputted from the front end
-     * 
-     * @param  string  $clue
-     * @return string
-     */
-    public static function guessType(string $clue)
-    {
-        switch (true) {
-            case $clue == ServicePlan::class:
-                return ServicePlan::class;
-                break;
-
-            case $clue == ServiceAddon::class:
-                return ServiceAddon::class;
-                break;
-
-            case strtolower($clue) == 'service_plan':
-                return ServicePlan::class;
-                break;
-
-            case strtolower($clue) == 'service_addon':
-                return ServiceAddon::class;
-                break;
-
-            case strtolower($clue) == 'service plan':
-                return ServicePlan::class;
-                break;
-
-            case strtolower($clue) == 'service addon':
-                return ServiceAddon::class;
-                break;
-            
-            default:
-                ServicePlan::class;
-                break;
-        }
     }
 }

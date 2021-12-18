@@ -52,7 +52,19 @@ class OrderRepository extends BaseRepository
 	 */
 	public function addItem(array $orderItem)
 	{
-		//
+		try {
+			$order = $this->getModel();
+			$order->items()->save(new OrderItem($orderItem));
+
+			$this->setModel($order);
+
+			$this->setSuccess('Successfully add item to order.');
+		} catch (QueryException $qe) {
+			$error = $qe->getMessage();
+			$this->setError('Failed to add item to order.');	
+		}
+
+		return $this->getModel();
 	}
 
 	/**
@@ -63,7 +75,16 @@ class OrderRepository extends BaseRepository
 	 */
 	public function removeItem(OrderItem $item)
 	{
-		//
+		try {
+			$item->delete();
+
+			$this->setSuccess('Successfully remove item from order.');
+		} catch (QueryException $qe) {
+			$error = $qe->getMessage();
+			$this->setError('Failed to remove item from order.');
+		}
+
+		return $this->returnResponse();
 	}
 
 	/**

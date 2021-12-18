@@ -82,7 +82,7 @@ class ContainerProperty extends Model
      * @param  \App\Models\Container  $container
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeOf(Builder $builder, Container $container)
+    public function scopeOf(Builder $query, Container $container)
     {
         return $query->where('container_id', $container->id);
     }
@@ -96,7 +96,7 @@ class ContainerProperty extends Model
      * @param  int  $propertyType
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeWithType(Builder $builder, int $propertyType)
+    public function scopeWithType(Builder $query, int $propertyType)
     {
         return $query->where('property_type', $propertyType);
     }

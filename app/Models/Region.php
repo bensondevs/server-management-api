@@ -3,14 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{ Model, SoftDeletes, Builder };
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
 
-use App\Observers\RegionObserver;
+use App\Observers\RegionObserver as Observer;
 
 class Region extends Model
 {
+    use HasFactory;
+
     /**
      * Model table name
      * 
@@ -62,7 +64,7 @@ class Region extends Model
     protected static function boot()
     {
     	parent::boot();
-        self::observe(RegionObserver::class);
+        self::observe(Observer::class);
     }
 
     /**
@@ -91,6 +93,6 @@ class Region extends Model
      */
     public function selectBestDatacenter()
     {
-        //
+        return Datacenter::leastSelected()->of($this)->first();
     }
 }

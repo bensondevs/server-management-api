@@ -9,7 +9,7 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use Laravel\Sanctum\Sanctum;
 
-use App\Models\{ User, Cart, ServicePlan };
+use App\Models\{ User, Cart, ServicePlan, ServiceAddon };
 
 class CartTest extends TestCase
 {
@@ -33,21 +33,39 @@ class CartTest extends TestCase
     }
 
     /**
-     * Add item to cart test
+     * Populate cart items test
      * 
      * @return void
      */
-    public function test_add_cart()
+    public function test_populate_cart_items()
     {
         $user = User::first() ?: User::factory()->create();
         Sanctum::actingAs($user, ['*']);
 
-        $url = '/api/carts/add';
-        $response = $this->json('POST', $url, [
-            'cartable_type' => ServicePlan::class,
-            'cartable_id' => ServicePlan::first()->id,
-            'quantity' => 1,
-        ]);
+        $cart = Cart::factory()->create();
+        $url = '/api/carts/' . $cart->id . '/items';
+        $response = $this->json('GET', $url);
+
+        $response->assertStatus(200);
+        $response->assertJson(function (AssertableJson $json) {
+            $json->has('cart_items');
+        });
+    }
+
+    /**
+     * Add service plan as item to cart
+     * 
+     * @return void
+     */
+    public function test_add_service_plan_to_cart()
+    {
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $cart = Cart::factory()->create();
+        $plan = ServicePlan::first();
+        $url = '/api/carts/' . $cart->id . '/add_plan/' . $plan->id;
+        $response = $this->json('POST', $url, ['quantity' => 1]);
 
         $response->assertStatus(201);
         $response->assertJson(function (AssertableJson $json) {
@@ -57,21 +75,21 @@ class CartTest extends TestCase
     }
 
     /**
-     * Set quantity to a cart test
+     * Add service addon as item to cart
      * 
      * @return void
      */
-    public function test_set_cart_quantity()
+    public function test_add_service_addon_to_cart()
     {
         $user = User::first() ?: User::factory()->create();
         Sanctum::actingAs($user, ['*']);
 
-        $cart = Cart::factory()->for($user)->create();
+        $cart = Cart::factory()->create();
+        $addon = ServiceAddon::first();
+        $url = '/api/carts/' . $cart->id . '/add_addon/' . $addon->id;
+        $response = $this->json('POST', $url, ['quantity' => rand(1, 10)]);
 
-        $url = '/api/carts/' . $cart->id . '/set_quantity';
-        $response = $this->json('PATCH', $url, ['quantity' => 2]);
-
-        $response->assertStatus(200);
+        $response->assertStatus(201);
         $response->assertJson(function (AssertableJson $json) {
             $json->has('message');
             $json->where('status', 'success');
@@ -79,17 +97,17 @@ class CartTest extends TestCase
     }
 
     /**
-     * Remove item from cart test
+     * Remove item from cart
      * 
      * @return void
      */
-    public function test_remove_cart()
+    public function remove_item_from_cart()
     {
         $user = User::first() ?: User::factory()->create();
         Sanctum::actingAs($user, ['*']);
 
-        $cart = Cart::factory()->for($user)->create();
-        $url = '/api/carts/' . $cart->id . '/remove';
+        $item = CartItem::factory()->create();
+        $url = '/api/carts/items/' . $item->id;
         $response = $this->json('DELETE', $url);
 
         $response->assertStatus(200);
@@ -114,6 +132,27 @@ class CartTest extends TestCase
         $response = $this->json('POST', $url);
 
         $response->assertStatus(201);
+        $response->assertJson(function (AssertableJson $json) {
+            $json->has('message');
+            $json->where('status', 'success');
+        });
+    }
+
+    /**
+     * Destroy cart test
+     * 
+     * @return void
+     */
+    public function test_destroy_cart()
+    {
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $cart = Cart::factory()->for($user)->create();
+        $url = '/api/carts/' . $cart->id . '/destroy';
+        $response = $this->json('DELETE', $url);
+
+        $response->assertStatus(200);
         $response->assertJson(function (AssertableJson $json) {
             $json->has('message');
             $json->where('status', 'success');

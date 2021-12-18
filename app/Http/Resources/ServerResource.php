@@ -14,20 +14,10 @@ class ServerResource extends JsonResource
      */
     public function toArray($request)
     {
-        $datacenter = $this->datacenter;
-        $region = ($datacenter) ? $datacenter->region : null;
-
-        $regionName = ($region) ? $region->region_name : null;
-        $datacenterName = ($datacenter) ? $datacenter->datacenter_name : null;
-        $serverName = $regionName . '-' . $datacenterName . '-' . $this->server_name;
-
         return [
             'id' => $this->id,
-            'server_name' => $serverName,
-            'ip_address' => $this->ip_address,
-            'datacenter' => $datacenter->datacenter_name,
-            'total_containers' => $this->containers_count,
-            'status' => $this->status,
+            'server_name' => $this->server_name,
+            'full_server_name' => $this->full_server_name,
         ];
     }
 }

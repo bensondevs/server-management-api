@@ -4,8 +4,6 @@ namespace App\Observers;
 
 use App\Models\SubnetIp;
 
-use App\Models\WaitingContainer;
-
 class SubnetIpObserver
 {
     /**
@@ -27,7 +25,7 @@ class SubnetIpObserver
      */
     public function created(SubnetIp $subnetIp)
     {
-        WaitingContainer::pushBack();
+        //
     }
 
     /**

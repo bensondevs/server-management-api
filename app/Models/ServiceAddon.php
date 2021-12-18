@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{ Model, SoftDeletes, Builder };
 use Webpatser\Uuid\Uuid;
 
-use App\Observers\ServiceAddonObserver;
+use App\Observers\ServiceAddonObserver as Observer;
+
+use App\Enums\ServiceAddon\ServiceAddonStatus as Status;
+use App\Enums\ContainerProperty\ContainerPropertyType as PropertyType;
 
 class ServiceAddon extends Model
 {
@@ -71,6 +73,31 @@ class ServiceAddon extends Model
     {
     	parent::boot();
         self::observe(Observer::class);
+    }
+
+    /**
+     * Create callable attribute of "status_description"
+     * This callable attribute will return enum description
+     * 
+     * @return string
+     */
+    public function getStatusDescriptionAttribute()
+    {
+        $status = $this->attributes['status'];
+        return Status::getDescription($status);
+    }
+
+    /**
+     * Create callable attribute of "property_type_description"
+     * This callable attribute will return container property enum
+     * description as string.
+     * 
+     * @return string
+     */
+    public function getPropertyTypeDescriptionAttribute()
+    {
+        $type = $this->attributes['property_type'];
+        return PropertyType::getDescription($type);
     }
 
     /**

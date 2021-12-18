@@ -14,15 +14,22 @@ class ServiceAddonResource extends JsonResource
      */
     public function toArray($request)
     {
-        return [
+        $structure = [
             'id' => $this->id,
+
             'addon_name' => $this->addon_name,
-            'addon_type' => strtoupper($this->addon_type),
-            'currency' => strtoupper($this->currency),
-            'addon_fee' => $this->addon_fee,
-            'quantity' => $this->quantity,
-            'unit' => $this->unit,
+            'addon_code' => $this->addon_code,
             'description' => $this->description,
+
+            'status' => $this->status,
+            'status_description' => $this->status_description,
+            'duration_days' => $this->duration_days,
+
+            'property_type' => $this->property_type,
+            'property_type_description' => $this->property_type_description,
+            'property_value' => $this->property_value,
         ];
+
+        return $structure;
     }
 }

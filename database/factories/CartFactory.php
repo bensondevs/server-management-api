@@ -3,8 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-
-use App\Models\{ Cart, ServicePlan };
+use App\Models\{ Cart, User };
 
 class CartFactory extends Factory
 {
@@ -27,11 +26,6 @@ class CartFactory extends Factory
                 $user = User::first();
                 $cart->user_id = $user->id;
             }
-
-            if (! $cart->cartable_id) {
-                $cart->cartable_id = ServicePlan::first()->id;
-                $cart->cartable_type = ServicePlan::class;
-            }
         });
     }
 
@@ -43,7 +37,9 @@ class CartFactory extends Factory
     public function definition()
     {
         return [
-            'quantity' => rand(1, 10),
+            'cart_name' => '',
+            'total' => 0,
+            'discount' => 0,
         ];
     }
 }

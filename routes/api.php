@@ -93,11 +93,18 @@ Route::group(['as' => 'api.'], function () {
 		 */
 		Route::group(['prefix' => '/carts'], function () {
 			Route::get('/', [CartController::class, 'carts']);
-			Route::post('add', [CartController::class, 'add']);
 			
 			Route::group(['prefix' => '/{cart}'], function () {
-				Route::match(['PUT', 'PATCH'], 'set_quantity', [CartController::class, 'setQuantity']);
-				Route::delete('remove', [CartController::class, 'remove']);
+				Route::post('/add_plan/{service_plan}', [CartController::class, 'addServicePlan'])
+					->middleware('one_time_free_plan');
+				Route::post('/add_addon/{service_addon}', [CartController::class, 'addServiceAddon']);
+				Route::delete('/destroy', [CartController::class, 'destroy']);
+			});
+			
+			Route::group(['prefix' => '/items/{cart_item}'], function () {
+				Route::get('/', [CartController::class, 'cartItems']);
+				Route::match(['PUT', 'PATCH'], 'set_quantity', [CartController::class, 'setItemQuantity']);
+				Route::delete('remove', [CartController::class, 'removeItem']);
 			});
 
 			Route::post('checkout', [CartController::class, 'checkout']);

@@ -35,10 +35,21 @@ class DatacenterController extends Controller
      */
     public function datacenters()
     {
-    	$datacenters = $this->datacenter->all();
-    	return response()->json([
-            'datacenters' => DatacenterResource::collection($datacenters)
-        ]);
+    	$datacenters = QueryBuilder::for(Datacenter::class)
+            ->allowedFilters([
+                'datacenter_name', 
+                'client_datacenter_name',
+                'location'
+            ])->allowedSorts(['location'])
+            ->allowedIncludes([
+                'containers', 
+                'servers', 
+                'subnets'
+            ])->allowAppends(['status_description'])
+            ->get();
+        $datacenters = DatacenterResource::collection($datacenters);
+
+    	return response()->json(['datacenters' => $datacenters]);
     }
 
     /**

@@ -43,7 +43,7 @@ class PaymentController extends Controller
     {
         $payments = QueryBuilder::for(Payment::class)
             ->allowedFilters(Payment::ALLOWED_FILTERS)
-            ->allowedSorts('created_at', 'amount', 'status', 'methods')
+            ->allowedSorts(['created_at', 'amount', 'status', 'methods'])
             ->paginate()
             ->appends($request->query());
 

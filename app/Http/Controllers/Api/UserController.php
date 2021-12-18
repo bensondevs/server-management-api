@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Requests\Users\UpdateUserPasswordRequest as UpdatePasswordRequest;
-
 use App\Repositories\UserRepository;
 
 class UserController extends Controller
@@ -37,23 +36,9 @@ class UserController extends Controller
     public function current()
     {
     	$user = auth()->user();
+        $user = new UserResource($user);
 
-    	return response()->json([
-    		'user' => [
-	    		'first_name' => $user->first_name,
-	    		'middle_name' => $user->middle_name,
-	    		'last_name' => $user->last_name,
-
-	    		'country' => $user->country,
-	    		'address' => $user->address,
-
-	    		'username' => $user->username,
-	    		'email' => $user->email,
-
-	    		'company_name' => $user->company_name,
-	    		'newsletter' => $user->newsletter,
-	    	],
-    	]);
+    	return response()->json(['user' => $user]);
     }
 
     /**
@@ -63,10 +48,8 @@ class UserController extends Controller
      * @param \App\Models\User  $user
      * @return Illuminate\Support\Facades\Response
      */
-    public function updatePassword(
-        UpdatePasswordRequest $request, 
-        User $user
-    ) {
+    public function updatePassword(UpdatePasswordRequest $request, User $user) 
+    {
     	$this->user->setModel($user);
 
         $input = $request->validated();

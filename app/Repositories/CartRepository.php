@@ -18,6 +18,13 @@ class CartRepository extends BaseRepository
 	private $user;
 
 	/**
+	 * Current cart item container
+	 * 
+	 * @var \App\Models\CartItem|null
+	 */
+	private $item;
+
+	/**
 	 * Repository class constructor method
 	 * 
 	 * @param  \App\Models\User|null  $user
@@ -27,19 +34,19 @@ class CartRepository extends BaseRepository
 	{
 		$this->setInitModel(new Cart);
 
-		$user ? 
-			$this->setUser($user) : 
-			$this->setUser(auth()->user());
+		$this->setItem(new CartItem);
+
+		$user = $user ?: auth()->user();
+		$this->setUser($user);
 	}
 
 	/**
 	 * Get user of the caty
 	 * 
-	 * @return  \App\Models\User  $user
+	 * @return  \App\Models\User
 	 */
 	public function getUser()
 	{
-		$this->user = $this->user ?: auth()->user();
 		return $this->user;
 	}
 
@@ -55,21 +62,71 @@ class CartRepository extends BaseRepository
 	}
 
 	/**
+	 * Get current cart item
+	 * 
+	 * @return \App\Models\CartItem
+	 */
+	public function getItem()
+	{
+		return $this->item;
+	}
+
+	/**
+	 * Set current cart item
+	 * 
+	 * @param  \App\Models\CartItem  $item
+	 * @return void
+	 */
+	public function setItem(CartItem $item)
+	{
+		$this->item = $item;
+	}
+
+	/**
+	 * Create new cart
+	 * 
+	 * @return \App\Models\Cart
+	 */
+	public function create()
+	{
+		try {
+			$cart = $this->getModel();
+			$cart->user_id = $this->getUser()->id;
+			$cart->save();
+
+			$this->setModel($cart);
+
+			$this->setSuccess('Successfully create new cart.');
+		} catch (QueryException $qe) {
+			$error = $qe->getMessage();
+			$this->setError('Failed to create new cart.', $error);
+		}
+
+		return $this->getModel();
+	}
+
+	/**
 	 * Add item to cart
 	 * 
-	 * @param  mixed  $cartable
+	 * @param  mixed  $cartItemable
 	 * @param  int  $quantity
 	 * @return \App\Models\Cart
 	 */
-	public function add($cartable, int $quantity)
+	public function addItem($cartItemable, int $quantity)
 	{
 		try {
-			$cart = Cart::create([
+			$cart = $this->getModel();
+			$cartItem = $cart->items()->save([
 				'user_id' => $this->getUser()->id,
-				'cartable_type' => get_class($cartable),
-				'cartable_id' => $cartable->id,
+				'cart_itemable_type' => get_class($cartItemable),
+				'cart_itemable_id' => $cartItemable->id,
 				'quantity' => $quantity,
 			]);
+
+			if (get_class($cartItemable) == ServicePlan::class) {
+				$cart->cart_name = $cartItemable->plan_name;
+				$cart->save();
+			}
 
 			$this->setModel($cart);
 
@@ -85,21 +142,20 @@ class CartRepository extends BaseRepository
 	/**
 	 * Set quantity of the cart
 	 * 
+	 * @param  \App\Models\CartItem  $item
 	 * @param  int  $quantity
 	 * @return \App\Models\Cart
 	 */
-	public function setQuantity(int $quantity)
+	public function setItemQuantity(CartItem $item, int $quantity)
 	{
 		try {
-			$cart = $this->getModel();
-			
 			if ($quantity > 0) {
-				$cart->quantity = $quantity;
-				$cart->save();
-				$this->setModel($cart);
+				$item->quantity = $quantity;
+				$item->save();
+
+				$this->setItem($cart);
 			} else {
-				$cart->delete();
-				$this->destroyModel();
+				$item->delete();
 			}
 
 			$this->setSuccess('Successfully set quantity for cart!');		
@@ -116,18 +172,15 @@ class CartRepository extends BaseRepository
 	 * 
 	 * @return  bool
 	 */
-	public function remove()
+	public function removeItem(CartItem $item)
 	{
 		try {
-			$cart = $this->getModel();
-			$cart->delete();
+			$item->delete();
 
-			$this->destroyModel();
-
-			$this->setSuccess('Successfully remove cart.');
+			$this->setSuccess('Successfully remove cart item.');
 		} catch (QueryException $qe) {
 			$error = $qe->getMessage();
-			$this->setError('Failed to remove cart.', $error);
+			$this->setError('Failed to remove cart item.', $error);
 		}
 
 		return $this->returnResponse();
@@ -199,5 +252,27 @@ class CartRepository extends BaseRepository
 		}
 
 		return $order;
+	}
+
+	/**
+	 * Destroy cart
+	 * 
+	 * @return bool
+	 */
+	public function destroy()
+	{
+		try {
+			$cart = $this->getModel();
+			$cart->delete();
+
+			$this->destroyModel();
+
+			$this->setSuccess('Successfully destroy cart.');
+		} catch (QueryException $qe) {
+			$error = $qe->getMessage();
+			$this->setError('Failed to destroy cart.', $error);
+		}
+
+		return $this->returnResponse();
 	}
 }

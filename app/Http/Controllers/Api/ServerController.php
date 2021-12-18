@@ -2,31 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Server;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
-use App\Repositories\ServerRepository;
 
 class ServerController extends Controller
 {
-    /**
-     * Server Repository Class Container
-     * 
-     * @var \App\Repository\ServerRepository
-     */
-    private $server;
-
-    /**
-     * Controller constructor methos
-     * 
-     * @param \App\Repository\ServerRepository $seb
-     * @return void
-     */
-    public function __construct(ServerRepository $server)
-    {
-    	$this->server = $server;
-    }
-
     /**
      * Populate with available servers
      * 
@@ -34,8 +14,14 @@ class ServerController extends Controller
      */
     public function servers()
     {
-    	$servers = $this->server->all();
-        $servers = $this->server->paginate();
-    	return response()->json(['servers' => $servers]);
+    	$servers = QueryBuilder::for(Server::class)
+            ->allowedFilters(['server_name', 'status'])
+            ->allowedIncludes(['datacenter', 'containers'])
+            ->allowedAppends(['full_server_name', 'ip_address'])
+            ->allowedSorts(['server_name', 'status'])
+            ->get();
+        return response()->json([
+            'servers' => ServerResource::collection($servers)
+        ]);
     }
 }

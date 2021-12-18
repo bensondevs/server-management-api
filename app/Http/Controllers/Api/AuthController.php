@@ -45,6 +45,12 @@ class AuthController extends Controller
     {
         $input = $request->validated();
     	$user = $this->auth->login($input);
+
+        if ($this->auth->status == 'error') {
+            return apiResponse($this->auth);
+        }
+
+        $user = new UserResource($user);
         return apiResponse($this->auth, ['user' => $user]);
     }
 

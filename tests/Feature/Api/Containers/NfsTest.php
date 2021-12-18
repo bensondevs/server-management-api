@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
-use Illuminate\Support\Facades\Queue;
+use Laravel\Sanctum\Sanctum;
 
 use App\Models\{ User, Container };
 
@@ -22,15 +22,12 @@ class NfsTest extends TestCase
      */
     public function test_check_container_nfs()
     {
-        $user = User::whereHas('containers')->first();
-        $token = $user->generateToken();
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
 
-        $headers = [
-            'Accept' => 'application/json',
-            'Authorization' => 'Bearer ' . $token,
-        ];
-        $container = $user->containers()->first();
-        $url = '/api/containers/nfs?container_id=' . $container->id;
+        $container = $user->containers()->first() ?: 
+            Container::factory()->for($user)->create();
+        $url = '/api/containers/' . $container->id . '/nfs';
         $response = $this->json('GET', $url);
 
         $response->assertStatus(200);
@@ -49,11 +46,9 @@ class NfsTest extends TestCase
      */
     public function test_populate_nfs_status_badges()
     {
-        $headers = [
-            'Accept' => 'application/json',
-        ];
         $url = '/meta/container/nfs_status_badges';
-        $response = $this->withHeaders($headers)->get($url);
+        $response = $this->json('GET', $url);
+
         $response->assertStatus(200);
     }
 
@@ -64,21 +59,22 @@ class NfsTest extends TestCase
      */
     public function test_create_nfs_folder()
     {
-        $user = User::whereHas('containers')->first();
-        $token = $user->generateToken();
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
 
-        $headers = [
-            'Accept' => 'application/json',
-            'Authorization' => 'Bearer ' . $token,
-        ];
-        $url = '/api/containers/nfs/folder/create';
-        $container = $user->containers()->first();
-        /*$response = $this->withHeaders($headers)->post($url, [
+        $container = $user->containers()->first() ?: 
+            Container::factory()->for($user)->create();
+        $url = '/api/containers/' . $container->id . '/nfs/folder/create';
+        $response = $this->json('POST', $url, [
             'container_id' => $container->id,
             'folder_name' => 'Test folder Name example',
         ]);
 
-        $response->assertStatus(200);*/
+        $response->assertStatus(201);
+        $response->assertJson(function (AssertableJson $json) {
+            $json->has('message');
+            $json->where('status', 'success');
+        });
     }
 
     /**
@@ -88,21 +84,20 @@ class NfsTest extends TestCase
      */
     public function test_delete_nfs_folder()
     {
-        $user = User::whereHas('containers.nfsFolders')->first();
-        $token = $user->generateToken();
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
 
-        $headers = [
-            'Accept' => 'application/json',
-            'Authorization' => 'Bearer ' . $token,
-        ];
-        $url = '/api/containers/nfs/folder/delete';
-        $container = $user->containers()->first();
-        $folder = $container->nfsFolders()->first();
-        /*$response = $this->withHeaders($headers)->post($url, [
-            'nfs_folder_id' => $folder->id,
-        ]);
+        $container = $user->containers()->first() ?: 
+            Container::factory()->for($user)->create();
+        $folder = NfsFolder::factory()->for($container)->create();
+        $url = '/api/containers/' . $container->id . '/nfs/folder/' . $folder->id . '/delete';
+        $response = $this->json('DELETE', $url);
 
-        $response->assertStatus(200);*/
+        $response->assertStatus(200);
+        $response->assertJson(function (AssertableJson $json) {
+            $json->has('message');
+            $json->where('status', 'success');
+        });
     }
 
     /**
@@ -112,24 +107,24 @@ class NfsTest extends TestCase
      */
     public function test_create_nfs_export()
     {
-        $user = User::whereHas('containers.nfsFolders')->first();
-        $token = $user->generateToken();
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
 
-        $headers = [
-            'Accept' => 'application/json',
-            'Authorization' => 'Bearer ' . $token,
-        ];
-        $url = '/api/containers/nfs/export/create';
-        $container = $user->containers()->first();
-        $folder = $container->nfsFolders()->first();
-        /*$response = $this->withHeaders($headers)->post($url, [
-            'container_id' => $container->id,
+        $container = $user->containers()->first() ?: 
+            Container::factory()->for($user)->create();
+        $folder = NfsFolder::factory()->for($container)->create();
+        $url = '/api/containers/' . $container->id . '/nfs/export/create';
+        $response = $this->json('POST', $url, [
             'nfs_folder_id' => $folder->id,
             'ip_address' => '1.11.11.1',
             'permissions' => 'rw',
         ]);
 
-        $response->assertStatus(200);*/
+        $response->assertStatus(200);
+        $response->assertJson(function (AssertableJson $json) {
+            $json->has('message');
+            $json->where('status', 'success');
+        });
     }
 
     /**

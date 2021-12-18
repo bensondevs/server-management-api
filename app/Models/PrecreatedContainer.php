@@ -6,8 +6,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
 use Webpatser\Uuid\Uuid;
 
-use App\Enums\PrecreatedContainer\PrecreatedContainerStatus as Status;
 use App\Observers\PrecreatedContainerObserver as Observer;
+use App\Enums\PrecreatedContainer\PrecreatedContainerStatus as Status;
 
 class PrecreatedContainer extends Model
 {

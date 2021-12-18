@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 
-use App\Observers\PricingObserver;
 use App\Enums\Currency;
+use App\Observers\PricingObserver as Observer;
+use App\Enums\Pricing\PricingStatus as Status;
 
 class Pricing extends Model
 {
@@ -64,7 +65,7 @@ class Pricing extends Model
     protected static function boot()
     {
     	parent::boot();
-        self::observe(PricingObserver::class);
+        self::observe(Observer::class);
     }
 
     /**
@@ -88,7 +89,7 @@ class Pricing extends Model
     public function getStatusDescriptionAttribute()
     {
         $status = $this->attributes['status'];
-        return PricingStatus::getKey($status);
+        return Status::getKey($status);
     }
 
     /**

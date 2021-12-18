@@ -76,6 +76,10 @@ class ContainerPropertyRepository extends BaseRepository
 	 */
 	public function syncronise()
 	{
-		//
+		try {
+			//
+		} catch (QueryException $qe) {
+			//
+		}
 	}
 }

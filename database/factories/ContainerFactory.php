@@ -4,7 +4,16 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-use App\Models\{ Container, Subscription, User, Server, Subnet, SubnetIp, ServicePlan };
+use App\Models\{ 
+    Container, 
+    Subscription, 
+    User, 
+    Server,
+    Region,
+    Subnet,
+    SubnetIp, 
+    ServicePlan 
+};
 use App\Enums\Container\{
     ContainerStatus as Status,
     ContainerOnServerStatus as OnServerStatus,
@@ -48,6 +57,14 @@ class ContainerFactory extends Factory
             if (! $container->user_id) {
                 $user = User::factory()->create();
                 $container->user_id = $user->id;
+            }
+
+            /**
+             * Assign region if no region attached
+             */
+            if (! $container->region_id) {
+                $region = Region::first();
+                $container->region_id = $region->id;
             }
 
             /**
@@ -114,10 +131,6 @@ class ContainerFactory extends Factory
             'current' => false,
             'status' => Status::Inactive,
             'status_on_server' => OnServerStatus::Uncreated,
-
-            'disk_size' => $faker->randomNumber(3, false),
-            'disk_array' => $faker->randomNumber(3, false),
-            'breakpoints' => $faker->randomNumber(2, false),
 
             'created_on_server_at' => null,
             'system_installed_at' => null,

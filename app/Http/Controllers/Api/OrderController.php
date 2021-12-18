@@ -4,14 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Spatie\QueryBuilder\QueryBuilder;
 
-use App\Http\Requests\Orders\{
-    PlaceOrderRequest as PlaceRequest,
-    PopulateOrdersApiRequest as PopulateApiRequest
-};
-
+use App\Models\Order;
 use App\Http\Resources\UserOrderResource;
-
 use App\Repositories\OrderRepository;
 
 class OrderController extends Controller
@@ -35,34 +31,30 @@ class OrderController extends Controller
     }
 
     /**
-     * Populate customer orders
+     * Populate user orders
      * 
-     * @param PopulateApiRequest  $request
      * @return Illuminate\Support\Facades\Response
      */
-    public function orders(PopulateApiRequest $request)
+    public function orders()
     {
-        $options = $request->options();
-
-        $orders = $this->order->all($options, true);
-        $orders = $this->order->paginate();
-        $orders = UserOrderResource::apiCollection($orders);
+        $orders = QueryBuilder::for(auth()->user()->orders())
+            ->allowedFilters(['status'])
+            ->allowedIncludes([
+                'items', 
+                'precreatedContainers'
+            ])->allowedSorts([
+                'total', 
+                'vat_size_percentage', 
+                'grand_total'
+            ])->allowAppends([
+                'vat_amount', 
+                'status_description', 
+                'vat_size_percentage'
+            ])
+            ->get();
+        $orders = new OrderCollection($orders);
 
     	return response()->json(['orders' => $orders]);
-    }
-
-    /**
-     * Plade order
-     * 
-     * @param PlaceRequest  $request
-     * @return Illuminate\Support\Facades\Response
-     */
-    public function place(PlaceRequest $request)
-    {
-        $orderData = $request->orderData();
-        $order = $this->order->place($orderData);
-
-        return apiResponse($this->order, ['order' => $order]);
     }
 
     /**
@@ -73,11 +65,19 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        if ($order->status >= OrderStatus::Paid && $order->status <= OrderStatus::Activated) {
-            $order->load(['payment']);
-        }
-
-        $order = new UserOrderResource($order);
+        $order = new OrderResource($order);
         return response()->json(['order' => $order]);
+    }
+
+    /**
+     * Report order to administrator
+     * 
+     * @param  ReportRequest  $request
+     * @param \App\Models\Order  $order
+     * @return Illuminate\Support\Facades\Response
+     */
+    public function report(ReportRequest $request, Order $order)
+    {
+        //
     }
 }

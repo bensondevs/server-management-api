@@ -170,37 +170,25 @@ class PrecreatedContainerRepository extends BaseRepository
 		$region = Region::find($metaContainer['region_id']);
 		
 		/**
-		 * Find server and check availability
+		 * Find best datacenter under selected region
 		 */
-		/*if (! $server = Server::find($metaContainer['server_id'])) {
-			return $this->sendToQueue(Reason::ServerNotFound);
+		if (! $datacenter = $region->selectBestDatacenter()) {
+			return $this->sendToQueue(Reason::NoDatacenterAvailable);
 		}
 
-		if ($server->isInactive()) {
-			return $this->sendToQueue(Reason::ServerInactive);
-		}*/
-		$server = $region->selectBestServer();
+		/**
+		 * Find best server under selected datacenter
+		 */
+		if (! $server = $datacenter->selectBestServer()) {
+			return $this->sendToQueue(Reason::NoServerAvailable);
+		}
 
 		/**
 		 * Find subnet and check availability
 		 */
-		/*if (! $subnet = Subnet::find($metaContainer['subnet_id'])) {
-			return $this->sendToQueue(Reason::SubnetNotFound);
+		if (! $subnet = $datacenter->selectBestSubnet()) {
+			return $this->sendToQueue(Reason::NoSubnetAvailable);
 		}
-
-		switch (true) {
-			case $subnet->isUnavailable():
-				return $this->sendToQueue(Reason::SubnetUnavailable);
-				break;
-
-			case $subnet->isForbidden():
-				return $this->sendToQueue(Reason::SubnetForbidden);
-				break;
-			
-			default:
-				// Subnet is available, pass checking
-				break;
-		}*/
 
 		/**
 		 * Search available subnet ip of the selected subnet
@@ -315,6 +303,15 @@ class PrecreatedContainerRepository extends BaseRepository
 		    	array_push($rawSubscriptions, $rawSub);
 		    }
 		    Subscription::insert($rawSubscriptions);
+
+		    /*
+		    |--------------------------------------------------------------------------
+		    | Set pre-created container status as "Created"
+		    |--------------------------------------------------------------------------
+		    */
+		    $preContainer->setCreated();
+
+		    $this->setModel($preContainer);
 	    	
 		    $this->setSuccess('Successfully create subscription.');
 	    } catch (QueryException $qe) {

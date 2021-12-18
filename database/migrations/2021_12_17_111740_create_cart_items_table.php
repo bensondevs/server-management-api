@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCartsTable extends Migration
+class CreateCartItemsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,18 +13,19 @@ class CreateCartsTable extends Migration
      */
     public function up()
     {
-        Schema::create('carts', function (Blueprint $table) {
+        Schema::create('cart_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
 
-            $table->uuid('user_id');
-            $table->foreign('user_id')
+            $table->uuid('cart_id');
+            $table->foreign('cart_id')
                 ->references('id')
-                ->on('users')
+                ->on('carts')
                 ->onDelete('CASCADE');
 
-            $table->string('cart_name')->nullable();
-            $table->double('total', 8, 2)->default(0);
-            $table->double('discount', 8, 2)->default(0);
+            $table->nullableUuidMorphs('cartable');
+            $table->integer('quantity');
+            $table->double('sub_total', 4, 2);
+            $table->double('discount', 8, 2);
 
             $table->timestamps();
         });
@@ -37,6 +38,6 @@ class CreateCartsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('carts');
+        Schema::dropIfExists('cart_items');
     }
 }

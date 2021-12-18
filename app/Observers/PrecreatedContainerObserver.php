@@ -9,21 +9,21 @@ class PrecreatedContainerObserver
     /**
      * Handle the PrecreatedContainer "creating" event.
      *
-     * @param  \App\Models\PrecreatedContainer  $precreatedContainer
+     * @param  \App\Models\PrecreatedContainer  $preContainer
      * @return void
      */
-    public function creating(PrecreatedContainer $precreatedContainer)
+    public function creating(PrecreatedContainer $preContainer)
     {
-        $precreatedContainer->id = generateUuid();
+        $preContainer->id = generateUuid();
     }
 
     /**
      * Handle the PrecreatedContainer "created" event.
      *
-     * @param  \App\Models\PrecreatedContainer  $precreatedContainer
+     * @param  \App\Models\PrecreatedContainer  $preContainer
      * @return void
      */
-    public function created(PrecreatedContainer $precreatedContainer)
+    public function created(PrecreatedContainer $preContainer)
     {
         //
     }
@@ -31,10 +31,10 @@ class PrecreatedContainerObserver
     /**
      * Handle the PrecreatedContainer "updated" event.
      *
-     * @param  \App\Models\PrecreatedContainer  $precreatedContainer
+     * @param  \App\Models\PrecreatedContainer  $preContainer
      * @return void
      */
-    public function updated(PrecreatedContainer $precreatedContainer)
+    public function updated(PrecreatedContainer $preContainer)
     {
         //
     }
@@ -42,10 +42,10 @@ class PrecreatedContainerObserver
     /**
      * Handle the PrecreatedContainer "deleted" event.
      *
-     * @param  \App\Models\PrecreatedContainer  $precreatedContainer
+     * @param  \App\Models\PrecreatedContainer  $preContainer
      * @return void
      */
-    public function deleted(PrecreatedContainer $precreatedContainer)
+    public function deleted(PrecreatedContainer $preContainer)
     {
         //
     }
@@ -53,10 +53,10 @@ class PrecreatedContainerObserver
     /**
      * Handle the PrecreatedContainer "restored" event.
      *
-     * @param  \App\Models\PrecreatedContainer  $precreatedContainer
+     * @param  \App\Models\PrecreatedContainer  $preContainer
      * @return void
      */
-    public function restored(PrecreatedContainer $precreatedContainer)
+    public function restored(PrecreatedContainer $preContainer)
     {
         //
     }
@@ -64,10 +64,10 @@ class PrecreatedContainerObserver
     /**
      * Handle the PrecreatedContainer "force deleted" event.
      *
-     * @param  \App\Models\PrecreatedContainer  $precreatedContainer
+     * @param  \App\Models\PrecreatedContainer  $preContainer
      * @return void
      */
-    public function forceDeleted(PrecreatedContainer $precreatedContainer)
+    public function forceDeleted(PrecreatedContainer $preContainer)
     {
         //
     }

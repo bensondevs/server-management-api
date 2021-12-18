@@ -34,7 +34,7 @@ class CartController extends Controller
     }
 
     /**
-     * Populate user cart
+     * Populate user carts
      * 
      * @return Illuminate\Support\Facades\Response
      */
@@ -46,33 +46,62 @@ class CartController extends Controller
     }
 
     /**
-     * Add item to cart
+     * Populate user cart items
      * 
-     * @param  AddCartRequest  $request
+     * @param  \App\Models\Cart  $cart
      * @return Illuminate\Support\Facades\Response
      */
-    public function add(AddCartRequest $request)
+    public function cartItems(Cart $cart)
     {
-        $this->cart->setUser(auth()->user());
-        $cartable = $request->getCartable();
-        $quantity = $request->input('quantity');
-        $this->cart->add($cartable, $quantity);
+        $items = $cart->items;
+        $items = CartItemResource::collection($items);
+        return response()->json(['cart_items' => $items]);
+    }
+
+    /**
+     * Putting service plan to cart. This will create new cart, because
+     * one cart can only contain one service plan.
+     * 
+     * @param  \App\Models\ServicePlan  $servicePlan
+     * @return \Illuminate\Support\Facades\Response
+     */
+    public function addServicePlan(ServicePlan $servicePlan)
+    {
+        $this->cart->create();
+        $this->cart->addItem($servicePlan, 1);
 
         return apiResponse($this->cart);
     }
 
     /**
-     * Set quantity for the cart
+     * Putting service addon to cart.
      * 
-     * @param  SetCartQuantityRequest  $request
-     * @return Illuminate\Support\Facades\Response
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Cart  $cart
+     * @param  \App\Models\ServiceAddon  $addon
+     * @return \Illuminate\Support\Facades\Response
      */
-    public function setQuantity(SetCartQuantityRequest $request, Cart $cart)
+    public function addServiceAddon(Request $request, Cart $cart, ServiceAddon $addon)
     {
         $this->cart->setModel($cart);
 
         $quantity = $request->input('quantity');
-        $this->cart->setQuantity($quantity);
+        $this->cart->addItem($addon, $quantity);
+
+        return apiResponse($this->cart);
+    }
+
+    /**
+     * Set quantity of the cart item
+     * 
+     * @param  SetQuantityRequest  $request
+     * @param  \App\Models\CartItem  $item
+     * @return \Illuminate\Support\Facades\Response
+     */
+    public function setItemQuantity(SetQuantityRequest $request, CartItem $item)
+    {
+        $quantity = $request->input('quantity');
+        $this->cart->setItemQuantity($item, $quantity);
 
         return apiResponse($this->cart);
     }
@@ -80,13 +109,26 @@ class CartController extends Controller
     /**
      * Remove item from cart
      * 
+     * @param  \App\Models\CartItem  $item
+     * @return \Illuminate\Support\Facades\Response
+     */
+    public function removeItem(CartItem $item)
+    {
+        $this->cart->removeItem($item);
+
+        return apiResponse($this->cart);
+    }
+
+    /**
+     * Destroy cart
+     * 
      * @param  \App\Models\Cart  $cart
      * @return Illuminate\Support\Facades\Response
      */
-    public function remove(Cart $cart)
+    public function destroy(Cart $cart)
     {
         $this->cart->setModel($cart);
-        $this->cart->remove();
+        $this->cart->destroy();
 
         return apiResponse($this->cart);
     }

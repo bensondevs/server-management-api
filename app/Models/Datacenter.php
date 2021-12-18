@@ -3,12 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Webpatser\Uuid\Uuid;
+use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
 use App\Traits\Searchable;
 
-use App\Enums\Datacenter\DatacenterStatus;
+use App\Observers\DatacenterObserver as Observer;
+use App\Enums\Datacenter\DatacenterStatus as Status;
 
 class Datacenter extends Model
 {
@@ -80,10 +79,7 @@ class Datacenter extends Model
     protected static function boot()
     {
     	parent::boot();
-
-    	self::creating(function ($datacenter) {
-            $datacenter->id = Uuid::generate()->string;
-    	});
+        self::observe(Observer::class);
     }
 
     /**
@@ -96,7 +92,7 @@ class Datacenter extends Model
     public function getStatusDescriptionAttribute()
     {
         $status = $this->attributes['status'];
-        return DatacenterStatus::getDescription($status);
+        return Status::getDescription($status);
     }
 
     /**

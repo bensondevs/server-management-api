@@ -15,7 +15,7 @@ use App\Traits\UuidTrait;
 
 use App\Mail\Users\RegisterConfirmationMail;
 use App\Jobs\SendMail;
-
+use App\Observers\UserObserver as Observer;
 use App\Enums\Currency;
 use App\Enums\User\UserAccountType as AccountType;
 
@@ -118,7 +118,7 @@ class User extends Authenticatable
     protected static function boot()
     {
         parent::boot();
-        self::observe(UserObserver::class);
+        self::observe(Observer::class);
     }
 
     /**
@@ -198,12 +198,26 @@ class User extends Authenticatable
     }
 
     /**
+     * Guess which currency should apply to user
+     * 
+     * @return  int
+     */
+    public function guessCurrency()
+    {
+        //
+    }
+
+    /**
      * Check if user has verified their email
      * 
      * @return bool
      */
     public function emailIsVerified()
     {
+        if (! isset($this->attributes['email_verified_at'])) {
+            return false;
+        }
+
         return $this->attributes['email_verified_at'] !== null;
     }
 
@@ -286,6 +300,6 @@ class User extends Authenticatable
      */
     public function isPasswordMatch(string $password)
     {
-        return hashCheck($password, $user->password);
+        return hash_check($password, $this->attributes['password']);
     }
 }

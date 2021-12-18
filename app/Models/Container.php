@@ -2,11 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\{ DB, Cache };
 use Illuminate\Database\Eloquent\{ Model, SoftDeletes, Builder };
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Webpatser\Uuid\Uuid;
 
 use App\Observers\ContainerObserver as Observer;
 use App\Repositories\ContainerRepository;
@@ -23,8 +21,10 @@ use App\Traits\Container\{
 };
 use App\Enums\Container\{
     ContainerStatus as Status,
-    ContainerOnServerStatus as StatusOnServer,
-    ContainerProperty as PropertyType
+    ContainerOnServerStatus as StatusOnServer
+};
+use App\Enums\ContainerProperty\{
+    ContainerPropertyType as PropertyType
 };
 
 class Container extends Model

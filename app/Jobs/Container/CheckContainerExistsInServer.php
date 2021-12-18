@@ -16,7 +16,6 @@ use App\Jobs\Container\ContainerBaseJob;
 class CheckContainerExistsInServer extends ContainerBaseJob implements ShouldQueue
 {
     use TrackExecution;
-
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**

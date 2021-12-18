@@ -30,9 +30,4 @@ class LoginRequest extends FormRequest
             'password' => ['required', 'string'],
         ];
     }
-
-    public function onlyInRules()
-    {
-        return $this->only(array_keys($this->rules()));
-    }
 }

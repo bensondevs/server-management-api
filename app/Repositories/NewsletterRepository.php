@@ -2,20 +2,30 @@
 
 namespace App\Repositories;
 
-use \Illuminate\Support\Facades\DB;
-use \Illuminate\Database\QueryException;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
 use App\Repositories\Base\BaseRepository;
 
 use App\Models\Newsletter;
 
 class NewsletterRepository extends BaseRepository
 {
+	/**
+	 * Repository constructor method
+	 * 
+	 * @return void
+	 */
 	public function __construct()
 	{
 		$this->setInitModel(new Newsletter);
 	}
 
+	/**
+	 * Save newsletter
+	 * 
+	 * @param  array  $newsletterData
+	 * @return \App\Models\Newsletter
+	 */
 	public function save(array $newsletterData)
 	{
 		try {
@@ -34,6 +44,11 @@ class NewsletterRepository extends BaseRepository
 		return $this->getModel();
 	}
 
+	/**
+	 * Delete newsletter
+	 * 
+	 * @return  bool
+	 */
 	public function delete()
 	{
 		try {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Spatie\QueryBuilder\QueryBuilder;
 
 use App\Models\Region;
 use App\Http\Resources\RegionResource;
@@ -17,7 +18,8 @@ class RegionController extends Controller
      */
     public function regions()
     {
-        $regions = RegionResource::collection(Region::all());
+        $regions = Region::all();
+        $regions = RegionResource::collection($regions);
     	return response()->json(['regions' => $regions]);
     }
 }

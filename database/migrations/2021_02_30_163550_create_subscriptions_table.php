@@ -33,8 +33,8 @@ class CreateSubscriptionsTable extends Migration
             $table->datetime('end');
 
             $table->timestamps();
-            $table->timestamp('expired_at');
-            $table->timestamp('terminated_at');
+            $table->timestamp('expired_at')->nullable();
+            $table->timestamp('terminated_at')->nullable();
         });
     }
 

@@ -3,15 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
 
 use App\Observers\ServicePlanObserver as Observer;
 use App\Enums\{ 
     Currency, 
-    ContainerProperty\ContainerPropertyType 
+    ContainerProperty\ContainerPropertyType as PropertyType 
 };
 
 class ServicePlan extends Model
@@ -87,6 +86,17 @@ class ServicePlan extends Model
     }
 
     /**
+     * Model booted static method.
+     * This method handles the global scope query of the model
+     * 
+     * @return void
+     */
+    protected static function booted()
+    {
+        //
+    }
+
+    /**
      * Get list of plan items
      */
     public function items()
@@ -100,28 +110,6 @@ class ServicePlan extends Model
     public function pricings()
     {
         return $this->morphMany(Pricing::class, 'priceable');
-    }
-
-    /**
-     * Hide service plan from the users
-     * 
-     * @return bool
-     */
-    public function hide()
-    {
-        $this->attributes['is_hidden'] = true;
-        return $this->save();
-    }
-
-    /**
-     * Unhide service plan from the users
-     * 
-     * @return bool
-     */
-    public function unhide()
-    {
-        $this->attributes['is_hidden'] = false;
-        return $this->save();
     }
 
     /**
@@ -197,6 +185,23 @@ class ServicePlan extends Model
     }
 
     /**
+     * Set service plan item
+     * 
+     * @param  int   $propertyType
+     * @param  mixed $value
+     * @return bool
+     */
+    public function setItem(int $propertyType, $value)
+    {
+        $item = ServicePlanItem::firstOrNew([
+            'property_type' => $propertyType,
+            'service_plan_id' => $this->attributes['id'],
+        ]);
+        $item->property_value = $value;
+        return $item->save();
+    }
+
+    /**
      * Set disk size in giga byte to the service plan
      * 
      * @param  int  $diskSize
@@ -204,12 +209,29 @@ class ServicePlan extends Model
      */
     public function setDiskSize(int $diskSizeGb = 100)
     {
-        $item = ServicePlanItem::firstOrNew([
-            'property_type' => ContainerPropertyType::DiskSize,
-            'service_plan_id' => $this->attributes['id'],
-        ]);
-        $item->property_value = $diskSizeGb;
-        return $item->save();
+        return $this->setItem(PropertyType::DiskSize, $diskSizeGb);
+    }
+
+    /**
+     * Set disk array of the service plan
+     * 
+     * @param  int  $diskArray
+     * @return bool
+     */
+    public function setDiskArray(int $diskArray = 5)
+    {
+        return $this->setItem(PropertyType::DiskArray, $diskArray);
+    }
+
+    /**
+     * Set breakpoints of the service plan
+     * 
+     * @param  int  $breakpoints
+     * @return bool
+     */
+    public function setBreakpoints(int $breakpoints = 1)
+    {
+        return $this->setItem(PropertyType::Breakpoints, $breakpoints);
     }
 
     /**
