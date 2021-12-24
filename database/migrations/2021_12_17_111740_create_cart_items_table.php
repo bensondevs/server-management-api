@@ -22,10 +22,10 @@ class CreateCartItemsTable extends Migration
                 ->on('carts')
                 ->onDelete('CASCADE');
 
-            $table->nullableUuidMorphs('cartable');
-            $table->integer('quantity');
-            $table->double('sub_total', 4, 2);
-            $table->double('discount', 8, 2);
+            $table->nullableUuidMorphs('cart_itemable');
+            $table->integer('quantity')->default(1);
+            $table->double('sub_total', 4, 2)->default(0);
+            $table->double('discount', 8, 2)->default(0);
 
             $table->timestamps();
         });

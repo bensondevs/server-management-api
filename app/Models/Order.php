@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{ Model, SoftDeletes, Builder };
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
 use App\Observers\OrderObserver;
 use App\Traits\TrackInQueue;
@@ -13,6 +13,7 @@ use App\Enums\Order\OrderStatus as Status;
 
 class Order extends Model
 {
+    use HasFactory;
     use TrackInQueue;
 
     /**
@@ -104,7 +105,7 @@ class Order extends Model
     public function getStatusDescriptionAttribute()
     {
         $status = $this->attributes['status'];
-        return OrderStatus::getDescription($status);
+        return Status::getDescription($status);
     }
 
     /**
@@ -144,7 +145,7 @@ class Order extends Model
      */
     public function user()
     {
-        return $this->hasOne(User::class);
+        return $this->belongsTo(User::class);
     }
 
     /**

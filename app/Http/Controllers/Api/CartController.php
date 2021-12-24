@@ -8,9 +8,9 @@ use App\Http\Requests\Carts\{
     AddCartRequest,
     SetCartQuantityRequest
 };
-use App\Http\Resources\CartResource;
+use App\Http\Resources\{ CartResource, CartItemResource };
 
-use App\Models\Cart;
+use App\Models\{ Cart, CartItem, ServiceAddon, ServicePlan };
 use App\Repositories\CartRepository;
 
 class CartController extends Controller
@@ -62,13 +62,14 @@ class CartController extends Controller
      * Putting service plan to cart. This will create new cart, because
      * one cart can only contain one service plan.
      * 
-     * @param  \App\Models\ServicePlan  $servicePlan
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\ServicePlan  $plan
      * @return \Illuminate\Support\Facades\Response
      */
-    public function addServicePlan(ServicePlan $servicePlan)
+    public function addServicePlan(Request $request, ServicePlan $plan)
     {
         $this->cart->create();
-        $this->cart->addItem($servicePlan, 1);
+        $this->cart->addItem($plan, 1);
 
         return apiResponse($this->cart);
     }

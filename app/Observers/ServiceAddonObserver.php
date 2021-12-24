@@ -15,6 +15,11 @@ class ServiceAddonObserver
     public function creating(ServiceAddon $serviceAddon)
     {
         $serviceAddon->id = generateUuid();
+
+        if (! $serviceAddon->addon_code) {
+            $code = sluggify($serviceAddon->addon_name);
+            $serviceAddon->addon_code = $code;
+        }
     }
 
     /**

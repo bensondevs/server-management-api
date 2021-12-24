@@ -9,6 +9,9 @@ use App\Http\Requests\Payments\Seb\{
     SebPaymentRequest as PaymentRequest,
     SebPaymentCallbackRequest as PaymentCallbackRequest
 };
+use App\Http\Resources\SebPaymentResource;
+use App\Repositories\Payments\SebRepository;
+use App\Models\SebPayment;
 
 class SebPaymentController extends Controller
 {
@@ -25,7 +28,7 @@ class SebPaymentController extends Controller
      * @param \App\Repositories\SebRepository  $seb
      * @return void
      */
-    public function __construct(SebPaymentRepository $sebPayment)
+    public function __construct(SebRepository $sebPayment)
     {
         $this->sebPayment = $sebPayment;
     }
@@ -34,14 +37,28 @@ class SebPaymentController extends Controller
      * Pay with SEB Payment Gateway
      * 
      * @param PaymentRequest  $request
-     * @param \App\Models\Order  $order
+     * @param \App\Models\SebPayment  $seb
      * @return Illuminate\Support\Facades\Response
      */
-    public function pay(PaymentRequest $request, Order $order)
+    public function pay(PaymentRequest $request, SebPayment $seb)
     {
+        $this->sebPayment->setModel($seb);
         $input = $request->validated();
-        $this->sebPayment->pay($order, $input);
-        return apiResponse($this->sebPayment);
+        $seb = $this->sebPayment->payOnce($input);
+        return apiResponse($this->sebPayment, ['seb_payment' => $seb]);
+    }
+
+    /**
+     * Show payment details
+     * 
+     * @param \App\Models\SebPayment  $sebPayment
+     * @return Illuminate\Support\Facades\Response
+     */
+    public function show(SebPayment $seb)
+    {
+        $seb->load(['apiResponses']);
+        $seb = new SebPaymentResource($seb);
+        return response()->json(['seb_payment' => $seb]);
     }
 
     /**
@@ -52,33 +69,21 @@ class SebPaymentController extends Controller
      */
     public function callback(PaymentCallbackRequest $request)
     {
-        $reference = $request->input('order_reference');
-        $this->sebPayment->handleCallback($reference);
+        $callback = $request->validated();
+        $this->sebPayment->handleCallback($callback);
         return apiResponse($this->sebPayment);
     }
 
     /**
      * Syncronise SEB Payment data
      * 
-     * @param \App\Models\SebPayment  $sebPayment
+     * @param \App\Models\SebPayment  $seb
      * @return Illuminate\Support\Facades\Response
      */
-    public function check(SebPayment $sebPayment)
+    public function check(SebPayment $seb)
     {
-        $this->sebPayment->setModel($sebPayment);
-        $this->sebPayment->check();
-        return apiResponse($this->sebPayment);
-    }
-
-    /**
-     * Show payment details
-     * 
-     * @param \App\Models\SebPayment  $sebPayment
-     * @return Illuminate\Support\Facades\Response
-     */
-    public function show(SebPayment $sebPayment)
-    {
-        $sebPayment = new SebPaymentResource($sebPayment);
-        return response()->json(['seb_payment' => $sebPayment]);
+        $this->sebPayment->setModel($seb);
+        $seb = $this->sebPayment->checkPayment();
+        return apiResponse($this->sebPayment, ['seb_payment' => $seb]);
     }
 }

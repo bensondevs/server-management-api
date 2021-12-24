@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Server;
 use App\Http\Controllers\Controller;
+use Spatie\QueryBuilder\QueryBuilder;
+
+use App\Models\Server;
+use App\Http\Resources\ServerResource;
 
 class ServerController extends Controller
 {

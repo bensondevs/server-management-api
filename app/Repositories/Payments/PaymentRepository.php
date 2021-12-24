@@ -38,7 +38,7 @@ class PaymentRepository extends BaseRepository
 			$payment->order_id = $order->id;
 			$payment->method = $method;
 			$payment->currency = $order->currency;
-			$payment->amount = $order->amount;
+			$payment->amount = $order->grand_total;
 			$payment->save();
 
 			$this->setModel($payment);

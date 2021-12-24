@@ -190,11 +190,27 @@ class User extends Authenticatable
     }
 
     /**
+     * Get user orders
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
      * Get containers of the users
      */
     public function containers()
     {
         return $this->hasMany(Container::class);
+    }
+
+    /**
+     * Get subscriptions of user
+     */
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
     }
 
     /**

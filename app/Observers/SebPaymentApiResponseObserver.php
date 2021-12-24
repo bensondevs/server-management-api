@@ -15,7 +15,10 @@ class SebPaymentApiResponseObserver
     public function creating(SebPaymentApiResponse $response)
     {
         $response->id = generateUuid();
-        $response->requester_ip = request()->ip();
+
+        if (! $response->requester_ip) {
+            $response->requester_ip = request()->ip();
+        }
     }
 
     /**
@@ -26,11 +29,13 @@ class SebPaymentApiResponseObserver
      */
     public function created(SebPaymentApiResponse $response)
     {
-        if ($data = $response->response) {
+        if ($data = $response->response_array) {
             // Update status of the seb payment model
-            $sebPayment = $response->sebPayment;
-            $sebPayment->state = $data['state'];
-            $sebPayment->save();
+            if (isset($data['payment_state'])) {
+                $sebPayment = $response->sebPayment;
+                $sebPayment->payment_state = $data['payment_state'];
+                $sebPayment->save();
+            }
         }
     }
 

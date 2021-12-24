@@ -24,7 +24,7 @@ return [
     | value of username
     |
     */
-    'username' => env('SEB_USERNAME'),
+    'api_username' => env('SEB_USERNAME'),
 
     /*
     |--------------------------------------------------------------------------
@@ -36,6 +36,18 @@ return [
     |
     */
     'account_name' => env('SEB_ACCOUNT_NAME'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | SEB Customer URL
+    |--------------------------------------------------------------------------
+    |
+    | This url will be used to redirect the user after finishing the payment
+    | process in the vendor payment page. This url CANNOT use `localhost` or
+    | another invalid url.
+    |
+    */
+    'customer_url' => env('SEB_CUSTOMER_URL'),
 
     /*
     |--------------------------------------------------------------------------

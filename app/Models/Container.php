@@ -153,12 +153,12 @@ class Container extends Model
      * Create ownedBy() static method to query based on container user
      * 
      * @param Illuminate\Database\Eloquent\Builder  $query
-     * @param \App\Models\User  $customer
+     * @param \App\Models\User  $user
      * @return Illuminate\Database\Eloquent\Builder
      */
-    public function scopeOwnedBy(Builder $query, User $customer)
+    public function scopeOwnedBy(Builder $query, User $user)
     {
-        return $query->where('customer_id', $customer->id);
+        return $query->where('user_id', $user->id);
     }
 
     /**
@@ -204,42 +204,6 @@ class Container extends Model
     {
         $status = $this->attributes['status'];
         return Status::getDescription($status);
-    }
-
-    /**
-     * Get order date in human date format M d, Y
-     * 
-     * @return string
-     */
-    public function getOrderHumanDateAttribute()
-    {
-        return carbon()
-            ->parse($this->attributes['order_date'])
-            ->format('M d, Y');
-    }
-
-    /**
-     * Get activation date in human date format M d, Y
-     * 
-     * @return string
-     */
-    public function getActivationHumanDateAttribute()
-    {
-        return carbon()
-            ->parse($this->attributes['activation_date'])
-            ->format('M d, Y');
-    }
-
-    /**
-     * Get expiration date in human date format M d, Y
-     * 
-     * @return string
-     */
-    public function getExpirationHumanDateAttribute()
-    {
-        return carbon()
-            ->parse($this->attributes['expiration_date'])
-            ->format('M d, Y');
     }
 
     /**

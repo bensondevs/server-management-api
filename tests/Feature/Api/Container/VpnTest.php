@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Api\Containers;
+namespace Tests\Feature\Api\Container;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\RefreshDatabase;

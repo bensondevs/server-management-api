@@ -17,8 +17,9 @@ class SebPaymentResource extends JsonResource
         $structure = [
             'id' => $this->id,
             'payment_id' => $this->payment_id,
-            'payment_reference' => $this->payment_reference,
-            'payment_state' => $this->payment_state,
+            'order_reference' => $this->order_reference,
+            'state' => $this->state,
+            'state_description' => $this->state_description,
             'amount' => $this->amount,
             'billing_address' => $this->billing_address,
         ];

@@ -28,9 +28,14 @@ class CartItemFactory extends Factory
             }
 
             if (! $item->cart_itemable_id) {
-                rand(0, 1) ? 
-                    $this->servicePlan() : 
-                    $this->serviceAddon();
+                $plan = ServicePlan::inRandomOrder()->first();
+                $pricing = $plan->pricings()->first();
+                $item->fill([
+                    'quantity' => 1,
+                    'sub_total' => $pricing->price,
+                    'cart_itemable_type' => ServicePlan::class,
+                    'cart_itemable_id' => $plan->id,
+                ]);
             }
         });
     }

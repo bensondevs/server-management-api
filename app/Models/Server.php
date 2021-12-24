@@ -131,20 +131,19 @@ class Server extends Model
      * Create callable attribute of "full_server_name"
      * This callable attribute will return full name of the server
      * with addition to it's prefix with datacenter name and region name
-     * 
-     * @param  string  $__SEPARATOR__
+     *
      * @return string
      */
-    public function getFullServerNameAttribute(string $__SEPARATOR__ = '|')
+    public function getFullServerNameAttribute()
     {
         $fullName = $this->attributes['server_name'];
 
         if ($datacenter = $this->datacenter) {
-            $fullName = $datacenter->datacenter_name . $__SEPARATOR__ . $fullName;
+            $fullName = $datacenter->datacenter_name . ' | ' . $fullName;
         }
 
         if ($region = $datacenter->region) {
-            $fullName = $region->region_name . $__SEPARATOR__ . $fullName;
+            $fullName = $region->region_name . ' | ' . $fullName;
         }
 
         return $fullName;

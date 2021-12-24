@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Api\Containers;
+namespace Tests\Feature\Api\Container;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -47,8 +47,8 @@ class NfsTest extends TestCase
     public function test_populate_nfs_status_badges()
     {
         $url = '/meta/container/nfs_status_badges';
-        $response = $this->json('GET', $url);
 
+        $response = $this->json('GET', $url);
         $response->assertStatus(200);
     }
 
@@ -114,6 +114,7 @@ class NfsTest extends TestCase
             Container::factory()->for($user)->create();
         $folder = NfsFolder::factory()->for($container)->create();
         $url = '/api/containers/' . $container->id . '/nfs/export/create';
+
         $response = $this->json('POST', $url, [
             'nfs_folder_id' => $folder->id,
             'ip_address' => '1.11.11.1',
@@ -134,13 +135,9 @@ class NfsTest extends TestCase
      */
     public function test_delete_nfs_export()
     {
-        $user = User::whereHas('containers.nfsExports')->first();
-        $token = $user->generateToken();
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
 
-        $headers = [
-            'Accept' => 'application/json',
-            'Authorization' => 'Bearer ' . $token,
-        ];
         $url = '/api/containers/nfs/export/delete';
         $container = $user->containers()->first();
         $nfsExport = $container->nfsExports()->first();

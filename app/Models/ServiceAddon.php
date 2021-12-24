@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\{ Model, SoftDeletes, Builder };
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
+use App\Traits\HasPrice;
 
 use App\Observers\ServiceAddonObserver as Observer;
 
@@ -13,6 +15,9 @@ use App\Enums\ContainerProperty\ContainerPropertyType as PropertyType;
 
 class ServiceAddon extends Model
 {
+    use HasFactory;
+    use HasPrice;
+
     /**
      * Model table name
      * 
@@ -98,13 +103,5 @@ class ServiceAddon extends Model
     {
         $type = $this->attributes['property_type'];
         return PropertyType::getDescription($type);
-    }
-
-    /**
-     * Get pricings for current addon
-     */
-    public function pricings()
-    {
-        return $this->morphMany(Pricing::class, 'pricingable');
     }
 }

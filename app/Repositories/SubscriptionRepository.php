@@ -50,6 +50,28 @@ class SubscriptionRepository extends BaseRepository
 	}
 
 	/**
+	 * Renew subscription by creating new order
+	 * to be paid by user.
+	 * 
+	 * @return 
+	 */
+	public function renew()
+	{
+		//
+	}
+
+	/**
+	 * Renew multiple subscription as one order.
+	 * 
+	 * @param
+	 * @return
+	 */
+	public function renewMultiple()
+	{
+		//
+	}
+
+	/**
 	 * Prolong the subscription
 	 * 
 	 * @param mixed  $additionalTime

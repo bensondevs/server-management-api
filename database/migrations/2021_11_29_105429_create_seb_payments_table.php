@@ -26,6 +26,7 @@ class CreateSebPaymentsTable extends Migration
             $table->tinyInteger('state')->default(1);
 
             $table->longText('order_reference')->nullable();
+
             $table->string('email')->nullable();
             $table->double('amount', 20, 2)->default(0);
             $table->json('billing_address')->nullable();

@@ -73,6 +73,45 @@ if (! function_exists('is_str_starts_with')) {
 }
 
 /**
+ * Check if string has uppercase character
+ * 
+ * @param string $string
+ * @return bool
+ */
+if (! function_exists('string_has_uppercase')) {
+	function string_has_uppercase(string $string)
+	{
+		return preg_match('/[A-Z]/', $string);
+	}
+}
+
+/**
+ * Check if string has numeric character
+ * 
+ * @param string $string
+ * @return bool
+ */
+if (! function_exists('string_has_numeric')) {
+	function string_has_numeric(string $string)
+	{
+		return preg_match('~[0-9]+~', $string);
+	}
+}
+
+/**
+ * Check if string has special character
+ * 
+ * @param string $string
+ * @return bool
+ */
+if (! function_exists('string_has_special_char')) {
+	function string_has_special_char(string $string)
+	{
+		return preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $string);
+	}
+}
+
+/**
  * Convert string to singular version
  * 
  * @param string  $string
@@ -99,7 +138,7 @@ if (! function_exists('str_to_plural')) {
 }
 
 /**
- * Convert string to snake case
+ * Convert string to snake_case
  * 
  * @param string  $string
  * @return string
@@ -112,7 +151,7 @@ if (! function_exists('str_snake_case')) {
 }
 
 /**
- * Convert string to camel case
+ * Convert string to camelCase
  * 
  * @param string  $string
  * @return string
@@ -121,6 +160,19 @@ if (! function_exists('str_camel_case')) {
 	function str_camel_case(string $string)
 	{
 	    return Str::camel($string);
+	}
+}
+
+/**
+ * Convert string to PascalCase
+ * 
+ * @param string $string
+ * @return string
+ */
+if (! function_exists('str_pascal_case')) {
+	function str_pascal_case(string $string)
+	{
+		return ucfirst(Str::camel($string));
 	}
 }
 
@@ -157,6 +209,19 @@ if (! function_exists('snake_to_camel')) {
 	    }
 
 	    return $result;
+	}
+}
+
+/**
+ * Convert string to slugged string
+ * 
+ * @param  string  $string
+ * @return string
+ */
+if (! function_exists('sluggify')) {
+	function sluggify(string $string)
+	{
+		return Str::slug($string);
 	}
 }
 

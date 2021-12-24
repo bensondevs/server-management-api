@@ -73,20 +73,47 @@ class CartItem extends Model
     }
 
     /**
+     * Get cart of this item
+     */
+    public function cart()
+    {
+        return $this->belongsTo(Cart::class);
+    }
+
+    /**
+     * Get itemable attached to this item
+     */
+    public function itemable()
+    {
+        return $this->morphTo('cart_itemable');
+    }
+
+    /**
+     * Alias for "itemable()"
+     */
+    public function cartItemable()
+    {
+        return $this->itemable();
+    }
+
+    /**
      * Count sub total of the cart item
      * 
      * @return float
      */
     public function countSubTotal()
     {
-        $itemable = $this->cart_itemable;
+        $type = $this->attributes['cart_itemable_type'];
+        $id = $this->attributes['cart_itemable_id'];
+        $itemable = $type::findOrFail($id);
 
         $pricings = $itemable->pricings;
         $pricing = $pricings->where('currency', current_currency())->first();
         
         $price = $pricing->price;
         $quantity = $this->attributes['quantity'];
-        $discount = $this->attributes['discount'];
+        $discount = isset($this->attributes['discount']) ?
+            $this->attributes['discount'] : 0;
 
         $subtotal = ($price * $quantity) - $discount;
         return $this->attributes['sub_total'] = $subtotal;

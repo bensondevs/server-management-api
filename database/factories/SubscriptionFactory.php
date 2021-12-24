@@ -4,8 +4,8 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-use App\Models\{ Subscription, ServicePlan, Container };
 use App\Enums\Subscription\SubscriptionStatus as Status;
+use App\Models\{ Subscription, ServicePlan, Container, User };
 
 class SubscriptionFactory extends Factory
 {
@@ -24,10 +24,21 @@ class SubscriptionFactory extends Factory
     public function configure()
     {
         return $this->afterMaking(function (Subscription $subscription) {
-            if ($subscription->subscribeable_id) {
+            if (! $subscription->user_id) {
+                $user = User::factory()->create();
+                $subscription->user_id = $user->id;
+            }
+
+            if (! $subscription->subscribeable_id) {
                 $plan = ServicePlan::first();
                 $subscription->subscribeable_id = $plan->id;
                 $subscription->subscribeable_type = ServicePlan::class;
+            }
+
+            if (! $subscription->subscriber_id) {
+                $subscriber = Container::factory()->create();
+                $subscription->subscriber_id = $subscriber->id;
+                $subscription->subscriber_type = Container::class;
             }
         });
     }

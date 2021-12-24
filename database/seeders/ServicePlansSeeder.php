@@ -39,8 +39,8 @@ class ServicePlansSeeder extends Seeder
     	]);
     	$standardPlan->setDiskSize(1000);
     	$standardPlan->setDuration(30);
-    	$freePlan->setPrice(10, Currency::EUR);
-    	$freePlan->setPrice(12, Currency::USD);
+    	$standardPlan->setPrice(10, Currency::EUR);
+    	$standardPlan->setPrice(12, Currency::USD);
 
     	/**
     	 * Configure advanced plan
@@ -52,7 +52,7 @@ class ServicePlansSeeder extends Seeder
     	]);
     	$advancedPlan->setDiskSize(3000);
     	$advancedPlan->setDuration(30);
-    	$freePlan->setPrice(30, Currency::EUR);
-    	$freePlan->setPrice(35, Currency::USD);
+    	$advancedPlan->setPrice(30, Currency::EUR);
+    	$advancedPlan->setPrice(35, Currency::USD);
     }
 }

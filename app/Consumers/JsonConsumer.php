@@ -102,11 +102,8 @@ class JsonConsumer
 			$uuid = $this->uuid;
 		}
 		$this->setUuid($uuid);
-
-		$host = env('RABBITMQ_HOST');
-		$port = env('RABBITMQ_PORT');
-		$user = env('RABBITMQ_USER');
-		$pass = env('RABBITMQ_PASSWORD');
+		
+		[$host, $port, $user, $pass] = array_values(config('rabbitmq.default'));
 
 		$connection = new AMQPStreamConnection($host, $port, $user, $pass);
 		$channel = $connection->channel();

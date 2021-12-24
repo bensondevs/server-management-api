@@ -9,7 +9,7 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use Laravel\Sanctum\Sanctum;
 
-use App\Models\{ User, Cart, ServicePlan, ServiceAddon };
+use App\Models\{ User, Cart, CartItem, ServicePlan, ServiceAddon };
 
 class CartTest extends TestCase
 {
@@ -62,15 +62,15 @@ class CartTest extends TestCase
         $user = User::first() ?: User::factory()->create();
         Sanctum::actingAs($user, ['*']);
 
-        $cart = Cart::factory()->create();
         $plan = ServicePlan::first();
-        $url = '/api/carts/' . $cart->id . '/add_plan/' . $plan->id;
-        $response = $this->json('POST', $url, ['quantity' => 1]);
+        $url = '/api/carts/add_plan/' . $plan->id;
+        $response = $this->json('POST', $url);
 
         $response->assertStatus(201);
         $response->assertJson(function (AssertableJson $json) {
             $json->has('message');
-            $json->where('status', 'success');
+            $json->where('status.0', 'success');
+            $json->where('status.1', 'success');
         });
     }
 
@@ -127,7 +127,10 @@ class CartTest extends TestCase
         $user = User::first() ?: User::factory()->create();
         Sanctum::actingAs($user, ['*']);
 
-        $cart = Cart::factory()->for($user)->create();
+        $cart = Cart::factory()
+            ->for($user)
+            ->has(CartItem::factory()->count(10), 'items')
+            ->create();
         $url = '/api/carts/checkout';
         $response = $this->json('POST', $url);
 

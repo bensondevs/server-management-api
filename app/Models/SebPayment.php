@@ -3,15 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{ Model, SoftDeletes, Builder };
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
 
 use App\Observers\SebPaymentObserver;
+use App\Enums\Payment\Seb\SebPaymentState as PaymentState;
 
 class SebPayment extends Model
 {
+    use HasFactory;
+    
     /**
      * Model table name
      * 
@@ -51,8 +53,8 @@ class SebPayment extends Model
      */
     protected $fillable = [
         'payment_id',
-        'payment_reference',
-        'payment_state',
+        'order_reference',
+        'state',
         'amount',
         'billing_address',
     ];
@@ -96,6 +98,41 @@ class SebPayment extends Model
     }
 
     /**
+     * Create callable attribute of "state_description"
+     * This callable attribute will return payment state enum description
+     * 
+     * @return string
+     */
+    public function getStateDescriptionAttribute()
+    {
+        $state = $this->attributes['state'];
+        return PaymentState::getDescription($state);
+    }
+
+    /**
+     * Create settable attribute of "payment_state"
+     * This settable attribute will set the payment state value using either
+     * integer or string
+     * 
+     * @param  mixed  $state
+     * @return void
+     */
+    public function setPaymentStateAttribute($state)
+    {
+        if (is_numeric($state)) {
+            $state = (int) $state;
+            $state = PaymentState::fromValue($state);
+        }
+
+        if (is_string($state)) {
+            $state = str_pascal_case($state);
+            $state = PaymentState::fromKey($state);
+        }
+
+        $this->attributes['state'] = $state;
+    }
+
+    /**
      * Get payment parent of current payment
      */
     public function payment()
@@ -119,8 +156,10 @@ class SebPayment extends Model
      */
     public function captureResponse(array $responseData)
     {
-        return $this->apiResponses()->save([
-            'response' => $responseData
-        ]);
+        $response = new SebPaymentApiResponse();
+        $response->response_array = $responseData;
+        $response->seb_payment_id = $this->attributes['id'];
+
+        return $response->save();
     }
 }

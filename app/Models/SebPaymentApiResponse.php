@@ -3,15 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{ Model, SoftDeletes, Builder };
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
 
-use App\Observers\SebPaymentApiResponseObserver;
+use App\Observers\SebPaymentApiResponseObserver as Observer;
 
 class SebPaymentApiResponse extends Model
 {
+    use HasFactory;
+
     /**
      * Model table name
      * 
@@ -65,7 +66,7 @@ class SebPaymentApiResponse extends Model
     protected static function boot()
     {
     	parent::boot();
-    	self::observe(SebPaymentApiResponseObserver::class);
+    	self::observe(Observer::class);
     }
 
     /**
@@ -92,5 +93,13 @@ class SebPaymentApiResponse extends Model
     {
         $response = $this->attributes['response'];
         return json_decode($response, true);
+    }
+
+    /**
+     * Get the response parent (seb payment instance)
+     */
+    public function sebPayment()
+    {
+        return $this->belongsTo(SebPayment::class);
     }
 }

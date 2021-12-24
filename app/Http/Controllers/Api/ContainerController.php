@@ -34,6 +34,16 @@ class ContainerController extends Controller
     }
 
     /**
+     * Populate containers that belongs to users
+     * 
+     * @return Illuminate\Support\Facades\Response
+     */
+    public function userContainers()
+    {
+        return response()->json(['containers' => auth()->user()->containers()]);
+    }
+
+    /**
      * Check a user has container
      * 
      * @return Illuminate\Support\Facades\Response
@@ -43,16 +53,6 @@ class ContainerController extends Controller
         $user = auth()->user();
         $exists = $user->containers()->active()->exists();
         return response()->json(['exists' => $exists]);
-    }
-
-    /**
-     * Populate containers that belongs to users
-     * 
-     * @return Illuminate\Support\Facades\Response
-     */
-    public function userContainers()
-    {
-        return response()->json(['containers' => auth()->user()->containers()]);
     }
 
     /**

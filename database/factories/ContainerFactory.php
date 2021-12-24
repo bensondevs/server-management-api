@@ -91,10 +91,12 @@ class ContainerFactory extends Factory
                 $subnetIp = SubnetIp::free()
                     ->where('subnet_id', $subnet->id)
                     ->first();
+                $subnetIp->assignTo($container->user);
                 $container->subnet_ip_id = $subnetIp->id;
             }
         })->afterCreating(function (Container $container) {
             $user = $container->user;
+            $container->subnetIp->assignTo($user);
 
             /**
              * Assign the properties

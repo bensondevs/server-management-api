@@ -15,6 +15,17 @@ use App\Enums\Payment\{
 class PaymentObserver
 {
     /**
+     * Handle the Payment "creating" event.
+     *
+     * @param  \App\Models\Payment  $payment
+     * @return void
+     */
+    public function creating(Payment $payment)
+    {
+        $payment->id = generateUuid();
+    }
+
+    /**
      * Handle the Payment "created" event.
      *
      * @param  \App\Models\Payment  $payment
@@ -22,7 +33,7 @@ class PaymentObserver
      */
     public function created(Payment $payment)
     {
-        switch ($payment->status) {
+        switch ($payment->method) {
             case Method::SEB:
                 $respository = new SebRepository();
                 break;

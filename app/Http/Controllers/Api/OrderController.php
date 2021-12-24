@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
 
 use App\Models\Order;
-use App\Http\Resources\UserOrderResource;
+use App\Http\Resources\{ OrderResource, OrderCollection };
 use App\Repositories\OrderRepository;
 
 class OrderController extends Controller
@@ -46,7 +46,7 @@ class OrderController extends Controller
                 'total', 
                 'vat_size_percentage', 
                 'grand_total'
-            ])->allowAppends([
+            ])->allowedAppends([
                 'vat_amount', 
                 'status_description', 
                 'vat_size_percentage'

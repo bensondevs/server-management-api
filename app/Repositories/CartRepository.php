@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use App\Repositories\Base\BaseRepository;
 
-use App\Models\{ User, Cart, Order, OrderItem };
+use App\Models\{ User, Cart, CartItem, Order, OrderItem };
 
 class CartRepository extends BaseRepository
 {
@@ -116,8 +116,9 @@ class CartRepository extends BaseRepository
 	{
 		try {
 			$cart = $this->getModel();
-			$cartItem = $cart->items()->save([
+			$cartItem = CartItem::create([
 				'user_id' => $this->getUser()->id,
+				'cart_id' => $cart->id,
 				'cart_itemable_type' => get_class($cartItemable),
 				'cart_itemable_id' => $cartItemable->id,
 				'quantity' => $quantity,
@@ -213,7 +214,10 @@ class CartRepository extends BaseRepository
 			// Massively add raw order item
 			$rawOrderItem = [];
 			foreach ($carts as $cart) {
-				$cartable = $cart->cartable;
+				if (! $cartable = $cart->cartable) {
+					continue;
+				}
+
 				array_push($rawOrderItem, [
 					'id' => generateUuid(),
 					'order_id' => $order->id,

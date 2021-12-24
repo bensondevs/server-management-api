@@ -3,11 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{ Model, SoftDeletes, Builder };
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
 
-use App\Observers\PaymentObserver;
+use App\Observers\PaymentObserver as Observer;
 use App\Enums\Payment\{
     PaymentStatus as Status, 
     PaymentMethod as Method
@@ -15,6 +15,8 @@ use App\Enums\Payment\{
 
 class Payment extends Model
 {
+    use HasFactory;
+    
     /**
      * Model database table
      * 
@@ -75,11 +77,7 @@ class Payment extends Model
     protected static function boot()
     {
     	parent::boot();
-        self::observe(PaymentObserver::class);
-
-    	self::creating(function ($payment) {
-            $payment->id = Uuid::generate()->string;
-    	});
+        self::observe(Observer::class);
     }
 
     /**
@@ -137,32 +135,6 @@ class Payment extends Model
     }
 
     /**
-     * Guess what payment method model is attached
-     */
-    public function vendorPayment()
-    {
-        switch ($this->attributes['method']) {
-            case Method::SEB:
-                $model = SebPayment::class;
-                break;
-            
-            case Method::Paypal:
-                $model = PaypalPayment::class;
-                break;
-
-            case Method::Stripe:
-                $model = StripePayment::class;
-                break;
-
-            default:
-                $model = SebPayment::class;
-                break;
-        }
-
-        return $this->hasOne($model);
-    }
-
-    /**
      * Get seb payment model
      */
     public function sebPayment()
@@ -184,5 +156,32 @@ class Payment extends Model
     public function paypalPayment()
     {
         return $this->hasOne(PaypalPayment::class);
+    }
+
+    /**
+     * Guess what payment method model is attached
+     */
+    public function loadVendorPayment()
+    {
+        switch ($this->attributes['method']) {
+            case Method::SEB:
+                $model = SebPayment::class;
+                break;
+            
+            case Method::Paypal:
+                $model = PaypalPayment::class;
+                break;
+
+            case Method::Stripe:
+                $model = StripePayment::class;
+                break;
+
+            default:
+                $model = SebPayment::class;
+                break;
+        }
+
+        $vendor = (new $model)->where('payment_id', $this->attributes['id'])->first();
+        return $this->attributes['vendor_payment'] = $vendor;
     }
 }

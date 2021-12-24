@@ -154,6 +154,7 @@ class SubnetIp extends Model
     public function assignTo(User $user)
     {
         $this->attributes['user_id'] = $user->id;
+        $this->attributes['status'] = Status::Assigned;
         return $this->save();
     }
 

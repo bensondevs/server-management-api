@@ -100,6 +100,7 @@ if (! function_exists('get_lower_class')) {
     function get_lower_class($class)
     {
         $lowerClassname = get_pure_class($class);
+        $lowerClassname = str_snake_case($lowerClassname);
         $lowerClassname = strtolower($lowerClassname);
         return $lowerClassname;
     }

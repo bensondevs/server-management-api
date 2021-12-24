@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Spatie\QueryBuilder\QueryBuilder;
 
+use App\Models\Datacenter;
 use App\Http\Resources\DatacenterResource;
 use App\Repositories\DatacenterRepository;
 
@@ -42,10 +44,10 @@ class DatacenterController extends Controller
                 'location'
             ])->allowedSorts(['location'])
             ->allowedIncludes([
-                'containers', 
+                'region', 
                 'servers', 
                 'subnets'
-            ])->allowAppends(['status_description'])
+            ])->allowedAppends(['status_description'])
             ->get();
         $datacenters = DatacenterResource::collection($datacenters);
 

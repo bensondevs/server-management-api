@@ -9,9 +9,9 @@ use Spatie\QueryBuilder\QueryBuilder;
 use App\Http\Requests\Payments\{
     CreatePaymentRequest as CreateRequest
 };
-
+use App\Http\Resources\PaymentResource;
 use App\Repositories\Payments\PaymentRepository;
-use App\Models\Payment;
+use App\Models\{ Payment, Order };
 
 class PaymentController extends Controller
 {
@@ -51,7 +51,8 @@ class PaymentController extends Controller
     }
 
     /**
-     * Create payment from the order
+     * Create payment from the order by selecting the payment
+     * method of the order.
      * 
      * @param CreateRequest  $request
      * @param \App\Models\Order  $order
@@ -62,6 +63,7 @@ class PaymentController extends Controller
         $method = $request->input('method');
         $payment = $this->payment->create($order, $method);
 
+        $payment->loadVendorPayment();
         return apiResponse($this->payment, ['payment' => $payment]);
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Api\Payments;
+namespace Tests\Feature\Api\Payment;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -10,7 +10,7 @@ use Tests\TestCase;
 use Laravel\Sanctum\Sanctum;
 
 use App\Enums\Payment\PaymentMethod as Method;
-use App\Models\{ User, Cart, ServicePlan, Order };
+use App\Models\{ User, Order, Payment };
 
 class PaymentTest extends TestCase
 {
@@ -43,12 +43,18 @@ class PaymentTest extends TestCase
         $user = User::first() ?: User::factory()->create();
         Sanctum::actingAs($user, ['*']);
 
-        $order = Order::factory()
-            ->for($user)
-            ->create();
+        $order = Order::factory()->for($user)->create();
 
         $url = '/api/payments/create/' . $order->id;
         $response = $this->json('POST', $url, ['method' => Method::SEB]);
+
+        $response->assertStatus(201);
+        $response->assertJson(function (AssertableJson $json) {
+            $json->has('message');
+            $json->where('status', 'success');
+            $json->has('payment');
+            $json->has('payment.vendor_payment');
+        });
     }
 
     /**
@@ -58,16 +64,17 @@ class PaymentTest extends TestCase
      */
     public function test_show_payment()
     {
-        //
-    }
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
 
-    /**
-     * Send report about payment
-     * 
-     * @return void
-     */
-    public function test_report_payment()
-    {
-        //
+        $payment = Payment::factory()->for($user)->create();
+
+        $url = '/api/payments/' . $payment->id;
+        $response = $this->json('GET', $url);
+
+        $response->assertStatus(200);
+        $response->assertJson(function (AssertableJson $json) {
+            $json->has('payment');
+        });
     }
 }

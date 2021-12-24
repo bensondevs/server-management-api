@@ -6,16 +6,18 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
+use App\Traits\HasPrice;
 
 use App\Observers\ServicePlanObserver as Observer;
 use App\Enums\{ 
-    Currency, 
-    ContainerProperty\ContainerPropertyType as PropertyType 
+    ContainerProperty\ContainerPropertyType as PropertyType,
+    Currency
 };
 
 class ServicePlan extends Model
 {
     use HasFactory;
+    use HasPrice;
 
     /**
      * The model table name
@@ -102,33 +104,6 @@ class ServicePlan extends Model
     public function items()
     {
         return $this->hasMany(ServicePlanItem::class);
-    }
-
-    /**
-     * Get pricing of the plan
-     */
-    public function pricings()
-    {
-        return $this->morphMany(Pricing::class, 'priceable');
-    }
-
-    /**
-     * Get price of the service plan
-     * 
-     * @return  float
-     */
-    public function getPrice()
-    {
-        if (! $pricings = $this->pricings) {
-            return 0;
-        }
-
-        $currency = current_currency();
-        if (! $pricing = $pricings->where('currency', $currency)->first()) {
-            return 0;
-        }
-
-        return $pricing->price;
     }
 
     /**
@@ -232,22 +207,5 @@ class ServicePlan extends Model
     public function setBreakpoints(int $breakpoints = 1)
     {
         return $this->setItem(PropertyType::Breakpoints, $breakpoints);
-    }
-
-    /**
-     * Set pricing for current service plan
-     * 
-     * @param  float  $price
-     * @param  int  $currency
-     */
-    public function setPrice(float $price = 0, int $currency = Currency::EUR)
-    {
-        $pricing = Pricing::firstOrNew([
-            'priceable_type' => get_class($this),
-            'priceable_id' => $this->attributes['id'],
-            'currency' => $currency,
-        ]);
-        $pricing->price = $price;
-        return $pricing->save();
     }
 }

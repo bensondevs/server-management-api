@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\{
 	DatacenterController,
 	CartController,
 	Payments\PaymentController,
+		Payments\SebPaymentController,
 	ServerController,
 	ServicePlanController
 };
@@ -38,34 +39,36 @@ use App\Http\Controllers\Api\{
 */
 
 Route::group(['as' => 'api.'], function () {
-	/*
-		API Callbacks Module
-	*/
-	Route::group(['prefix' => 'callbacks', 'as' => 'callbacks.'], function () {
-		Route::get('payment_callback', [PaymentController::class, 'paymentCallback'])->name('payment_callback');
+	/**
+	 * API Callbacks Module
+	 */
+	Route::group(['prefix' => 'callbacks'], function () {
+		/**
+		 * SEB Payment callback
+		 */
+		Route::get('payments/seb', [SebPaymentController::class, 'callback']);
 	});
 
-	/*
-		Auth API Module
-	*/
+	/**
+	 * Auth API Module
+	 */
 	Route::group(['prefix' => 'auth', 'as' => 'auth.'], function () {
 		Route::post('login', [AuthController::class, 'login'])->name('login');
 		Route::post('register', [AuthController::class, 'register'])->name('register');
 		Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 	});
 
-	/*
-		Service Plans Module
-	*/
+	/**
+	 * Service Plan Module
+	 */
 	Route::group(['prefix' => 'service_plans', 'as' => 'service_plans.'], function () {
-		Route::get('/', [ServicePlanController::class, 'plans']);
-		Route::get('view', [ServicePlanController::class, 'viewPlan']);
-		Route::get('purchase', [ServicePlanController::class, 'purchase']);
+		Route::get('/', [ServicePlanController::class, 'servicePlans']);
+		Route::get('/{plan}', [ServicePlanController::class, 'show']);
 	});
 
-	/*
-		Authenticated and Verified Groups
-	*/
+	/**
+	 * Authenticated and Verified Groups
+	 */
 	Route::group(['middleware' => ['auth:sanctum', 'verified']], function () {
 		/**
 		 * Region API Module
@@ -94,15 +97,15 @@ Route::group(['as' => 'api.'], function () {
 		Route::group(['prefix' => '/carts'], function () {
 			Route::get('/', [CartController::class, 'carts']);
 			
+			Route::post('/add_plan/{plan}', [CartController::class, 'addServicePlan'])
+				->middleware('one_time_free_plan');
 			Route::group(['prefix' => '/{cart}'], function () {
-				Route::post('/add_plan/{service_plan}', [CartController::class, 'addServicePlan'])
-					->middleware('one_time_free_plan');
-				Route::post('/add_addon/{service_addon}', [CartController::class, 'addServiceAddon']);
+				Route::get('/items', [CartController::class, 'cartItems']);
+				Route::post('/add_addon/{addon}', [CartController::class, 'addServiceAddon']);
 				Route::delete('/destroy', [CartController::class, 'destroy']);
 			});
 			
 			Route::group(['prefix' => '/items/{cart_item}'], function () {
-				Route::get('/', [CartController::class, 'cartItems']);
 				Route::match(['PUT', 'PATCH'], 'set_quantity', [CartController::class, 'setItemQuantity']);
 				Route::delete('remove', [CartController::class, 'removeItem']);
 			});
@@ -115,8 +118,7 @@ Route::group(['as' => 'api.'], function () {
 		 */
 		Route::group(['prefix' => '/orders'], function () {
 			Route::get('/', [OrderController::class, 'orders']);
-			Route::post('place', [OrderController::class, 'place'])->name('place');
-			Route::get('show', [OrderController::class, 'show'])->name('show');
+			Route::get('/{order}', [OrderController::class, 'show']);
 		});
 
 		/**
@@ -131,7 +133,7 @@ Route::group(['as' => 'api.'], function () {
 			 * Container API main content
 			 */
 			Route::group(['prefix' => '/{container}'], function () {
-				Route::get('/show', [ContainerController::class, 'show']);
+				Route::get('/', [ContainerController::class, 'show']);
 				Route::post('/select', [ContainerController::class, 'select']);
 
 				/**
@@ -306,12 +308,31 @@ Route::group(['as' => 'api.'], function () {
 		 */
 		Route::group(['prefix' => 'payments'], function () {
 			Route::get('/', [PaymentController::class, 'payments']);
-			Route::post('create/{order}', [PaymentController::class, 'create']);
+			Route::post('/create/{order}', [PaymentController::class, 'create']);
 
+			/**
+			 * Payment main API Module
+			 */
 			Route::group(['prefix' => '/{payment}'], function () {
 				Route::get('/', [PaymentController::class, 'show']);
-				Route::post('report', [PaymentController::class, 'report']);
+				Route::post('/report', [PaymentController::class, 'report']);
 			});
+
+			/**
+			 * SEB Payment API Module
+			 */
+			Route::group(['prefix' => '/seb/{seb}'], function () {
+				Route::get('/', [SebPaymentController::class, 'show']);
+				Route::post('/pay', [SebPaymentController::class, 'pay']);
+				Route::get('/check', [SebPaymentController::class, 'check']);
+			});
+		});
+
+		/**
+		 * Subscription API Module
+		 */
+		Route::group(['prefix' => 'subscriptions'], function () {
+			//
 		});
 
 		/**

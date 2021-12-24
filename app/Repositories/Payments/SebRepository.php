@@ -7,7 +7,7 @@ use Illuminate\Database\QueryException;
 use App\Repositories\Base\BaseRepository;
 use App\Traits\ApiConsumerTrait;
 
-use App\Models\{ Payment, SebPayment };
+use App\Models\{ Payment, SebPayment, Order };
 use App\Enums\Payment\Seb\{
 	SebPaymentStatus as Status,
 	SebPaymentApiResponse as ApiResponseStatus
@@ -95,9 +95,8 @@ class SebRepository extends BaseRepository
 	{
 		try {
 			$sebPayment = $this->getModel();
-			$sebPayment->payment()->associate($payment);
+			$sebPayment->payment_id = $payment->id;
 			$sebPayment->order_reference = $payment->order_id;
-			$sebPayment->payment_reference = $payment->id;
 			$sebPayment->amount = $payment->amount;
 			$sebPayment->save();
 
@@ -129,9 +128,12 @@ class SebRepository extends BaseRepository
 
 		// Prepare parameters of the request
 		$parameters = $this->prepareParameters($parameters);
+		$parameters['nonce'] = $sebPayment->id;
 		$parameters['payment_reference'] = $sebPayment->payment_id;
+		$parameters['amount'] = $sebPayment->payment->amount;
 		$parameters['order_reference'] = $sebPayment->order_reference;
-		$parameters['email'] = $sebPayment->payment->user->email;
+		$parameters['email'] = $sebPayment->email ?: 
+			$sebPayment->payment->user->email;
 		$parameters['customer_ip'] = request()->ip();
 		$parameters['timestamp'] = now();
 
@@ -146,10 +148,31 @@ class SebRepository extends BaseRepository
 			$this->setSuccess('Successfully send request to execute payment to SEB.');
 		} catch (\Throwable $th) {
 			$error = $th->getMessage();
-			$this->setError('Failed to send request to execute payment to SEB.');
+			$this->setError('Failed to send request to execute payment to SEB.', $error);
 		}
 
 		return $this->getModel();
+	}
+
+	/**
+	 * Handle callback from SEB API
+	 * 
+	 * @param  array $callback
+	 * @return \App\Models\SebPayment
+	 */
+	public function handleCallback(array $callback)
+	{
+		if (! isset($callback['payment_reference'])) {
+			$order = Order::findOrFail($callback['order_reference']);
+			$payment = $order->payment;
+		} else {
+			$payment = Payment::findOrFail($callback['payment_reference']);
+		}
+
+		$sebPayment = $payment->sebPayment;
+		$this->setModel($sebPayment);
+
+		return $this->checkPayment();
 	}
 
 	/**

@@ -130,10 +130,6 @@ class ContainerObserver
             $cache[$container->id] = $container->nfs_pid_numbers;
             Cache::put('nfs_status', $cache, 300);
         }
-
-        if ($user = auth()->user()) {
-            record_activity($user->anchorName() . ' has updated container (ID:' . $container->id . ')', $user, $container);
-        }
     }
 
     /**

@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-use App\Models\{ Order, User };
+use App\Models\{ Order, OrderItem, User };
 use App\Enums\Currency;
 use App\Enums\Order\OrderStatus as Status;
 
@@ -34,11 +34,12 @@ class OrderFactory extends Factory
             }
         })->afterCreating(function (Order $order) {
             /**
-             * Create pre-created container
+             * Create massive order items if not exists
              */
-            if (! $oder->precreatedContainer()->exists()) {
-                //
-            }
+            /*if (! $order->items()->exists()) {
+                OrderItem::factory()->servicePlan()->create();
+                OrderItem::factory()->serviceAddon()->count(1)->create();
+            }*/
         });
     }
     

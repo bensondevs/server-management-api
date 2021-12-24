@@ -89,4 +89,20 @@ class Cart extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Get cart items of the cart
+     */
+    public function items()
+    {
+        return $this->hasMany(CartItem::class);
+    }
+
+    /**
+     * Alias for "items()"
+     */
+    public function cartItems()
+    {
+        return $this->items();
+    }
 }
