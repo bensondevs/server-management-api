@@ -43,12 +43,12 @@ class ContainerObserver
             record_activity($user->anchorName() . ' had created a new container.', $user, $container);
         }*/
 
-        // Create on server
-        $container->createOnServer();
-
         // Assign user to Subnet IP
         $subnetIp = $container->subnetIp;
         $subnetIp->assignTo($container->user);
+
+        // Create on server
+        // $container->createOnServer();
     }
 
     /**

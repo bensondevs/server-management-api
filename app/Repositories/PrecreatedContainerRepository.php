@@ -7,6 +7,7 @@ use Illuminate\Database\QueryException;
 use App\Repositories\Base\BaseRepository;
 
 use App\Models\{ 
+	Region,
 	PrecreatedContainer, 
 	ServicePlan, 
 	Container, 
@@ -175,6 +176,7 @@ class PrecreatedContainerRepository extends BaseRepository
 		if (! $datacenter = $region->selectBestDatacenter()) {
 			return $this->sendToQueue(Reason::NoDatacenterAvailable);
 		}
+		$metaContainer['datacenter_id'] = $datacenter->id;
 
 		/**
 		 * Find best server under selected datacenter
@@ -182,6 +184,7 @@ class PrecreatedContainerRepository extends BaseRepository
 		if (! $server = $datacenter->selectBestServer()) {
 			return $this->sendToQueue(Reason::NoServerAvailable);
 		}
+		$metaContainer['server_id'] = $server->id;
 
 		/**
 		 * Find subnet and check availability
@@ -189,6 +192,7 @@ class PrecreatedContainerRepository extends BaseRepository
 		if (! $subnet = $datacenter->selectBestSubnet()) {
 			return $this->sendToQueue(Reason::NoSubnetAvailable);
 		}
+		$metaContainer['subnet_id'] = $subnet->id;
 
 		/**
 		 * Search available subnet ip of the selected subnet
@@ -205,6 +209,8 @@ class PrecreatedContainerRepository extends BaseRepository
 		 */
 		try {
 			$container = new Container($metaContainer);
+			$container->user_id = $preContainer->user_id;
+			$container->precreated_container_id = $preContainer->id;
 			$container->save();
 			$this->setContainer($container);
 
@@ -259,7 +265,7 @@ class PrecreatedContainerRepository extends BaseRepository
 		    		'updated_at' => now(),
 		    	];
 
-		    	switch ($itemableType) {
+		    	switch ($item->itemable_type) {
 
 		    		/**
 		    		 * If item is service plan, set container as subscriber.
@@ -297,7 +303,7 @@ class PrecreatedContainerRepository extends BaseRepository
 		    		 * If none match, skip this order item
 		    		 */
 		    		default:
-		    			continue;
+		    			continue 2;
 		    			break;
 		    	}
 		    	array_push($rawSubscriptions, $rawSub);
@@ -316,7 +322,7 @@ class PrecreatedContainerRepository extends BaseRepository
 		    $this->setSuccess('Successfully create subscription.');
 	    } catch (QueryException $qe) {
 	    	$error = $qe->getMessage();
-	    	$this->setError('Failed to create subscription.');
+	    	$this->setError('Failed to create subscription.', $error);
 	    }
 	}
 
@@ -342,7 +348,7 @@ class PrecreatedContainerRepository extends BaseRepository
 			$this->setSuccess('Successfully send pre-created container to queue.');
 		} catch (QueryException $qe) {
 			$error = $qe->getMessage();
-			$this->setError('Failed to send to queue.');
+			$this->setError('Failed to send to queue.', $error);
 		}
 
 		return $this->getModel();

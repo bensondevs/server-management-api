@@ -97,6 +97,20 @@ class SubnetIp extends Model
     }
 
     /**
+     * Create callable method of "of(Subnet $subnet)"
+     * This callable method will query only subnet ip of specified
+     * subnet.
+     * 
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  \App\Models\Subnet  $subnet
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOf(Builder $query, Subnet $subnet)
+    {
+        return $query->where('subnet_id', $subnet->id);
+    }
+
+    /**
      * Create callable function of "free()"
      * This callable function will make model query only 
      * 

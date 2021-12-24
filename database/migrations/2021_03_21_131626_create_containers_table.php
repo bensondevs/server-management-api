@@ -22,10 +22,22 @@ class CreateContainersTable extends Migration
                 ->on('users')
                 ->onDelete('SET NULL');
 
+            $table->uuid('precreated_container_id')->nullable();
+            $table->foreign('precreated_container_id')
+                ->references('id')
+                ->on('precreated_containers')
+                ->onDelete('SET NULL');
+
             $table->uuid('region_id');
             $table->foreign('region_id')
                 ->references('id')
                 ->on('regions')
+                ->onDelete('CASCADE');
+
+            $table->uuid('datacenter_id');
+            $table->foreign('datacenter_id')
+                ->references('id')
+                ->on('datacenters')
                 ->onDelete('CASCADE');
 
             $table->uuid('server_id');

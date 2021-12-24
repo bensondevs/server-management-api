@@ -9,8 +9,11 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use Laravel\Sanctum\Sanctum;
 
-use App\Enums\Payment\PaymentMethod as Method;
-use App\Models\{ User, Order, Payment };
+use App\Enums\Payment\{
+    PaymentMethod as Method,
+    PaymentStatus as Status
+};
+use App\Models\{ User, Order, Payment, Container };
 
 class PaymentTest extends TestCase
 {
@@ -76,5 +79,37 @@ class PaymentTest extends TestCase
         $response->assertJson(function (AssertableJson $json) {
             $json->has('payment');
         });
+    }
+
+    /**
+     * On payment paid test
+     * 
+     * @return void
+     */
+    public function test_on_payment_paid()
+    {
+        $payment = Payment::factory()->create();
+        $order = $payment->order;
+
+        /**
+         * Check after status become settled already
+         */
+        $payment->status = Status::Settled;
+        $payment->save();
+
+        $preContainer = $order->precreatedContainer;
+        $metaContainer = $preContainer->meta_container;
+        $this->assertDatabaseHas('containers', [
+            'user_id' => $payment->user_id,
+            'region_id' => $metaContainer['region_id'],
+            'hostname' => $metaContainer['hostname'],
+            'client_email' => $metaContainer['client_email'],
+        ]);
+
+        $container = $preContainer->container;
+        $this->assertDatabaseHas('subscriptions', [
+            'subscriber_type' => Container::class,
+            'subscriber_id' => $container->id,
+        ]);
     }
 }

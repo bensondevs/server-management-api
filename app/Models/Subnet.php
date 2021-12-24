@@ -87,10 +87,24 @@ class Subnet extends Model
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeLeastSelected()
+    public function scopeLeastSelected(Builder $query)
     {
         return $query->withCount('containers')
             ->orderByDesc('containers_count');
+    }
+
+    /**
+     * Create callable method of "of(Datacenter $datacenter)"
+     * This callable method will query only subnet of specified
+     * datacenter.
+     * 
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  \App\Models\Datacenter  $datacenter
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOf(Builder $query, Datacenter $datacenter)
+    {
+        return $query->where('datacenter_id', $datacenter->id);
     }
 
     /**

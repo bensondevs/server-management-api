@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
 
 use App\Observers\PrecreatedContainerObserver as Observer;
@@ -11,6 +12,8 @@ use App\Enums\PrecreatedContainer\PrecreatedContainerStatus as Status;
 
 class PrecreatedContainer extends Model
 {
+    use HasFactory;
+
     /**
      * Model table name
      * 
@@ -60,6 +63,7 @@ class PrecreatedContainer extends Model
      * @var array 
      */
     protected $fillable = [
+        'user_id',
         'order_id',
         'status',
         'precreated_container_data',
@@ -111,6 +115,14 @@ class PrecreatedContainer extends Model
     public function order()
     {
         return $this->belongsTo(Order::class);
+    }
+
+    /**
+     * Get created container by this pre-created container
+     */
+    public function container()
+    {
+        return $this->hasOne(Container::class);
     }
 
     /**
@@ -409,13 +421,13 @@ class PrecreatedContainer extends Model
      */
     public function applyService($service)
     {
-        switch (get_class($orderItem)) {
+        switch (get_class($service)) {
             /**
              * If order item is class type service plan:
              * - Apply service plan to pre-created container
              */
             case ServicePlan::class:
-                return $embryo->applyServicePlan($orderItem);
+                return $embryo->applyServicePlan($service);
                 break;
 
             /**
@@ -423,7 +435,7 @@ class PrecreatedContainer extends Model
              * - Apply service addon to pre-created container
              */
             case ServiceAddon::class:
-                return $embryo->applyServiceAddon($orderItem);
+                return $embryo->applyServiceAddon($service);
                 break;
             
             /**

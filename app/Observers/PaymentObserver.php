@@ -5,7 +5,7 @@ namespace App\Observers;
 use App\Repositories\Payments\{
     SebRepository, PaypalRepository, StripeRepository
 };
-
+use App\Repositories\PrecreatedContainerRepository;
 use App\Models\Payment;
 use App\Enums\Payment\{
     PaymentStatus as Status,
@@ -62,23 +62,15 @@ class PaymentObserver
              * Indicate payment has been paid
              */
             if ($payment->status == Status::Settled) {
-                switch ($payment->method) {
-                    case Method::SEB:
-                        // code...
-                        break;
-                    
-                    case Method::Paypal:
-                        // code...
-                        break;
+                $order = $payment->order;
+                $preContainer = $order->precreatedContainer;
 
-                    case Method::Stripe:
-                        // code...
-                        break;
-
-                    default:
-                        // code...
-                        break;
-                }
+                /**
+                 * Execute the container creation
+                 */
+                $repository = new PrecreatedContainerRepository;
+                $repository->setModel($preContainer);
+                $repository->process();
             }
 
             /**

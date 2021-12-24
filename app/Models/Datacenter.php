@@ -83,6 +83,34 @@ class Datacenter extends Model
     }
 
     /**
+     * Create callable method of "leastSelected()"
+     * This callable method will query only datacenter with least amount
+     * of container active inside
+     * 
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeLeastSelected(Builder $query)
+    {
+        return $query->withCount('containers')
+            ->orderByDesc('containers_count');
+    }
+
+    /**
+     * Create callable method of "of(Region $region)"
+     * This callable method will query only datacenters of specified
+     * region.
+     * 
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  \App\Models\Region  $region
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOf(Builder $query, Region $region)
+    {
+        return $query->where('region_id', $region->id);
+    }
+
+    /**
      * Create callable attribute of "status_description"
      * This callable attribute will return the status description
      * from the enum
@@ -117,6 +145,14 @@ class Datacenter extends Model
     public function servers()
     {
         return $this->hasMany(Server::class);
+    }
+
+    /**
+     * Get containers inside the datacenter
+     */
+    public function containers()
+    {
+        return $this->hasMany(Container::class);
     }
 
     /**

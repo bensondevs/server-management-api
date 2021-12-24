@@ -94,7 +94,7 @@ final class WaitingReason extends Enum
      * 
      * @var int
      */
-    const SubnetForbidden = 32;
+    const SubnetIpForbidden = 32;
 
     /**
      * No subnet IP is available

@@ -78,6 +78,8 @@ class Container extends Model
      */
     protected $fillable = [
         'user_id',
+        'region_id',
+        'datacenter_id',
         'server_id',
         'subnet_id',
         'subnet_ip_id',
@@ -225,6 +227,26 @@ class Container extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get region where container is existing 
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function region()
+    {
+        return $this->belongsTo(Region::class);
+    }
+
+    /**
+     * Get datacenter where container is existing 
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function datacenter()
+    {
+        return $this->belongsTo(Datacenter::class);
     }
 
     /**

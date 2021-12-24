@@ -8,10 +8,13 @@ use App\Models\{
     Container, 
     Subscription, 
     User, 
-    Server,
+
     Region,
+    Datacenter,
+    Server,
     Subnet,
     SubnetIp, 
+    
     ServicePlan 
 };
 use App\Enums\Container\{
@@ -65,6 +68,14 @@ class ContainerFactory extends Factory
             if (! $container->region_id) {
                 $region = Region::first();
                 $container->region_id = $region->id;
+            }
+
+            /**
+             * Assign datacenter if no datacenter attached
+             */
+            if (! $container->datacenter_id) {
+                $datacenter = Datacenter::first();
+                $container->datacenter_id = $datacenter->id;
             }
 
             /**

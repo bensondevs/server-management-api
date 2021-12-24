@@ -25,7 +25,10 @@ class ContainerResource extends JsonResource
 
             'service_plan_id' => $this->service_plan_id,
 
-            'customer_id' => $this->customer_id,
+            'user_id' => $this->user_id,
+
+            'region_id' => $this->region_id,
+            'datacenter_id' => $this->datacenter_id,
             'server_id' => $this->server_id,
             'subnet_id' => $this->subnet_id,
             'subnet_ip_id' => $this->subnet_ip_id,
@@ -47,12 +50,12 @@ class ContainerResource extends JsonResource
             'expiration_date' => $this->expiration_human_date,
         ];
 
-        if ($this->relationLoaded('customer')) {
-            $structure['customer'] = new UserResource($this->customer);
-            $structure['customer_name'] = $structure['customer']->full_name;
+        if ($this->relationLoaded('user')) {
+            $structure['user'] = new UserResource($this->user);
+            $structure['user_full_name'] = $structure['user']->full_name;
 
             if (! $structure['client_email']) {
-                $structure['client_email'] = $structure['customer']->email;
+                $structure['client_email'] = $structure['user']->email;
             }
         }
 

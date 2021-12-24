@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-use App\Models\{ Order, OrderItem, ServicePlan };
+use App\Models\{ Order, OrderItem, ServicePlan, ServiceAddon };
 use App\Enums\Currency;
 
 class OrderItemFactory extends Factory
