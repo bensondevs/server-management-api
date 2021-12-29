@@ -7,6 +7,18 @@ use App\Models\OrderItem;
 class OrderItemObserver
 {
     /**
+     * Handle the OrderItem "creating" event.
+     *
+     * @param  \App\Models\OrderItem  $orderItem
+     * @return void
+     */
+    public function creating(OrderItem $orderItem)
+    {
+        $orderItem->id = generateUuid();
+        $orderItem->calculateTotal();
+    }
+
+    /**
      * Handle the OrderItem "created" event.
      *
      * @param  \App\Models\OrderItem  $orderItem

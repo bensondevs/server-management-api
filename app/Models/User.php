@@ -164,8 +164,24 @@ class User extends Authenticatable
      */
     public function getDefaultCurrencyAttribute()
     {
-        $currency = $this->attributes['default_currency'];
+        $currency = $this->attributes['currency'];
         return Currency::getDescription($currency);
+    }
+
+    /**
+     * Create callable attribute of "vat_size_percentage"
+     * This callale attribute will return var size percentage in integer
+     * of current user depends on the vat number of user
+     * 
+     * @return int
+     */
+    public function getVatSizePercentageAttribute()
+    {
+        if ($this->attributes['vat_number']) {
+            //
+        }
+
+        return 0;
     }
 
     /**

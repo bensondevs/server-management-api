@@ -4,6 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+use App\Enums\SubnetIp\SubnetIpStatus as Status;
+
 class CreateSubnetIpsTable extends Migration
 {
     /**
@@ -28,7 +30,7 @@ class CreateSubnetIpsTable extends Migration
                 ->on('users')
                 ->onDelete('CASCADE');
 
-            $table->tinyInteger('status')->default(1);
+            $table->tinyInteger('status')->default(Status::Free);
 
             $table->text('comment');
 

@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\{ Model, SoftDeletes, Builder };
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
 
+use App\Observers\OrderItemObserver as Observer;
+
 class OrderItem extends Model
 {
     use HasFactory;
@@ -70,11 +72,7 @@ class OrderItem extends Model
     protected static function boot()
     {
     	parent::boot();
-
-    	self::creating(function ($orderItem) {
-            $orderItem->id = Uuid::generate()->string;
-            $orderItem->calculateTotal();
-    	});
+        self::observe(Observer::class);
     }
 
     /**
@@ -103,9 +101,49 @@ class OrderItem extends Model
     public function calculateTotal()
     {
         $quantity = $this->attributes['quantity'];
-        $price = $this->attributes['price'];
+        $price = isset($this->attributes['price']) ?
+            $this->attributes['price'] : 0;
+        $discount = isset($this->attributes['discount']) ?
+            $this->attributes['discount'] : 0;
 
-        $total = $quantity * $price - $this->attributes['discount'];
+        $total = $quantity * $price - $discount;
         return $this->attributes['total'] = $total;
+    }
+
+    /**
+     * Set order (parent) of current order item.
+     * This method will set the `order_id` of current model
+     * 
+     * @param  \App\Models\Order  $order
+     * @return $this
+     */
+    public function for(Order $order)
+    {
+        $this->attributes['order_id'] = $order->id;
+        return $this;
+    }
+
+    /**
+     * Set subscription's subscribeable as item
+     * for renewal and attach it to current item
+     * 
+     * @param  \App\Models\Subscription  $subs
+     * @param  bool  $saveDirectly
+     * @return $this
+     */
+    public function setSubscription(Subscription $subs, bool $saveDirectly = false)
+    {
+        // Set all affected and related attributes
+        $this->attributes['is_renewal'] = true;
+        $this->attributes['subscription_id'] = $subs->id;
+        $this->attributes['itemable_type'] = $subs->subscribeable_type;
+        $this->attributes['itemable_id'] = $subs->subscribeable_id;
+
+        // If parameter save directly is true
+        // This function will execute the save action of model
+        // Otherwise, just let it be
+        if ($saveDirectly) $this->save();
+
+        return $this;
     }
 }

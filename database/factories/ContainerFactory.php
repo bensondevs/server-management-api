@@ -66,7 +66,7 @@ class ContainerFactory extends Factory
              * Assign region if no region attached
              */
             if (! $container->region_id) {
-                $region = Region::first();
+                $region = Region::factory()->create();
                 $container->region_id = $region->id;
             }
 
@@ -74,7 +74,8 @@ class ContainerFactory extends Factory
              * Assign datacenter if no datacenter attached
              */
             if (! $container->datacenter_id) {
-                $datacenter = Datacenter::first();
+                $region = Region::findOrFail($container->region_id);
+                $datacenter = Datacenter::factory()->for($region)->create();
                 $container->datacenter_id = $datacenter->id;
             }
 
@@ -82,7 +83,8 @@ class ContainerFactory extends Factory
              * Assign server if no server attached
              */
             if (! $container->server_id) {
-                $server = Server::first();
+                $datacenter = Datacenter::findOrFail($container->datacenter_id);
+                $server = Server::factory()->for($datacenter)->create();
                 $container->server_id = $server->id;
             }
 
@@ -90,7 +92,11 @@ class ContainerFactory extends Factory
              * Assign subnet if no subnet attached
              */
             if (! $container->subnet_id) {
-                $subnet = Subnet::available()->first();
+                $datacenter = Datacenter::findOrFail($container->datacenter_id);
+                $subnet = Subnet::factory()
+                    ->for($datacenter)
+                    ->available()
+                    ->create();
                 $container->subnet_id = $subnet->id;
             }
 

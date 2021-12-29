@@ -39,9 +39,9 @@ trait RequestHasRelations
             $relationName = str_replace('with_', '', $name);
             $relationName = str_camel_case($relationName);
 
-            /*
-                Get request key name, if not set then get the default value 
-            */
+            /**
+             * Get request key name, if not set then get the default value
+             */
             if ($this->input($name, $defaultValue)) {
                 $relations[] = $relationName;
             }
@@ -74,7 +74,7 @@ trait RequestHasRelations
         $relationCounts = [];
         foreach ($this->relationCountNames as $name => $defaultValue) {
             $relationCountName = str_replace('with_', '', $name);
-            $relationCountName = str_replace('_count');
+            $relationCountName = str_replace('_count', '', $name);
 
             if ($this->input($name, $defaultValue)) {
                 $relationCounts[] = $relationCountName;

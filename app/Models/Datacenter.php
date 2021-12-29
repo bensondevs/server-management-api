@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\Searchable;
 
 use App\Observers\DatacenterObserver as Observer;
@@ -12,6 +13,7 @@ use App\Enums\Datacenter\DatacenterStatus as Status;
 class Datacenter extends Model
 {
     use Searchable;
+    use HasFactory;
 
     /**
      * Model table name

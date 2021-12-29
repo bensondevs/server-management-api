@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
 
 use App\Observers\ServerObserver as Observer;
@@ -11,6 +12,8 @@ use App\Enums\Server\ServerStatus as Status;
 
 class Server extends Model
 {
+    use HasFactory;
+    
     /**
      * Model database table
      * 

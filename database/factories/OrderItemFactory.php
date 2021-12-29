@@ -47,6 +47,7 @@ class OrderItemFactory extends Factory
         $faker = $this->faker;
 
         return [
+            'is_renewal' => false,
             'quantity' => $faker->randomNumber(1, true),
             'currency' => $faker->randomElement([
                 Currency::EUR,

@@ -4,6 +4,12 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+use App\Enums\Currency;
+use App\Enums\Order\{
+    OrderStatus as Status,
+    OrderType as Type
+};
+
 class CreateOrdersTable extends Migration
 {
     /**
@@ -17,7 +23,8 @@ class CreateOrdersTable extends Migration
             $table->uuid('id')->primary();
             $table->integer('order_number');
 
-            $table->tinyInteger('status')->default(0);
+            $table->tinyInteger('type')->default(Type::New);
+            $table->tinyInteger('status')->default(Status::Unpaid);
 
             $table->uuid('user_id');
             $table->foreign('user_id')
@@ -25,7 +32,7 @@ class CreateOrdersTable extends Migration
                 ->on('users')
                 ->onDelete('CASCADE');
 
-            $table->tinyInteger('currency')->default(1);
+            $table->tinyInteger('currency')->default(Currency::EUR);
             $table->double('total')->default(0);
             $table->float('vat_size_percentage')->default(0);
             $table->double('grand_total', 20, 2)->default(0);

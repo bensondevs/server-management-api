@@ -5,7 +5,10 @@ namespace App\Observers;
 use App\Repositories\Payments\{
     SebRepository, PaypalRepository, StripeRepository
 };
-use App\Repositories\PrecreatedContainerRepository;
+use App\Repositories\{
+    PrecreatedContainerRepository,
+    SubscriptionRepository
+};
 use App\Models\Payment;
 use App\Enums\Payment\{
     PaymentStatus as Status,
@@ -63,14 +66,35 @@ class PaymentObserver
              */
             if ($payment->status == Status::Settled) {
                 $order = $payment->order;
-                $preContainer = $order->precreatedContainer;
 
-                /**
-                 * Execute the container creation
-                 */
-                $repository = new PrecreatedContainerRepository;
-                $repository->setModel($preContainer);
-                $repository->process();
+                switch ($order->type) {
+                    // Order type is new
+                    // This will create new container from precreated container
+                    case OrderType::New:
+                        $preContainer = $order->precreatedContainer;
+
+                        /**
+                         * Execute the container creation
+                         */
+                        $repository = new PrecreatedContainerRepository;
+                        $repository->setModel($preContainer);
+                        $repository->process();
+                        break;
+
+                    // Order type is renewal
+                    // This will renew the subscription activation date.
+                    case OrderType::Renewal:
+                        /**
+                         * Execute the subscription prolonging
+                         */
+                        $repository = new SubscriptionRepository;
+                        $repository->processRenewal($order);
+                        break;
+                    
+                    default:
+                        abort(500);
+                        break;
+                }
             }
 
             /**

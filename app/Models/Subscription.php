@@ -122,6 +122,20 @@ class Subscription extends Model
     }
 
     /**
+     * Create callable attribute of "status_description"
+     * This attribute will return the enum description of status.
+     * 
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function getStatusDescriptionAttribute()
+    {
+        $status = isset($this->attributes['status']) ?
+            $this->attributes['status'] : 4;
+        return Status::getDescription($status);
+    }
+
+    /**
      * Create callable attribute of "human_start"
      * This attribute will return the start date for human
      * 
@@ -129,7 +143,9 @@ class Subscription extends Model
      */
     public function getHumanStartAttribute()
     {
-        $start = $this->attributes['start'];
+        $start = isset($this->attributes['start']) ?
+            $this->attributes['start'] :
+            now();
         return carbon()->parse($start)->diffForHumans();
     }
 
@@ -274,6 +290,22 @@ class Subscription extends Model
     {
         $this->attributes['status'] = Status::Terminated;
         return $this->save();
+    }
+
+    /**
+     * Prolong the subscription using amount of day
+     * 
+     * @param  int  $dayAmount
+     * @param  bool $saveDirectly
+     * @return bool
+     */
+    public function prolong(int $dayAmount, bool $saveDirectly = true)
+    {
+        $end = carbon($this->attributes['end']);
+        $end->addDays($dayAmount);
+        $this->attributes['end'] = $end;
+        $this->attributes['status'] = Status::Active;
+        return $saveDirectly ? $this->save() : true;
     }
 
     /**

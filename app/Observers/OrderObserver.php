@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Models\Order;
+use App\Models\{ Order, User };
 use App\Enums\Order\OrderStatus as Status;
 
 class OrderObserver
@@ -18,6 +18,20 @@ class OrderObserver
         $order->id = isset($order->id) ? $order->id : generateUuid();
         $order->order_number = $order->generateOrderNumber();
         $order->expired_at = now()->addDays(3);
+
+        if (! $order->user_id) {
+            $order->user_id = auth()->user()->id;
+        }
+
+        if (! $order->currency) {
+            $user = User::findOrFail($order->user_id);
+            $order->currency = $user->currency;
+        }
+
+        if (! $order->vat_size_percentage) {
+            $user = User::findOrFail($order->user_id);
+            $order->vat_size_percentage = $user->vat_size_percentage;
+        }
     }
 
     /**
@@ -28,7 +42,10 @@ class OrderObserver
      */
     public function created(Order $order)
     {
-        //
+        // Count order grand total and save without triggering event
+        // Because, triggering event in observer might causing endless loop
+        $order->countGrandTotal();
+        $order->saveQuietly();
     }
 
     /**
@@ -39,11 +56,7 @@ class OrderObserver
      */
     public function updated(Order $order)
     {
-        if ($order->isDirty('status') && $order->status == Status::Paid) {
-            $precreatedContainer = $order->precreatedContainer;
-
-            //
-        }
+        //
     }
 
     /**

@@ -36,7 +36,8 @@ class SubscriptionFactory extends Factory
             }
 
             if (! $subscription->subscriber_id) {
-                $subscriber = Container::factory()->create();
+                $user = User::findOrFail($subscription->user_id);
+                $subscriber = $user->containers()->first();
                 $subscription->subscriber_id = $subscriber->id;
                 $subscription->subscriber_type = Container::class;
             }

@@ -5,6 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+use App\Http\Requests\Subscriptions\{
+    RenewMultipleSubscriptionsRequest as RenewMultipleRequest
+};
+use App\Http\Resources\SubscriptionResource;
+
 use App\Models\Subscription;
 use App\Repositories\SubscriptionRepository;
 
@@ -44,12 +49,12 @@ class SubscriptionController extends Controller
     /**
      * Show subscription details
      * 
-     * @param  \App\Models\Subscription  $subs
+     * @param  \App\Models\Subscription  $subscription
      * @return \Illuminate\Support\Facades\Response
      */
-    public function show(Subscription $subs)
+    public function show(Subscription $subscription)
     {
-        $subs = new SubscriptionResource($subs);
+        $subs = new SubscriptionResource($subscription);
 
         return response()->json(['subscription' => $subs]);
     }
@@ -57,12 +62,15 @@ class SubscriptionController extends Controller
     /**
      * Create order to renew subscription
      * 
-     * @param  \App\Models\Subscription  $subs
+     * @param  \App\Models\Subscription  $subscription
      * @return \Illuminate\Support\Facades\Response
      */
-    public function renew(Subscription $subs)
+    public function renew(Subscription $subscription)
     {
-        //
+        $this->subs->setModel($subscription);
+        $this->subs->createRenewalOrder();
+        
+        return apiResponse($this->subs);
     }
 
     /**
@@ -73,7 +81,11 @@ class SubscriptionController extends Controller
      */
     public function renewMultiple(RenewMultipleRequest $request)
     {
-        //
+        $ids = $request->input('subscription_ids');
+        $subscriptions = Subscription::whereIn('id', $ids)->get();
+        $this->subs->createMultipleRenewalOrder($subscriptions);
+
+        return apiResponse($this->subs);
     }
 
     /**

@@ -77,7 +77,7 @@ class Order extends Model
      * 
      * @return string
      */
-    public function getVatSizePercentageAttribute()
+    public function getVatSizePercentagePercentAttribute()
     {
         $vatSize = $this->attributes['vat_size_percentage'];
         return $vatSize . '%';

@@ -23,6 +23,10 @@ class CreateOrderItemsTable extends Migration
                 ->onDelete('CASCADE');
 
             $table->uuidMorphs('itemable');
+            
+            $table->boolean('is_renewal')->default(false);
+            $table->uuid('subscription_id')->nullable();
+
             $table->integer('quantity')->default(1);
             $table->tinyInteger('currency')->default(1);
             $table->double('price', 20, 2)->default(0);

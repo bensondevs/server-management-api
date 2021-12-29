@@ -24,7 +24,8 @@ use App\Http\Controllers\Api\{
 	Payments\PaymentController,
 		Payments\SebPaymentController,
 	ServerController,
-	ServicePlanController
+	ServicePlanController,
+	SubscriptionController
 };
 
 /*
@@ -332,7 +333,13 @@ Route::group(['as' => 'api.'], function () {
 		 * Subscription API Module
 		 */
 		Route::group(['prefix' => 'subscriptions'], function () {
-			//
+			Route::get('/', [SubscriptionController::class, 'subscriptions']);
+
+			Route::group(['prefix' => '{subscription}'], function () {
+				Route::get('/', [SubscriptionController::class, 'show']);
+				Route::post('/renew', [SubscriptionController::class, 'renew']);
+			});
+			Route::post('/renew_multiple', [SubscriptionController::class, 'renewMultiple']);
 		});
 
 		/**

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
 use App\Traits\Searchable;
 
@@ -13,6 +14,7 @@ use IPTools\Network;
 
 class Subnet extends Model
 {
+    use HasFactory;
     use Searchable;
 
     /**
