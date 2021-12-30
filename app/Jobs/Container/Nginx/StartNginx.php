@@ -14,7 +14,7 @@ use App\Models\Container;
 use App\Traits\TrackExecution;
 use App\Jobs\Container\ContainerBaseJob;
 
-class StartNginx implements ShouldQueue
+class StartNginx extends ContainerBaseJob implements ShouldQueue
 {
     use TrackExecution;
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;

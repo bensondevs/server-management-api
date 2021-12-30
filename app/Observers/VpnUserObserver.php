@@ -7,6 +7,19 @@ use App\Models\{VpnUser, VpnSubnet};
 class VpnUserObserver
 {
     /**
+     * Handle the VpnUser "creating" event.
+     *
+     * @param  \App\Models\VpnUser  $vpnUser
+     * @return void
+     */
+    public function creating(VpnUser $vpnUser)
+    {
+        if (! $vpnUser->id) {
+            $vpnUser->id = generateUuid();
+        }
+    }
+
+    /**
      * Handle the VpnUser "created" event.
      *
      * @param  \App\Models\VpnUser  $vpnUser

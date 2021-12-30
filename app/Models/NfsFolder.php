@@ -4,10 +4,15 @@ namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
+
+use App\Observers\NfsFolderObserver as Observer;
 
 class NfsFolder extends Model
 {
+    use HasFactory;
+
     /**
      * Model database table
      * 
@@ -56,10 +61,7 @@ class NfsFolder extends Model
     protected static function boot()
     {
     	parent::boot();
-
-    	self::creating(function ($nfsFolder) {
-            $nfsFolder->id = Uuid::generate()->string;
-    	});
+        self::observe(Observer::class);
     }
 
     /**

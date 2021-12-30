@@ -61,7 +61,6 @@ class ContainerNfsExportController extends Controller
 
         $this->nfs->setModel($container);
         $this->nfs->createExport($input);
-        $this->nfs->checkExports();
 
         return apiResponse($this->nfs);
     }
@@ -109,5 +108,7 @@ class ContainerNfsExportController extends Controller
     {
         $this->nfs->setModel($container);
         $this->nfs->deleteExport($nfsExport);
+
+        return apiResponse($this->nfs);
     }
 }

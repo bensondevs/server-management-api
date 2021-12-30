@@ -6,11 +6,23 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 
 use App\Models\Container;
+use App\Rules\UniqueNginxLocationName;
 
-class CreateLocationRequest extends FormRequest
+class CreateNginxLocationRequest extends FormRequest
 {
+    /**
+     * Target container model container
+     * 
+     * @var \App\Models\Container
+     */
     private $serverContainer;
 
+    /**
+     * Get server container from route parameter
+     * or request input of `id`
+     * 
+     * @return \App\Models\Container
+     */
     public function getServerContainer()
     {
         if ($this->serverContainer) return $this->serverContainer;
@@ -30,8 +42,7 @@ class CreateLocationRequest extends FormRequest
      */
     public function authorize()
     {
-        $container = $this->getServerContainer();
-        return Gate::allows('create-location-container-nginx', $container);
+        return true;
     }
 
     /**
@@ -41,8 +52,14 @@ class CreateLocationRequest extends FormRequest
      */
     public function rules()
     {
+        $container = $this->getServerContainer();
+
         return [
-            //
+            'nginx_location' => [
+                'required', 
+                'string',
+                new UniqueNginxLocationName($container),
+            ],
         ];
     }
 }

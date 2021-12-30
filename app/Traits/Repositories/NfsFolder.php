@@ -4,14 +4,14 @@ namespace App\Traits\Repositories;
 
 use Illuminate\Database\QueryException;
 
-use App\Jobs\Containers\Nfs\Folder\{
+use App\Jobs\Container\Nfs\Folder\{
     CreateNfsFolder as CreateFolder,
     DeleteNfsFolder as DeleteFolder,
 };
 
 use App\Http\Resources\NfsFolderResource;
 
-use App\Models\NfsFolder;
+use App\Models\NfsFolder as Folder;
 
 trait NfsFolder 
 {
@@ -52,14 +52,14 @@ trait NfsFolder
     /**
      * Delete Folder Job Execution
      * 
-     * @param \App\Models\NfsFolder  $nfsFolder
+     * @param Folder  $nfsFolder
      * @return bool
      */
-    public function deleteFolder(NfsFolder $nfsFolder)
+    public function deleteFolder(Folder $nfsFolder)
     {
         try {
             $container = $this->getModel();
-            $delete = new DeleteFolder($folder);
+            $delete = new DeleteFolder($nfsFolder);
             $container->trackDispatch($delete);
 
             $this->setSuccess('Deleting folder in NFS server.');

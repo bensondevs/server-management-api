@@ -83,7 +83,7 @@ class ContainerNginxController extends Controller
     /**
      * Stop NGINX Service
      * 
-     * @param \App\Models\Container  $container
+     * @param  \App\Models\Container  $container
      * @return \Illuminate\Support\Facades\Response
      */
     public function stop(Container $container)
@@ -91,5 +91,31 @@ class ContainerNginxController extends Controller
         $container = $this->nginx->setModel($container);
         $status = $this->nginx->stop();
         return apiResponse($this->nginx, ['nginx_status' => $status]);
+    }
+
+    /**
+     * Enable NGINX Service to start on boot
+     * 
+     * @param  \App\Models\Container  $container
+     * @return \Illuminate\Support\Facades\Response
+     */
+    public function enable(Container $container)
+    {
+        $container = $this->nginx->setModel($container);
+        $enability = $this->nginx->enable();
+        return apiResponse($this->nginx, ['nginx_enability' => $enability]);
+    }
+
+    /**
+     * Disable NGINX Service to start on boot
+     * 
+     * @param  \App\Models\Container  $container
+     * @return \Illuminate\Support\Facades\Response
+     */
+    public function disable(Container $container)
+    {
+        $container = $this->nginx->setModel($container);
+        $enability = $this->nginx->disable();
+        return apiResponse($this->nginx, ['nginx_enability' => $enability]);
     }
 }

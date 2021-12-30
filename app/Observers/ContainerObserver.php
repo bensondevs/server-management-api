@@ -18,8 +18,10 @@ class ContainerObserver
      */
     public function creating(Container $container)
     {
-        $subnetIp = SubnetIp::findOrFail($container->subnet_ip_id);
-        $container->id = $container->generate_id($subnetIp->ip_address);
+        if (! $container->id) {
+            $subnetIp = SubnetIp::findOrFail($container->subnet_ip_id);
+            $container->id = $container->generate_id($subnetIp->ip_address);
+        }
     }
 
     /**

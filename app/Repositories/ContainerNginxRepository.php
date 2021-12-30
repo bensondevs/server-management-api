@@ -13,11 +13,16 @@ use App\Jobs\Container\Nginx\{
 	StartNginx as Start,
 	ReloadNginx as Reload,
 	RestartNginx as Restart,
-	StopNginx as Stop
+	StopNginx as Stop,
+	EnableNginx as Enable,
+	DisableNginx as Disable
+};
+use App\Jobs\Container\Nginx\Location\{
+	CreateNginxLocation as CreateLocation,
+	RemoveNginxLocation as RemoveLocation
 };
 
 use App\Http\Resources\NginxLocationResource;
-
 use App\Models\Container;
 
 class ContainerNginxRepository extends AmqpRepository
@@ -52,8 +57,8 @@ class ContainerNginxRepository extends AmqpRepository
 
 		return [
 			'nginx_status' => $container->current_nginx_status,
+			'nginx_enability' => $container->current_nginx_enability,
 			'nginx_pid_numbers' => $container->current_nginx_pid_numbers,
-			'nginx_start_on_boot_status' => $container->current_nginx_start_on_boot_status,
 			'nginx_locations' => $this->locations(),
 		];
 	}
@@ -140,5 +145,47 @@ class ContainerNginxRepository extends AmqpRepository
 		}
 
 		return $container->current_nginx_status;
+	}
+
+	/**
+	 * Send command to enable NGINX Service start on boot
+	 * 
+	 * @return int
+	 */
+	public function enable()
+	{
+		try {
+			$container = $this->getModel();
+			$job = new Enable($container);
+			$container->trackDispatch($job);
+
+			$this->setSuccess('Enabling NGINX...');
+		} catch (Exception $e) {
+			$error = $e->getMessage();
+			$this->setError('Failed to send command to stop NGINX.', $error);
+		}
+
+		return $container->current_nginx_enability;
+	}
+
+	/**
+	 * Send command to disable NGINX Service start on boot
+	 * 
+	 * @return int
+	 */
+	public function disable()
+	{
+		try {
+			$container = $this->getModel();
+			$job = new Disable($container);
+			$container->trackDispatch($job);
+
+			$this->setSuccess('Disabling NGINX...');
+		} catch (Exception $e) {
+			$error = $e->getMessage();
+			$this->setError('Failed to send command to disable NGINX.', $error);
+		}
+
+		return $container->current_nginx_enability;
 	}
 }

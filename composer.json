@@ -31,6 +31,7 @@
         "spatie/laravel-newsletter": "^4.10",
         "spatie/laravel-permission": "^4.0",
         "spatie/laravel-query-builder": "^4.0",
+        "staudenmeir/belongs-to-through": "^2.5",
         "stevebauman/location": "^6.1",
         "torann/geoip": "^3.0",
         "vladimir-yuldashev/laravel-queue-rabbitmq": "^11.2",

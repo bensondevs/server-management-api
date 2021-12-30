@@ -8,6 +8,7 @@ use App\Jobs\Container\Nfs\Export\{
     DeleteNfsExport as DeleteExport
 };
 
+use App\Models\NfsExport as Export;
 use App\Http\Resources\NfsExportResource;
 
 trait NfsExport 
@@ -53,11 +54,11 @@ trait NfsExport
     /**
      * Update NFS Export
      * 
-     * @param \App\Models\NfsExport  $nfsExport
+     * @param Export  $nfsExport
      * @param array  $exportData
      * @return bool
      */
-    public function updateExport(NfsExport $export, array $exportData = [])
+    public function updateExport(Export $export, array $exportData = [])
     {
         try {
             $container = $export->container;
@@ -76,10 +77,10 @@ trait NfsExport
     /**
      * Delete NFS Export
      * 
-     * @param \App\Models\NfsExport  $nfsExport
+     * @param Export  $nfsExport
      * @return bool
      */
-    public function deleteExport(NfsExport $export)
+    public function deleteExport(Export $export)
     {
         try {
             $container = $this->getModel();

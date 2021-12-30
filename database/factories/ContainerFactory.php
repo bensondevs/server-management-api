@@ -143,6 +143,8 @@ class ContainerFactory extends Factory
     {
         $faker = $this->faker;
         return [
+            'id' => $faker->randomNumber(7, true),
+
             'hostname' => 'example.container.test',
             'total_amount' => $faker->randomNumber(3, false),
             'client_email' => $faker->safeEmail(),

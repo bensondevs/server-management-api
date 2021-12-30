@@ -3,17 +3,15 @@
 namespace App\Jobs\Container\Vpn;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Contracts\Queue\{ ShouldBeUnique, ShouldQueue };
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\{ InteractsWithQueue, SerializesModels };
 
 use App\Models\Container;
 use App\Traits\TrackExecution;
 use App\Jobs\Container\ContainerBaseJob;
 
-class CompleteCheckVpn extends ContainerBaseJob implements ShouldQueue
+class CompleteVpnCheck extends ContainerBaseJob implements ShouldQueue
 {
     use TrackExecution;
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -28,6 +26,7 @@ class CompleteCheckVpn extends ContainerBaseJob implements ShouldQueue
     /**
      * Create a new job instance.
      *
+     * @param  \App\Models\Container  $serverContainer
      * @return void
      */
     public function __construct(Container $serverContainer)

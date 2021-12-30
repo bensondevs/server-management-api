@@ -323,3 +323,27 @@ if (! function_exists('current_currency')) {
         return \App\Enums\Currency::EUR;
     }
 }
+
+/**
+ * Generate random Subnet
+ * 
+ * @return string
+ */
+if (! function_exists('random_subnet')) {
+    function random_subnet()
+    {
+        return mt_rand(0, 255) . '.' . mt_rand(0, 255) . '.' . mt_rand(0, 255) . '.' . mt_rand(0, 255) . '/24';
+    }
+}
+
+/**
+ * Generate random ip
+ * 
+ * @return string
+ */
+if (! function_exists('random_ip')) {
+    function random_ip()
+    {
+        return mt_rand(0, 255) . '.' . mt_rand(0, 255) . '.' . mt_rand(0, 255) . '.' . mt_rand(0, 255);
+    }
+}

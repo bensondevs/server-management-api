@@ -3,15 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use IPTools\Network;
 use Webpatser\Uuid\Uuid;
 
-use App\Observers\VpnUserObserver;
+use App\Observers\VpnUserObserver as Observer;
 
 class VpnUser extends Model
 {
+    use HasFactory;
+
     /**
      * Model database table
      * 
@@ -63,12 +65,7 @@ class VpnUser extends Model
     protected static function boot()
     {
     	parent::boot();
-        self::observe(VpnUserObserver::class);
-
-    	self::creating(function ($vpnUser) {
-            $vpnUser->id = isset($vpnUser->id) ? 
-                $vpnUser->id : generateUuid();
-    	});
+        self::observe(Observer::class);
     }
 
     /**
@@ -170,7 +167,10 @@ class VpnUser extends Model
         string $username,
         bool $abortNotFound = false
     ) {
-        $query = self::where('container_id', $container->id)->where('username', $username)
-        return $abortNotFound ? $query->firstOrFail() : $query->first();
+        $query = self::where('container_id', $container->id)
+            ->where('username', $username);
+        return $abortNotFound ? 
+            $query->firstOrFail() : 
+            $query->first();
     }
 }

@@ -2,11 +2,11 @@
 
 namespace App\Traits\Repositories;
 
-use App\Jobs\Container\Nginx\{
+use App\Jobs\Container\Nginx\Location\{
     CreateNginxLocation as CreateLocation,
-    DeleteNginxLocation as DeleteLocation
+    RemoveNginxLocation as RemoveLocation
 };
-
+use App\Models\NginxLocation as Location;
 use App\Http\Resources\NginxLocationResource;
 
 trait NginxLocation 
@@ -46,16 +46,16 @@ trait NginxLocation
     }
 
     /**
-     * Delete NGINX Location
+     * Remove NGINX Location
      * 
-     * @param \App\Models\NginxLocation  $nginxLocation
+     * @param Location  $nginxLocation
      * @return bool
      */
-    public function deleteLocation(NginxLocation $nginxLocation)
+    public function removeLocation(Location $nginxLocation)
     {
         try {
             $container = $this->getModel();
-            $job = new DeleteLocation($container, $nginxLocation);
+            $job = new RemoveLocation($nginxLocation);
             $container->trackDispatch($job);
             
             $this->setSuccess('Removing NGINX location...');        

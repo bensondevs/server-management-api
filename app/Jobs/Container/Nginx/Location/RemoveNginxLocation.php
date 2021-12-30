@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\Container\Nginx;
+namespace App\Jobs\Container\Nginx\Location;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -9,32 +9,32 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-use App\Models\NfsLocation;
+use App\Models\NginxLocation;
 use App\Traits\TrackExecution;
 use App\Jobs\Container\ContainerBaseJob;
 
-class DeleteNginxLocation extends ContainerBaseJob implements ShouldQueue
+class RemoveNginxLocation extends ContainerBaseJob implements ShouldQueue
 {
     use TrackExecution;
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * Target NFS Location model container
+     * Target NGINX Location model container
      * 
-     * @var \App\Models\NfsLocation
+     * @var \App\Models\NginxLocation
      */
-    private $nfsLocation;
+    private $nginxLocation;
 
     /**
      * Create a new job instance.
      *
-     * @param \App\Models\NfsLocation  $nfsLocation
+     * @param \App\Models\NginxLocation  $nginxLocation
      * @return void
      */
-    public function __construct(NfsLocation $nfsLocation)
+    public function __construct(NginxLocation $nginxLocation)
     {
         parent::__construct();
-        $this->nfsLocation = $nfsLocation;
+        $this->nginxLocation = $nginxLocation;
     }
 
     /**
@@ -44,17 +44,20 @@ class DeleteNginxLocation extends ContainerBaseJob implements ShouldQueue
      */
     public function handle()
     {
-        $location = $this->nfsLocation;
-        $container = $location->container;
+        $nginxLocation = $this->nginxLocation;
+        $container = $nginxLocation->container;
         $server = $container->server;
 
         $response = $this->sendRequest($server, [
-            'command' => 'complete nginx check',
+            'command' => 'remove nginx location',
             'container_id' => $container->id,
+            'location' => $nginxLocation->location,
         ]);
 
+        $this->recordResponse($response);
+
         if ($response['status'] == 'success') {
-            $location->delete();
+            $nginxLocation->delete();
         }
     }
 }

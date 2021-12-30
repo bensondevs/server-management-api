@@ -8,35 +8,27 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Cache;
 
-use App\Models\{ Container, NfsLocation };
+use App\Models\Container;
 use App\Traits\TrackExecution;
 use App\Jobs\Container\ContainerBaseJob;
 
-class RestartNginx extends ContainerBaseJob implements ShouldQueue
+class EnableNginx extends ContainerBaseJob implements ShouldQueue
 {
     use TrackExecution;
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * Timeout seconds until job execution is failed
+     * Target container model container
      * 
-     * @var int
-     */
-    public $timeout = 1200;
-
-    /**
-     * Target NGINX Location model container
-     * 
-     * @var \App\Models\Container
+     * @return \App\Models\Container|null
      */
     private $serverContainer;
 
     /**
      * Create a new job instance.
      *
-     * @param  \App\Models\ServerContainer  $serverContainer
+     * @param  \App\Models\Container  $serverContainer
      * @return void
      */
     public function __construct(Container $serverContainer)
@@ -56,7 +48,7 @@ class RestartNginx extends ContainerBaseJob implements ShouldQueue
         $server = $container->server;
 
         $response = $this->sendRequest($server, [
-            'command' => 'restart nginx',
+            'command' => 'enable nginx',
             'container_id' => $container->id,
         ]);
 

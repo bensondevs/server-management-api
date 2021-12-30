@@ -15,6 +15,7 @@ use App\Jobs\Container\ContainerBaseJob;
 
 class DisableNfs extends ContainerBaseJob implements ShouldQueue
 {
+    use TrackExecution;
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**

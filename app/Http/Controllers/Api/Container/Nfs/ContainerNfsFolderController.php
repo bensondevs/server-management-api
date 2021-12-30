@@ -21,7 +21,7 @@ class ContainerNfsFolderController extends Controller
      * 
      * @var \App\Repositories\ContainerNfsRepository
      */
-    private $nfs
+    private $nfs;
 
     /**
      * Controller constructor function
@@ -41,9 +41,8 @@ class ContainerNfsFolderController extends Controller
      */
     public function nfsFolders(Container $container)
     {
-        $this->nfs->setModel($container);
-
-        $nfsFolders = $this->nfs->folders();
+        $nfsFolders = $container->nfsFolders;
+        $nfsFolders = NfsFolderResource::collection($nfsFolders);
         return response()->json(['nfs_folders' => $nfsFolders]);
     }
 

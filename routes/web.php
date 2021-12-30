@@ -7,16 +7,6 @@ use App\Http\Controllers\Auth\LoginController;
 
 use App\Http\Controllers\TestController;
 
-use App\Http\Controllers\Meta\{
-	CountryController as MetaCountryController,
-	PaymentController as MetaPaymentController,
-	DatacenterController as MetaDatacenterController,
-	SubnetController as MetaSubnetController,
-	ContainerController as MetaContainerController,
-	JobTrackerController as MetaJobTrackerController,
-	OrderController as MetaOrderController
-};
-
 use App\Http\Controllers\Dashboard\DashboardController;
 	use App\Http\Controllers\Dashboard\PermissionController;
 	use App\Http\Controllers\Dashboard\RegionController;
@@ -35,14 +25,13 @@ use App\Http\Controllers\Dashboard\DashboardController;
 		use App\Http\Controllers\Dashboard\ContainerNfsController;
 		use App\Http\Controllers\Dashboard\ContainerNginxController;
 	use App\Http\Controllers\Dashboard\PricingController;
-	use App\Http\Controllers\Dashboard\JobTrackerController;
 	use App\Http\Controllers\Dashboard\UserController;
 	use App\Http\Controllers\Dashboard\AdministratorController;
 	use App\Http\Controllers\Dashboard\NewsletterController;
 	use App\Http\Controllers\Dashboard\SettingController;
 	use App\Http\Controllers\Dashboard\ActivityLogController;
 
-use App\Http\Controllers\Api\PaymentController as PaymentApiController;
+use App\Http\Controllers\Api\Payments\PaymentController as PaymentApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,7 +51,7 @@ Route::get('many_to_many', function () {
 	return \App\Models\SambaGroup::first()->shares;
 });
 
-Route::group(['prefix' => 'meta', 'as' => 'meta.'], function () {
+/*Route::group(['prefix' => 'meta', 'as' => 'meta.'], function () {
 	Route::group(['prefix' => 'countries', 'as' => 'countries.'], function () {
 		Route::get('/', [MetaCountryController::class, 'countries'])->name('index');
 	});
@@ -99,7 +88,7 @@ Route::group(['prefix' => 'meta', 'as' => 'meta.'], function () {
 		Route::get('statuses', [MetaOrderController::class, 'statuses']);
 		Route::get('status_badges', [MetaOrderController::class, 'statusBadges']);
 	});
-});
+});*/
 
 Route::group([
 	'middleware' => [
@@ -310,13 +299,13 @@ Route::group([
 	*/
 	Route::group(['prefix' => 'job_trackers', 'as' => 'job_trackers.'], function () {
 		/* Pages */
-		Route::get('/', [JobTrackerController::class, 'index'])->name('index');
+		// Route::get('/', [JobTrackerController::class, 'index'])->name('index');
 
 		/* Actions */
-		Route::post('clear', [JobTrackerController::class, 'clear'])->name('clear');
+		// Route::post('clear', [JobTrackerController::class, 'clear'])->name('clear');
 
 		/* AJAX Request */
-		Route::get('populate', [JobTrackerController::class, 'populate'])->name('populate');
+		// Route::get('populate', [JobTrackerController::class, 'populate'])->name('populate');
 	});
 
 	/*

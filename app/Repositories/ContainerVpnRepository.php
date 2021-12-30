@@ -21,11 +21,13 @@ use App\Jobs\Container\Vpn\{
 	RestartVpn as Restart,
 	StopVpn as Stop,
 	StartVpn as Start,
+	EnableVpn as Enable,
+	DisableVpn as Disable,
 	ToggleVpnEnability as ToggleEnability,
 	
 	DownloadVpnConfig as DownloadConfig,
 	ChangeVpnSubnet as ChangeSubnet,
-	CompleteCheckVpn as CompleteCheck,
+	CompleteVpnCheck as CompleteCheck,
 	ChangeVpnUserSubnetIp as ChangeUserSubnetIp
 };
 
@@ -206,8 +208,51 @@ class ContainerVpnRepository extends AmqpRepository
 			'vpn_status' => $container->current_vpn_status,
 			'vpn_enability' => $container->current_vpn_enability,
 			'vpn_pid_numbers' => $container->current_vpn_pid_numbers,
-			'vpn_enability' => $container->current_vpn_enability,
 		];
+	}
+
+	/**
+	 * Enable the Container VPN Service
+	 * 
+	 * @return int
+	 */
+	public function enable()
+	{
+		try {
+			$container = $this->getModel();
+
+			$enable = new Enable($container);
+			$container->trackDispatch($enable);
+
+			$this->setSuccess('Enabling VPN...');
+		} catch (Exception $e) {
+			$error = $e->getMessage();
+			$this->setError('Failed to send request to enable VPN start on boot.', $error);
+		}
+
+		return (int) $container->vpn_enability;
+	}
+
+	/**
+	 * Disable the Container VPN Service
+	 * 
+	 * @return int
+	 */
+	public function disable()
+	{
+		try {
+			$container = $this->getModel();
+
+			$disable = new Disable($container);
+			$container->trackDispatch($disable);
+
+			$this->setSuccess('Disabling VPN...');
+		} catch (Exception $e) {
+			$error = $e->getMessage();
+			$this->setError('Failed to send request to enable VPN start on boot.', $error);
+		}
+
+		return (int) $container->vpn_enability;
 	}
 
 	/**
@@ -265,14 +310,11 @@ class ContainerVpnRepository extends AmqpRepository
 	 */
 	public function userConfig(VpnUser $vpnUser)
 	{
-		$username = $vpnUser->username;
-
 		$container = $this->getModel();
-		$job = new DownloadConfig($container, $username);
+		$job = new DownloadConfig($vpnUser);
 		$container->trackDispatch($job);
 
-		$vpnUser = VpnUser::findInContainer($container, $username);
-		return $vpnUser->decoded_config_content;
+		return $vpnUser->config_content;
 	}
 
 	/**

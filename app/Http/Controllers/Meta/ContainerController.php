@@ -7,12 +7,12 @@ use Illuminate\Http\Request;
 
 use App\Enums\Container\{
     ContainerStatus as Status,
-    ContainerVpnStatus as VpnStatus,
-    ContainerVpnEnability as VpnEnability,
-    ContainerSambaSmbdStatus as SambaSmbdStatus,
-    ContainerSambaNmbdStatus as SambaNmbdStatus,
-    ContainerNginxStatus as NginxStatus,
-    ContainerNfsStatus as NfsStatus,
+    Vpn\ContainerVpnStatus as VpnStatus,
+    Vpn\ContainerVpnEnability as VpnEnability,
+    Samba\ContainerSambaSmbdStatus as SambaSmbdStatus,
+    Samba\ContainerSambaNmbdStatus as SambaNmbdStatus,
+    Nginx\ContainerNginxStatus as NginxStatus,
+    Nfs\ContainerNfsStatus as NfsStatus,
 };
 
 class ContainerController extends Controller

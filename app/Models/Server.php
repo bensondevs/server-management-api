@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
+use Znck\Eloquent\Traits\BelongsToThrough;
 
 use App\Observers\ServerObserver as Observer;
 use App\Enums\Server\ServerStatus as Status;
@@ -13,6 +14,7 @@ use App\Enums\Server\ServerStatus as Status;
 class Server extends Model
 {
     use HasFactory;
+    use BelongsToThrough;
     
     /**
      * Model database table
@@ -141,15 +143,41 @@ class Server extends Model
     {
         $fullName = $this->attributes['server_name'];
 
+        if ($region = $this->region) {
+            $fullName = $region->region_name . ' | ' . $fullName;
+        }
+
         if ($datacenter = $this->datacenter) {
             $fullName = $datacenter->datacenter_name . ' | ' . $fullName;
         }
 
-        if ($region = $datacenter->region) {
-            $fullName = $region->region_name . ' | ' . $fullName;
-        }
-
         return $fullName;
+    }
+
+    /**
+     * Create callable attribute of "queue_server_name"
+     * This callable attribute will return queue server name of server
+     * with structure of {Region}-{Datacenter Name}-{Server Name}
+     * 
+     * @return string
+     */
+    public function getQueueServerNameAttribute()
+    {
+        $datacenter = $this->datacenter;
+        
+        $regionName = $datacenter->region->region_name;
+        $datacenterName = $datacenter->datacenter_name;
+        $serverName = $this->attributes['server_name'];
+
+        return $regionName . '-' . $datacenterName . '-' . $serverName;
+    }
+
+    /**
+     * Get region of the server
+     */
+    public function region()
+    {
+        return $this->belongsToThrough(Region::class, Datacenter::class);
     }
 
     /**

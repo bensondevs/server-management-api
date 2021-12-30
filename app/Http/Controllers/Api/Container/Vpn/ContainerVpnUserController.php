@@ -80,13 +80,13 @@ class ContainerVpnUserController extends Controller
      * Download VPN User Configuration
      * 
      * @param \App\Models\Container  $container
-     * @param \App\Models\VpnUser  $vpnUser
+     * @param \App\Models\VpnUser  $user
      */
-    public function downloadConfig(Container $container, VpnUser $vpnUser)
+    public function downloadConfig(Container $container, VpnUser $user)
     {
         $this->vpn->setModel($container);
         return response()->json([
-            'config' => $this->vpn->userConfig($vpnUser),
+            'config' => $this->vpn->userConfig($user),
         ]);
     }
 
@@ -112,15 +112,11 @@ class ContainerVpnUserController extends Controller
     /**
      * Revoke VPN User
      * 
-     * @param RevokeRequest  $request
      * @param \App\Models\Container  $container
      * @param \App\Models\VpnUser  $vpnUser
      */
-    public function revoke(
-        RevokeRequest $request, 
-        Container $container, 
-        VpnUser $vpnUser
-    ) {
+    public function revoke(Container $container, VpnUser $vpnUser) 
+    {
         $this->vpn->setModel($container);
         $this->vpn->revokeUser($vpnUser);
         return apiResponse($this->vpn);

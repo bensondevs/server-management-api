@@ -8,13 +8,12 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Cache;
 
 use App\Models\Container;
 use App\Traits\TrackExecution;
 use App\Jobs\Container\ContainerBaseJob;
 
-class ReloadNginx implements ShouldQueue
+class ReloadNginx extends ContainerBaseJob implements ShouldQueue
 {
     use TrackExecution;
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -29,6 +28,7 @@ class ReloadNginx implements ShouldQueue
     /**
      * Create a new job instance.
      *
+     * @param  \App\Models\Container  $serverContainer
      * @return void
      */
     public function __construct(Container $serverContainer)

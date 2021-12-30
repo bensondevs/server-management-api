@@ -10,8 +10,8 @@ use App\Http\Requests\Payments\PopulatePaymentsRequest as PopulateRequest;
 
 use App\Http\Resources\PaymentResource;
 
-use App\Repositories\SebRepository;
-use App\Repositories\PaymentRepository;
+use App\Repositories\Payments\SebRepository;
+use App\Repositories\Payments\PaymentRepository;
 
 class PaymentController extends Controller
 {

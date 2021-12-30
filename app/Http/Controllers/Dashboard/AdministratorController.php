@@ -13,7 +13,6 @@ use App\Models\User;
 
 use App\Repositories\UserRepository;
 use App\Repositories\PermissionRepository;
-use App\Repositories\ActivityLogRepository;
 
 class AdministratorController extends Controller
 {
@@ -23,13 +22,11 @@ class AdministratorController extends Controller
 
     public function __construct(
     	UserRepository $userRepository,
-		PermissionRepository $permissionRepository,
-        ActivityLogRepository $activityLogRepository
+		PermissionRepository $permissionRepository
     )
     {
     	$this->user = $userRepository;
     	$this->permission = $permissionRepository;
-        $this->activityLog = $activityLogRepository;
     }
 
     public function index()

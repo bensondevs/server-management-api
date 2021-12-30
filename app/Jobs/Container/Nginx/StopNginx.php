@@ -14,7 +14,7 @@ use App\Models\Container;
 use App\Traits\TrackExecution;
 use App\Jobs\Container\ContainerBaseJob;
 
-class StopNginx implements ShouldQueue
+class StopNginx extends ContainerBaseJob implements ShouldQueue
 {
     use TrackExecution;
 

@@ -22,7 +22,12 @@ class CreateNfsExportsTable extends Migration
                 ->on('containers')
                 ->onDelete('CASCADE');
 
-            $table->string('target_folder');
+            $table->uuid('nfs_folder_id');
+            $table->foreign('nfs_folder_id')
+                ->references('id')
+                ->on('nfs_folders')
+                ->onDelete('CASCADE');
+
             $table->string('permissions');
 
             $table->timestamps();

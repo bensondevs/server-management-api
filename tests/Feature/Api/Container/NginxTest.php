@@ -10,39 +10,30 @@ use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 use Laravel\Sanctum\Sanctum;
 
-use App\Models\{ User, Container, VpnUser, VpnSubnet };
-use App\Jobs\Container\Vpn\{
-    // VPN Actions
-    CompleteVpnCheck,
-    StartVpn,
-    RestartVpn,
-    ReloadVpn,
-    StopVpn,
-    EnableVpn,
-    DisableVpn,
+use App\Models\{ User, Container, NginxLocation };
+use App\Jobs\Container\Nginx\{
+    // NGINX action job classes
+    StartNginx,
+    RestartNginx,
+    StopNginx,
+    ReloadNginx,
+    EnableNginx,
+    DisableNginx,
+    CompleteNginxCheck,
 
-    // VPN User
-    CreateVpnUser,
-    RevokeVpnUser,
-
-    // VPN Configuration
-    DownloadVpnConfig,
-
-    // VPN Subnet
-    ChangeVpnSubnet,
-    ChangeVpnUserSubnetIp
+    // NGINX Location
+    Location\CreateNginxLocation,
+    Location\RemoveNginxLocation
 };
 
-class VpnTest extends TestCase
+class NginxTest extends TestCase
 {
-    use DatabaseTransactions;
-
     /**
-     * A check container VPN test.
+     * A check container NGINX test.
      *
      * @return void
      */
-    public function test_complete_check_vpn()
+    public function test_complete_check_nginx()
     {
         Queue::fake();
 
@@ -51,26 +42,27 @@ class VpnTest extends TestCase
 
         $container = $user->containers()->first() ?: 
             Container::factory()->for($user)->create();
-        $url = '/api/containers/' . $container->id . '/vpn';
+        $url = '/api/containers/' . $container->id . '/nginx';
         $response = $this->json('GET', $url);
 
         $response->assertStatus(200);
         $response->assertJson(function (AssertableJson $json) {
-            $json->has('vpn_informations');
-            $json->has('vpn_informations.vpn_status');
-            $json->has('vpn_informations.vpn_enability');
-            $json->has('vpn_informations.vpn_pid_numbers');
+            $json->has('nginx_informations')
+                ->has('nginx_informations.nginx_status')
+                ->has('nginx_informations.nginx_enability')
+                ->has('nginx_informations.nginx_pid_numbers')
+                ->has('nginx_informations.nginx_locations');
         });
 
-        Queue::assertPushed(CompleteVpnCheck::class);
+        Queue::assertPushed(CompleteNginxCheck::class);
     }
 
     /**
-     * A start container VPN test
+     * A start container NGINX test
      * 
      * @return void
      */
-    public function test_start_vpn()
+    public function test_start_nginx()
     {
         Queue::fake();
 
@@ -79,26 +71,26 @@ class VpnTest extends TestCase
 
         $container = $user->containers()->first() ?: 
             Container::factory()->for($user)->create();
-        $url = '/api/containers/' . $container->id . '/vpn/start';
+        $url = '/api/containers/' . $container->id . '/nginx/start';
         $response = $this->json('POST', $url);
 
         $response->assertStatus(201);
         $response->assertJson(function (AssertableJson $json) {
-            $json->where('status', 'success');
             $json->has('status')
                 ->has('message')
-                ->has('vpn_status');
+                ->has('nginx_status');
+            $json->where('status', 'success');
         });
 
-        Queue::assertPushed(StartVpn::class);
+        Queue::assertPushed(StartNginx::class);
     }
 
     /**
-     * A reload container VPN test
+     * A restart container NGINX test
      * 
      * @return void
      */
-    public function test_reload_vpn()
+    public function test_restart_nginx()
     {
         Queue::fake();
 
@@ -107,26 +99,26 @@ class VpnTest extends TestCase
 
         $container = $user->containers()->first() ?: 
             Container::factory()->for($user)->create();
-        $url = '/api/containers/' . $container->id . '/vpn/reload';
+        $url = '/api/containers/' . $container->id . '/nginx/restart';
         $response = $this->json('POST', $url);
 
         $response->assertStatus(201);
         $response->assertJson(function (AssertableJson $json) {
-            $json->where('status', 'success');
             $json->has('status')
                 ->has('message')
-                ->has('vpn_status');
+                ->has('nginx_status');
+            $json->where('status', 'success');
         });
 
-        Queue::assertPushed(ReloadVpn::class);
+        Queue::assertPushed(RestartNginx::class);
     }
 
     /**
-     * A restart container VPN test
+     * A reload container NGINX test
      * 
      * @return void
      */
-    public function test_restart_vpn()
+    public function test_reload_nginx()
     {
         Queue::fake();
 
@@ -135,26 +127,26 @@ class VpnTest extends TestCase
 
         $container = $user->containers()->first() ?: 
             Container::factory()->for($user)->create();
-        $url = '/api/containers/' . $container->id . '/vpn/restart';
+        $url = '/api/containers/' . $container->id . '/nginx/reload';
         $response = $this->json('POST', $url);
 
         $response->assertStatus(201);
         $response->assertJson(function (AssertableJson $json) {
-            $json->where('status', 'success');
             $json->has('status')
                 ->has('message')
-                ->has('vpn_status');
+                ->has('nginx_status');
+            $json->where('status', 'success');
         });
 
-        Queue::assertPushed(RestartVpn::class);
+        Queue::assertPushed(ReloadNginx::class);
     }
 
     /**
-     * A stop container VPN test
+     * A stop container NGINX test
      * 
      * @return void
      */
-    public function test_stop_vpn()
+    public function test_stop_nginx()
     {
         Queue::fake();
 
@@ -163,26 +155,26 @@ class VpnTest extends TestCase
 
         $container = $user->containers()->first() ?: 
             Container::factory()->for($user)->create();
-        $url = '/api/containers/' . $container->id . '/vpn/stop';
+        $url = '/api/containers/' . $container->id . '/nginx/stop';
         $response = $this->json('POST', $url);
 
         $response->assertStatus(201);
         $response->assertJson(function (AssertableJson $json) {
-            $json->where('status', 'success');
             $json->has('status')
                 ->has('message')
-                ->has('vpn_status');
+                ->has('nginx_status');
+            $json->where('status', 'success');
         });
 
-        Queue::assertPushed(StopVpn::class);
+        Queue::assertPushed(StopNginx::class);
     }
 
     /**
-     * An enable container VPN test
+     * An enable container NGINX start on boot
      * 
      * @return void
      */
-    public function test_enable_vpn()
+    public function test_enable_nginx()
     {
         Queue::fake();
 
@@ -191,26 +183,26 @@ class VpnTest extends TestCase
 
         $container = $user->containers()->first() ?: 
             Container::factory()->for($user)->create();
-        $url = '/api/containers/' . $container->id . '/vpn/enable';
+        $url = '/api/containers/' . $container->id . '/nginx/enable';
         $response = $this->json('POST', $url);
 
         $response->assertStatus(201);
         $response->assertJson(function (AssertableJson $json) {
-            $json->where('status', 'success');
             $json->has('status')
                 ->has('message')
-                ->has('vpn_enability');
+                ->has('nginx_enability');
+            $json->where('status', 'success');
         });
 
-        Queue::assertPushed(EnableVpn::class);
+        Queue::assertPushed(EnableNginx::class);
     }
 
     /**
-     * A disable container VPN test
+     * A disable container NGINX start on boot
      * 
      * @return void
      */
-    public function test_disable_vpn()
+    public function test_disable_nginx()
     {
         Queue::fake();
 
@@ -219,47 +211,47 @@ class VpnTest extends TestCase
 
         $container = $user->containers()->first() ?: 
             Container::factory()->for($user)->create();
-        $url = '/api/containers/' . $container->id . '/vpn/disable';
+        $url = '/api/containers/' . $container->id . '/nginx/disable';
         $response = $this->json('POST', $url);
 
         $response->assertStatus(201);
         $response->assertJson(function (AssertableJson $json) {
-            $json->where('status', 'success');
             $json->has('status')
                 ->has('message')
-                ->has('vpn_enability');
+                ->has('nginx_enability');
+            $json->where('status', 'success');
         });
 
-        Queue::assertPushed(DisableVpn::class);
+        Queue::assertPushed(DisableNginx::class);
     }
 
     /**
-     * A populate container VPN user test
+     * A populate container NGINX test
      * 
      * @return void
      */
-    public function test_populate_vpn_users()
+    public function test_populate_nginx_locations()
     {
         $user = User::first() ?: User::factory()->create();
         Sanctum::actingAs($user, ['*']);
 
         $container = $user->containers()->first() ?: 
             Container::factory()->for($user)->create();
-        $url = '/api/containers/' . $container->id . '/vpn/users';
+        $url = '/api/containers/' . $container->id . '/nginx/locations';
         $response = $this->json('GET', $url);
 
         $response->assertStatus(200);
         $response->assertJson(function (AssertableJson $json) {
-            $json->has('vpn_users');
+            $json->has('nginx_locations');
         });
     }
 
     /**
-     * A create container VPN user test.
-     *
+     * A create container NGINX test
+     * 
      * @return void
      */
-    public function test_create_vpn_user()
+    public function test_create_nginx_location()
     {
         Queue::fake();
 
@@ -268,48 +260,26 @@ class VpnTest extends TestCase
 
         $container = $user->containers()->first() ?: 
             Container::factory()->for($user)->create();
-        $url = '/api/containers/' . $container->id . '/vpn/users/create';
+        $url = '/api/containers/' . $container->id . '/nginx/locations/create';
         $response = $this->json('POST', $url, [
-            'username' => random_string() . random_string(),
-            'subnet_ip' => random_subnet(),
+            'nginx_location' => random_string(7),
         ]);
 
         $response->assertStatus(201);
         $response->assertJson(function (AssertableJson $json) {
             $json->has('status')->has('message');
+            $json->where('status', 'success');
         });
 
-        Queue::assertPushed(CreateVpnUser::class);
+        Queue::assertPushed(CreateNginxLocation::class);
     }
 
     /**
-     * A show container VPN user test
+     * A remove container NGINX test
      * 
      * @return void
      */
-    public function test_show_vpn_user()
-    {
-        $user = User::first() ?: User::factory()->create();
-        Sanctum::actingAs($user, ['*']);
-
-        $container = $user->containers()->first() ?: 
-            Container::factory()->for($user)->create();
-        $vpnUser = VpnUser::factory()->for($container)->create();
-        $url = '/api/containers/' . $container->id . '/vpn/users/' . $vpnUser->id;
-        $response = $this->json('GET', $url);
-
-        $response->assertStatus(200);
-        $response->assertJson(function (AssertableJson $json) {
-            $json->has('vpn_user');
-        });
-    }
-
-    /**
-     * A revoke container VPN user test
-     * 
-     * @return void
-     */
-    public function test_revoke_vpn_user()
+    public function test_remove_nginx_location()
     {
         Queue::fake();
 
@@ -318,8 +288,10 @@ class VpnTest extends TestCase
 
         $container = $user->containers()->first() ?: 
             Container::factory()->for($user)->create();
-        $vpnUser = VpnUser::factory()->for($container)->create();
-        $url = '/api/containers/' . $container->id . '/vpn/users/' . $vpnUser->id . '/revoke';
+        $location = NginxLocation::factory()
+            ->for($container)
+            ->create();
+        $url = '/api/containers/' . $container->id . '/nginx/locations/' . $location->id . '/remove';
         $response = $this->json('DELETE', $url);
 
         $response->assertStatus(200);
@@ -328,32 +300,6 @@ class VpnTest extends TestCase
             $json->where('status', 'success');
         });
 
-        Queue::assertPushed(RevokeVpnUser::class);
-    }
-
-    /**
-     * A download config container VPN user test
-     * 
-     * @return void
-     */
-    public function test_download_vpn_user()
-    {
-        Queue::fake();
-
-        $user = User::first() ?: User::factory()->create();
-        Sanctum::actingAs($user, ['*']);
-
-        $container = $user->containers()->first() ?: 
-            Container::factory()->for($user)->create();
-        $vpnUser = VpnUser::factory()->for($container)->create();
-        $url = '/api/containers/' . $container->id . '/vpn/users/' . $vpnUser->id . '/download_config';
-        $response = $this->json('GET', $url);
-
-        $response->assertStatus(200);
-        $response->assertJson(function (AssertableJson $json) {
-            $json->has('config');
-        });
-
-        Queue::assertPushed(DownloadVpnConfig::class);
+        Queue::assertPushed(RemoveNginxLocation::class);
     }
 }

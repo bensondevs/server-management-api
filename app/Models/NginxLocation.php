@@ -3,14 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
 
-use App\Models\Container;
+use App\Observers\NginxLocationObserver as Observer;
 
 class NginxLocation extends Model
 {
+    use HasFactory;
+
     /**
      * Model database table
      * 
@@ -60,10 +62,7 @@ class NginxLocation extends Model
     protected static function boot()
     {
     	parent::boot();
-
-    	self::creating(function ($nginxLocation) {
-            $nginxLocation->id = Uuid::generate()->string;
-    	});
+        self::observe(Observer::class);
     }
 
     /**

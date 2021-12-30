@@ -36,8 +36,10 @@ class CartRepository extends BaseRepository
 
 		$this->setItem(new CartItem);
 
-		$user = $user ?: auth()->user();
-		$this->setUser($user);
+		if (auth()->check()) {
+			$user = $user ?: auth()->user();
+			$this->setUser($user);
+		}
 	}
 
 	/**

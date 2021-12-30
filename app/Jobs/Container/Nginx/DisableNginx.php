@@ -9,32 +9,32 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-use App\Models\NfsLocation;
+use App\Models\Container;
 use App\Traits\TrackExecution;
 use App\Jobs\Container\ContainerBaseJob;
 
-class RemoveNginxLocation implements ShouldQueue
+class DisableNginx extends ContainerBaseJob implements ShouldQueue
 {
     use TrackExecution;
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * Target NGINX Location model container
+     * Target container model container
      * 
-     * @var \App\Models\NfsLocation
+     * @return \App\Models\Container|null
      */
-    private $nginxLocation;
+    private $serverContainer;
 
     /**
      * Create a new job instance.
      *
-     * @param \App\Models\NginxLocation  $nginxLocation
+     * @param  \App\Models\Container  $serverContainer
      * @return void
      */
-    public function __construct(NginxLocation $nginxLocation)
+    public function __construct(Container $serverContainer)
     {
         parent::__construct();
-        $this->nginxLocation = $nginxLocation;
+        $this->serverContainer = $serverContainer;
     }
 
     /**
@@ -44,20 +44,19 @@ class RemoveNginxLocation implements ShouldQueue
      */
     public function handle()
     {
-        $nginxLocation = $this->nginxLocation;
-        $container = $nginxLocation->container;
+        $container = $this->serverContainer;
         $server = $container->server;
 
         $response = $this->sendRequest($server, [
-            'command' => 'remove nginx location',
+            'command' => 'disable nginx',
             'container_id' => $container->id,
-            'location' => $nginxLocation->location,
         ]);
 
-        $this->recordResponse($response);
+        $this->recordResponse($response, ['nginx_status']);
 
         if ($response['status'] == 'success') {
-            $nginxLocation->delete();
+            $container->nginx_status = $response['nginx_status'];
+            $container->save();
         }
     }
 }

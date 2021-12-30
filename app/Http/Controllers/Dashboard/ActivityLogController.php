@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\Activity;
-use App\Repositories\ActivityLogRepository;
+// use App\Repositories\ActivityLogRepository;
 
 class ActivityLogController extends Controller
 {
@@ -23,10 +23,10 @@ class ActivityLogController extends Controller
      * @param  \App\Repositories\ActivityLogRepository  $log
      * @return void
      */
-    public function __construct(ActivityLogRepository $log)
+    /*public function __construct(ActivityLogRepository $log)
     {
     	$this->log = $log;
-    }
+    }*/
 
     /**
      * Activity log of the application

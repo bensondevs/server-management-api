@@ -10,6 +10,8 @@ use App\Http\Requests\Containers\Samba\User\{
     DeleteSambaUserRequest as DeleteRequest,
 };
 
+use App\Repositories\ContainerSambaRepository;
+
 class ContainerSambaUserController extends Controller
 {
     /**

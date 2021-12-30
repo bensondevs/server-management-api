@@ -10,11 +10,14 @@ use App\Http\Controllers\Api\{
 	ContainerController,
 		Container\Nfs\ContainerNfsController as NfsController,
 			Container\Nfs\ContainerNfsFolderController as NfsFolderController,
-			Container\Nfs\ContainerNfsFolderController as NfsExportController,
+			Container\Nfs\ContainerNfsExportController as NfsExportController,
 		Container\Nginx\ContainerNginxController as NginxController,
-			Container\Nginx\Location\ContainerNginxController as NginxLocationController,
+			Container\Nginx\ContainerNginxLocationController as NginxLocationController,
 		Container\Samba\ContainerSambaController as SambaController,
-			Container\Samba\ContainerSambaDirectoryController as SambaDirectoryController,
+			// Container\Samba\ContainerSambaDirectoryController as SambaDirectoryController,
+			Container\Samba\ContainerSambaShareController as SambaShareController,
+			Container\Samba\ContainerSambaGroupController as SambaGroupController,
+			Container\Samba\ContainerSambaUserController as SambaUserController,
 		Container\Vpn\ContainerVpnController as VpnController,
 			Container\Vpn\ContainerVpnUserController as VpnUserController,
 			Container\Vpn\ContainerVpnSubnetController as VpnSubnetController,
@@ -181,15 +184,17 @@ Route::group(['as' => 'api.'], function () {
 				 */
 				Route::group(['prefix' => '/nginx'], function () {
 					Route::get('/', [NginxController::class, 'containerNginx']);
-					Route::post('start', [NginxController::class, 'start']);
-					Route::post('restart', [NginxController::class, 'restart']);
-					Route::post('reload', [NginxController::class, 'reload']);
-					Route::post('stop', [NginxController::class, 'stop']);
+					Route::post('/start', [NginxController::class, 'start']);
+					Route::post('/restart', [NginxController::class, 'restart']);
+					Route::post('/reload', [NginxController::class, 'reload']);
+					Route::post('/stop', [NginxController::class, 'stop']);
+					Route::post('/enable', [NginxController::class, 'enable']);
+					Route::post('/disable', [NginxController::class, 'disable']);
 
 					Route::group(['prefix' => '/locations'], function () {
 						Route::get('/', [NginxLocationController::class, 'nginxLocations']);
-						Route::post('create', [NginxLocationController::class, 'create']);
-						Route::delete('delete', [NginxLocationController::class, 'delete']);
+						Route::post('/create', [NginxLocationController::class, 'create']);
+						Route::delete('/{location}/remove', [NginxLocationController::class, 'remove']);
 					});
 				});
 
@@ -272,11 +277,14 @@ Route::group(['as' => 'api.'], function () {
 				 * Container VPN Service
 				 */
 				Route::group(['prefix' => '/vpn'], function () {
+					Route::get('/', [VpnController::class, 'containerVpn']);
+
 					Route::post('/start', [VpnController::class, 'start']);
 					Route::post('/reload', [VpnController::class, 'reload']);
 					Route::post('/restart', [VpnController::class, 'restart']);
 					Route::post('/stop', [VpnController::class, 'stop']);
-					Route::post('/disable', [VpnController::class, 'enable']);
+					Route::post('/enable', [VpnController::class, 'enable']);
+					Route::post('/disable', [VpnController::class, 'disable']);
 
 					/**
 					 * Container VPN Subnet Module
@@ -294,9 +302,9 @@ Route::group(['as' => 'api.'], function () {
 						Route::post('create', [VpnUserController::class, 'create']);
 
 						Route::group(['prefix' => '/{user}'], function () {
-							Route::get('show', [VpnUserController::class, 'show']);
-							Route::delete('delete', [VpnUserController::class, 'delete']);
-							Route::post('change_subnet_ip', [VpnUserController::class, 'change_subnet_ip']);
+							Route::get('/', [VpnUserController::class, 'show']);
+							Route::delete('revoke', [VpnUserController::class, 'revoke']);
+							// Route::post('change_subnet_ip', [VpnUserController::class, 'change_subnet_ip']);
 							Route::get('download_config', [VpnUserController::class, 'downloadConfig']);
 						});
 					});
@@ -307,7 +315,7 @@ Route::group(['as' => 'api.'], function () {
 		/**
 		 *	Payment API Module
 		 */
-		Route::group(['prefix' => 'payments'], function () {
+		Route::group(['prefix' => '/payments'], function () {
 			Route::get('/', [PaymentController::class, 'payments']);
 			Route::post('/create/{order}', [PaymentController::class, 'create']);
 
@@ -332,7 +340,7 @@ Route::group(['as' => 'api.'], function () {
 		/**
 		 * Subscription API Module
 		 */
-		Route::group(['prefix' => 'subscriptions'], function () {
+		Route::group(['prefix' => '/subscriptions'], function () {
 			Route::get('/', [SubscriptionController::class, 'subscriptions']);
 
 			Route::group(['prefix' => '{subscription}'], function () {

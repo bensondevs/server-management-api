@@ -27,7 +27,7 @@ class RemoveLocationRequest extends FormRequest
     public function authorize()
     {
         $container = $this->getServerContainer();
-        return Gate::allows('remove-location-container-nginx');
+        return true;
     }
 
     /**
