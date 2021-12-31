@@ -19,6 +19,11 @@ class StartSamba extends ContainerBaseJob implements ShouldQueue
     use TrackExecution;
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * Timeout seconds until the job execution terminated
+     * 
+     * @var int
+     */
     public $timeout = 1200;
 
     /**

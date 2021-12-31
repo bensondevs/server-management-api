@@ -10,9 +10,12 @@ use App\Http\Requests\Containers\Samba\Group\{
     User\AddSambaGroupUserRequest as AddGroupUserRequest,
     User\RemoveSambaGroupUserRequest as RemoveGroupUserRequest,
 };
+use App\Http\Resources\{
+    SambaGroupResource,
+    SambaUserResource
+};
 
-use App\Models\{ Container, SambaGroup, SambaUser };
-
+use App\Models\{ Container, SambaGroup, SambaUser, SambaGroupUser };
 use App\Repositories\ContainerSambaRepository;
 
 class ContainerSambaGroupController extends Controller
@@ -42,8 +45,8 @@ class ContainerSambaGroupController extends Controller
      */
     public function sambaGroups(Container $container)
     {
-        $this->samba->setModel($container);
-        $groups = $this->samba->groups();
+        $groups = $container->sambaGroups;
+        $groups = SambaGroupResource::collection($groups);
         return response()->json(['samba_groups' => $groups]);
     }
 
@@ -52,7 +55,7 @@ class ContainerSambaGroupController extends Controller
      * 
      * @param \App\Models\Container  $container
      * @param \App\Models\SambaGroup  $group
-     * @return Illuminate\Support\Facades\Response
+     * @return \Illuminate\Support\Facades\Response
      */
     public function show(Container $container, SambaGroup $group)
     {
@@ -61,20 +64,35 @@ class ContainerSambaGroupController extends Controller
     }
 
     /**
+     * Show samba group users
+     * 
+     * @param  \App\Models\Container   $container
+     * @param  \App\Models\SambaGroup  $group
+     * @return \Illuminate\Support\Facades\Response
+     */
+    public function groupUsers(Container $container, SambaGroup $group)
+    {
+        $users = $group->users;
+        $users = SambaUserResource::collection($users);
+
+        return response()->json(['samba_users' => $users]);
+    }
+
+    /**
      * Add samba user to samba group
      * 
      * @param \App\Models\Container  $container
-     * @param \App\Models\SambaGroup  $sambaGroup
-     * @param \App\Models\SambaUser  $sambaUser
+     * @param \App\Models\SambaGroup  $group
+     * @param \App\Models\SambaUser  $user
      * @return Illuminate\Support\Facades\Response
      */
     public function addUser(
         Container $container, 
-        SambaGroup $sambaGroup, 
-        SambaUser $sambaUser
+        SambaGroup $group, 
+        SambaUser $user
     ) {
         $this->samba->setModel($container);
-        $this->samba->addGroupUser($sambaGroup, $sambaUser);
+        $this->samba->addGroupUser($group, $user);
         return apiResponse($this->samba);
     }
 
@@ -82,16 +100,19 @@ class ContainerSambaGroupController extends Controller
      * Remove samba user from samba group
      * 
      * @param \App\Models\Container  $container
-     * @param \App\Models\SambaGroup  $sambaGroup
-     * @param \App\Models\SambaUser  $sambaUser
+     * @param \App\Models\SambaGroup  $group
+     * @param \App\Models\SambaUser  $user
      */
     public function removeUser(
         Container $container, 
-        SambaGroup $sambaGroup, 
-        SambaUser $sambaUser
+        SambaGroup $group, 
+        SambaUser $user
     ) {
         $this->samba->setModel($container);
-        $this->samba->removeGroupUser($sambaGroup, $sambaUser);
+        $groupUser = SambaGroupUser::where('samba_group_id', $group->id)
+            ->where('samba_user_id', $user->id)
+            ->firstOrFail();
+        $this->samba->removeGroupUser($groupUser);
         return apiResponse($this->samba);
     }
 
@@ -106,10 +127,10 @@ class ContainerSambaGroupController extends Controller
     public function delete(
         DeleteRequest $request, 
         Container $container, 
-        SambaGroup $sambaGroup
+        SambaGroup $group
     ) {
         $this->samba->setModel($container);
-        $this->samba->deleteGroup($sambaGroup);
+        $this->samba->deleteGroup($group);
         return apiResponse($this->samba);
     }
 }

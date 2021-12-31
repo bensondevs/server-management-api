@@ -10,31 +10,38 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
 use App\Models\Container;
-
 use App\Traits\TrackExecution;
+use App\Jobs\Container\ContainerBaseJob;
 
-use App\Repositories\AmqpRepository;
-
-class CompleteSambaCheck implements ShouldQueue
+class CompleteSambaCheck extends ContainerBaseJob implements ShouldQueue
 {
     use TrackExecution;
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * Timeout seconds until the job execution terminated
+     * 
+     * @var int
+     */
     public $timeout = 1200;
 
-    private $amqpRepo;
+    /**
+     * Target container model container
+     * 
+     * @var \App\Models\Container|null
+     */
     private $serverContainer;
 
     /**
      * Create a new job instance.
      *
+     * @param  \App\Models\Container  $serverContainer
      * @return void
      */
     public function __construct(Container $serverContainer)
     {
+        parent::__construct();
         $this->serverContainer = $serverContainer;
-
-        $this->amqpRepo = new AmqpRepository();
     }
 
     /**
@@ -47,15 +54,10 @@ class CompleteSambaCheck implements ShouldQueue
         $container = $this->serverContainer;
         $server = $container->server;
 
-        $requestId = generateUuid();
-
-        $this->amqpRepo->connectServerQueue($server, $requestId);
-        $this->amqpRepo->publishJson([
-            'uuid' => $requestId,
+        $response = $this->sendRequest($server, [
             'command' => 'complete samba check',
             'container_id' => $container->id,
         ]);
-        $response = $this->amqpRepo->consumeServerResponse($server, $requestId);
 
         $this->recordResponse($response, [
             'samba_status',

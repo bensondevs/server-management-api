@@ -7,9 +7,12 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests\Containers\Samba\User\{
     CreateSambaUserRequest as CreateRequest,
+    ChangeSambaUserPasswordRequest as ChangePasswordRequest,
     DeleteSambaUserRequest as DeleteRequest,
 };
+use App\Http\Resources\SambaUserResource;
 
+use App\Models\{ Container, SambaGroup, SambaUser };
 use App\Repositories\ContainerSambaRepository;
 
 class ContainerSambaUserController extends Controller
@@ -39,8 +42,8 @@ class ContainerSambaUserController extends Controller
      */
     public function sambaUsers(Container $container)
     {
-        $this->samba->setModel($container);
-        $users = $this->samba->users();
+        $users = $container->sambaUsers;
+        $users = SambaUserResource::collection($users);
         return response()->json(['samba_users' => $users]);
     }
 
@@ -53,8 +56,10 @@ class ContainerSambaUserController extends Controller
      */
     public function notInGroup(Container $container, SambaGroup $group)
     {
-        $this->samba->setModel($container);
-        $users = $this->samba->notInGroupUsers($group);
+        $users = SambaUser::whereInContainer($container)
+            ->whereNotInGroup($group)
+            ->get();
+        $users = SambaUserResource::collection($users);
         return response()->json(['samba_users' => $users]);
     }
 
@@ -68,8 +73,10 @@ class ContainerSambaUserController extends Controller
     public function create(CreateRequest $request, Container $container)
     {
         $input = $request->validated();
+
         $this->samba->setModel($container);
         $this->samba->createUser($input);
+        
         return apiResponse($this->samba);
     }
 
@@ -87,8 +94,10 @@ class ContainerSambaUserController extends Controller
         SambaUser $user
     ) {
         $password = $request->input('password');
+
         $this->samba->setModel($container);
         $this->samba->changeUserPassword($user, $password);
+
         return apiResponse($this->samba);
     }
 
@@ -103,6 +112,7 @@ class ContainerSambaUserController extends Controller
     {
         $this->samba->setModel($container);
         $this->samba->deleteUser($user);
+
         return apiResponse($this->samba);
     }
 }

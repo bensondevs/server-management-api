@@ -40,7 +40,7 @@ class NfsTest extends TestCase
      *
      * @return void
      */
-    public function test_check_container_nfs()
+    public function test_complete_check_container_nfs()
     {
         Queue::fake();
 

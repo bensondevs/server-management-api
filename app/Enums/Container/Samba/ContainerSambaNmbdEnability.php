@@ -7,6 +7,13 @@ use BenSampo\Enum\Enum;
 final class ContainerSambaNmbdEnability extends Enum
 {
     /**
+     * Container Samba NMBD is requesting
+     * 
+     * @var int
+     */
+    const Requesting = 0;
+
+    /**
      * Container Samba NMBD Enabled
      * 
      * @var int

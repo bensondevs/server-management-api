@@ -31,6 +31,17 @@ trait NfsTrait
     }
 
     /**
+     * Set NFS status requesting
+     * 
+     * @return bool
+     */
+    public function setNfsStatusRequesting()
+    {
+        $this->attributes['nfs_status'] = Status::Requesting;
+        return $this->save();
+    }
+
+    /**
      * Get Current NFS Status
      * 
      * @return int
@@ -106,6 +117,17 @@ trait NfsTrait
 
         $nfsPidNumbers = json_encode($nfsPidNumbers);
         $this->attributes['nfs_pid_numbers'] = $nfsPidNumbers;
+    }
+
+    /**
+     * Set NFS Enability as requesting
+     * 
+     * @return bool
+     */
+    public function setNfsEnabilityRequesting()
+    {
+        $this->attributes['nfs_enability'] = Enability::Requesting;
+        return $this->save();
     }
 
     /**

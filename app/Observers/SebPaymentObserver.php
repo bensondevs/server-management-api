@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Models\SebPayment;
 use App\Enums\Payment\PaymentStatus;
-use App\Enums\SebPayment\SebPaymentState as State;
+use App\Enums\Payment\Seb\SebPaymentState as State;
 
 class SebPaymentObserver
 {
@@ -39,7 +39,7 @@ class SebPaymentObserver
     public function updated(SebPayment $sebPayment)
     {
         if ($sebPayment->isDirty('state')) {
-            switch ($sebPayment->state) {
+            switch ($sebPayment->state->value) {
                 case State::Settled:
                     $payment = $sebPayment->payment;
                     $payment->status = PaymentStatus::Settled;

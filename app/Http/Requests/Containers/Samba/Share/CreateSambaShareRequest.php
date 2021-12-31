@@ -5,21 +5,12 @@ namespace App\Http\Requests\Containers\Samba\Share;
 use Illuminate\Foundation\Http\FormRequest;
 
 use App\Models\{ Container, SambaDirectory };
-
 use App\Rules\AllowedSambaName;
 
 class CreateSambaShareRequest extends FormRequest
 {
     private $directory;
     private $serverContainer;
-
-    public function getSambaDirectory()
-    {
-        if ($this->directory) return $this->directory;
-
-        $directoryName = $this->input('directory_name');
-        return $this->directory = SambaDirectory::findByName($directoryName);
-    }
 
     public function getServerContainer()
     {

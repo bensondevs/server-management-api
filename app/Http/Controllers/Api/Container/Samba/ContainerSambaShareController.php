@@ -98,67 +98,50 @@ class ContainerSambaShareController extends Controller
     /**
      * Remove Samba Share User
      * 
-     * @param RemoveUserRequest  $request
      * @param \App\Models\Container  $container
      * @param \App\Models\SambaShare  $share
      * @param \App\Models\SambaUser  $user
      * @return Illuminate\Support\Facades\Response
      */
-    public function removeUser(
-        RemoveUserRequest $request, 
-        SambaShare $share, 
-        SambaUser $user
-    ) {
+    public function removeUser(Container $container, SambaShare $share, SambaUser $user) 
+    {
         //
     }
 
     /**
      * Add Samba Share Group
      * 
-     * @param AddGroupRequest  $request
      * @param \App\Models\Container  $container
      * @param \App\Models\SambaShare  $share
      * @return Illuminate\Support\Facades\Response
      */
-    public function addGroup(
-        AddGroupRequest $request, 
-        Container $container, 
-        SambaShare $share
-    ) {
+    public function addGroup( Container $container, SambaShare $share) 
+    {
         //
     }
 
     /**
      * Remove Samba Share Group
      * 
-     * @param RemoveGroupRequest  $request
      * @param \App\Models\Container  $container
      * @param \App\Models\SambaShare  $share
      * @param \App\Models\SambaUser  $user
      * @return Illuminate\Support\Facades\Response
      */
-    public function removeGroup(
-        RemoveGroupRequest $request,
-        Container $container,
-        SambaShare $share,
-        SambaUser $user
-    ) {
+    public function removeGroup(Container $container, SambaShare $share, SambaUser $user) 
+    {
         //
     }
 
     /**
      * Delete samba share
      * 
-     * @param DeleteRequest  $request
      * @param \App\Models\Container  $container
      * @param \App\Models\SambaShare  $share
      * @return Illuminate\Support\Facades\Response
      */
-    public function delete(
-        DeleteRequest $request, 
-        Container $container, 
-        SambaShare $share
-    ) {
+    public function delete(Container $container, SambaShare $share) 
+    {
         //
     }
 }

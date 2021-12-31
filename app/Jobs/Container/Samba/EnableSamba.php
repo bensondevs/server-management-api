@@ -8,17 +8,16 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Cache;
 
 use App\Models\Container;
 use App\Traits\TrackExecution;
 use App\Jobs\Container\ContainerBaseJob;
 use App\Enums\Container\Samba\{
-    ContainerSambaNmbdStatus as NmbdStatus,
-    ContainerSambaSmbdStatus as SmbdStatus
+    ContainerSambaNmbdEnability as NmbdEnability,
+    ContainerSambaSmbdEnability as SmbdEnability
 };
 
-class ReloadSamba extends ContainerBaseJob implements ShouldQueue
+class EnableSamba extends ContainerBaseJob implements ShouldQueue
 {
     use TrackExecution;
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -45,7 +44,6 @@ class ReloadSamba extends ContainerBaseJob implements ShouldQueue
      */
     public function __construct(Container $serverContainer)
     {
-        parent::__construct();
         $this->serverContainer = $serverContainer;
     }
 
@@ -60,21 +58,21 @@ class ReloadSamba extends ContainerBaseJob implements ShouldQueue
         $server = $container->server;
 
         $response = $this->sendRequest($server, [
-            'command' => 'reload samba',
+            'command' => 'enable samba',
             'container_id' => $container->id,
         ]);
 
         $this->recordResponse($response, ['samba_status']);
 
-        if (isset($response['samba_status'])) {
-            $status = $response['samba_status'];
+        if (isset($response['samba_enability'])) {
+            $status = $response['samba_enability'];
             $container->samba_smbd_status = isset($status['smbd']) ?
                 $status['smbd'] : 
-                SmbdStatus::Unknown;
+                SmbdEnability::Unknown;
 
             $container->samba_nmbd_status = isset($status['nmbd']) ?
                 $status['nmbd'] : 
-                NmbdStatus::Unknown;
+                NmbdEnability::Unknown;
             
             $container->save();
         }

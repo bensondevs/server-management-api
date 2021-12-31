@@ -11,20 +11,26 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
 
 use App\Models\Container;
-
 use App\Traits\TrackExecution;
+use App\Jobs\Container\ContainerBaseJob;
 
-use App\Repositories\AmqpRepository;
-
-class StopSamba implements ShouldQueue
+class StopSamba extends ContainerBaseJob implements ShouldQueue
 {
     use TrackExecution;
-
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * Timeout seconds until the job execution terminated
+     * 
+     * @var int
+     */
     public $timeout = 1200;
 
-    private $amqpRepo;
+    /**
+     * Target container model container
+     * 
+     * @var \App\Models\Container|null
+     */
     private $serverContainer;
 
     /**
@@ -34,9 +40,8 @@ class StopSamba implements ShouldQueue
      */
     public function __construct(Container $serverContainer)
     {
+        parent::__construct();
         $this->serverContainer = $serverContainer;
-
-        $this->amqpRepo = new AmqpRepository();
     }
 
     /**
@@ -49,15 +54,10 @@ class StopSamba implements ShouldQueue
         $container = $this->serverContainer;
         $server = $container->server;
 
-        $requestId = generateUuid();
-
-        $this->amqpRepo->connectServerQueue($server);
-        $this->amqpRepo->publishJson([
-            'uuid' => $requestId,
+        $response = $this->sendRequest($server, [
             'command' => 'stop samba',
             'container_id' => $container->id,
         ]);
-        $response = $this->amqpRepo->consumeServerResponse($server, $requestId);
 
         $this->recordResponse($response, ['samba_status']);
 

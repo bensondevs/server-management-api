@@ -10,6 +10,7 @@ use App\Repositories\{
     SubscriptionRepository
 };
 use App\Models\Payment;
+use App\Enums\Order\OrderType;
 use App\Enums\Payment\{
     PaymentStatus as Status,
     PaymentMethod as Method

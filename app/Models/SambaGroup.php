@@ -4,10 +4,15 @@ namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
+
+use App\Observers\SambaGroupObserver as Observer;
 
 class SambaGroup extends Model
 {
+    use HasFactory;
+
     /**
      * Model database table
      * 
@@ -67,10 +72,7 @@ class SambaGroup extends Model
     protected static function boot()
     {
     	parent::boot();
-
-    	self::creating(function ($sambaGroup) {
-            $sambaGroup->id = Uuid::generate()->string;
-    	});
+        self::observe(Observer::class);
     }
 
     /**
@@ -160,11 +162,11 @@ class SambaGroup extends Model
     /**
      * Check group name exists in container
      * 
-     * @param string  $groupName
      * @param \App\Models\Container  $container
+     * @param string  $groupName
      * @return bool
      */
-    public static function isExistsInContainer(string $groupName, Container $container)
+    public static function isExistsInContainer(Container $container, string $groupName)
     {
         return self::where('container_id', $container->id)
             ->where('group_name', $groupName)

@@ -220,28 +220,32 @@ Route::group(['as' => 'api.'], function () {
 					Route::group(['prefix' => '/shares'], function () {
 						Route::get('/', [SambaShareController::class, 'sambaShares']);
 						Route::post('/create', [SambaShareController::class, 'create']);
+
 						Route::group(['prefix' => '/{share}'], function () {
-							Route::get('/show', [SambaShareController::class, 'show']);
-							Route::match(['PUT', 'PATCH'], 'update', [SambaShareController::class, 'update']);
-							Route::delete('delete', [SambaShareController::class, 'delete']);
-						});
+							/**
+							 * Samba Share basic actions
+							 */
+							Route::get('/', [SambaShareController::class, 'show']);
+							Route::match(['PUT', 'PATCH'], '/update', [SambaShareController::class, 'update']);
+							Route::delete('/delete', [SambaShareController::class, 'delete']);
 
-						/**
-						 * Samba Share Group
-						 */
-						Route::group(['prefix' => '/{share}/groups'], function () {
-							Route::get('/', [SambaShareController::class, 'shareGroups']);
-							Route::post('add', [SambaShareController::class, 'addShareGroup']);
-							Route::delete('remove', [SambaShareController::class, 'removeShareGroup']);
-						});
+							/**
+							 * Samba Share Group
+							 */
+							Route::group(['prefix' => '/groups'], function () {
+								Route::get('/', [SambaShareController::class, 'shareGroups']);
+								Route::post('/add', [SambaShareController::class, 'addShareGroup']);
+								Route::delete('/remove', [SambaShareController::class, 'removeShareGroup']);
+							});
 
-						/**
-						 * Samba Share User
-						 */
-						Route::group(['prefix' => 'users'], function () {
-							Route::get('/', [SambaShareController::class, 'shareUsers']);
-							Route::post('add', [SambaShareController::class, 'addUser']);
-							Route::delete('remove', [SambaShareController::class, 'removeUser']);
+							/**
+							 * Samba Share User
+							 */
+							Route::group(['prefix' => '/users'], function () {
+								Route::get('/', [SambaShareController::class, 'shareUsers']);
+								Route::post('/add', [SambaShareController::class, 'addUser']);
+								Route::delete('/remove', [SambaShareController::class, 'removeUser']);
+							});
 						});
 					});
 
@@ -250,15 +254,15 @@ Route::group(['as' => 'api.'], function () {
 					 */
 					Route::group(['prefix' => '/groups'], function () {
 						Route::get('/', [SambaGroupController::class, 'sambaGroups']);
-						Route::get('/{group}/show', [SambaGroupController::class, 'show']);
+						Route::get('/{group}', [SambaGroupController::class, 'show']);
 
 						/**
 						 * Samba Group Users
 						 */
 						Route::group(['prefix' => '/{group}/users'], function () {
 							Route::get('/', [SambaGroupController::class, 'groupUsers']);
-							Route::post('add', [SambaGroupController::class, 'addUser']);
-							Route::delete('remove', [SambaGroupController::class, 'removeUser']);
+							Route::post('add/{user}', [SambaGroupController::class, 'addUser']);
+							Route::delete('remove/{user}', [SambaGroupController::class, 'removeUser']);
 						});
 					});
 
@@ -267,9 +271,9 @@ Route::group(['as' => 'api.'], function () {
 					 */
 					Route::group(['prefix' => '/users'], function () {
 						Route::get('/', [SambaUserController::class, 'sambaUsers']);
-						Route::post('create', [SambaUserController::class, 'create']);
-						Route::match(['PUT', 'PATCH'], 'update_password', [SambaUserController::class, 'updatePassword']);
-						Route::delete('delete', [SambaUserController::class, 'delete']);
+						Route::post('/create', [SambaUserController::class, 'create']);
+						Route::match(['PUT', 'PATCH'], '/{user}/change_password', [SambaUserController::class, 'changePassword']);
+						Route::delete('/{user}/delete', [SambaUserController::class, 'delete']);
 					});
 				});
 

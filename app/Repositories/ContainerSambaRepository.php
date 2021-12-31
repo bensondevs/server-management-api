@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
+use App\Repositories\Base\BaseRepository;
 
 use App\Models\{ 
 	Container, 
@@ -13,9 +14,13 @@ use App\Models\{
 	SambaDirectory,
 	SambaGroupUser 
 };
-
+use App\Enums\Container\Samba\{
+	ContainerSambaNmbdStatus as NmbdStatus,
+	ContainerSambaSmbdStatus as SmbdStatus,
+	ContainerSambaNmbdEnability as NmbdEnability,
+	ContainerSambaSmbdEnability as SmbdEnability
+};
 use App\Traits\Repositories\SambaShare as SambaShareTrait;
-
 use App\Jobs\Container\Samba\{
 	Directory\CreateSambaDirectory as CreateDirectory,
 	Directory\DeleteSambaDirectory as DeleteDirectory,
@@ -36,6 +41,8 @@ use App\Jobs\Container\Samba\{
 	StopSamba as Stop,
 	ReloadSamba as Reload,
 	RestartSamba as Restart,
+	EnableSamba as Enable,
+	DisableSamba as Disable,
 	ToggleSambaStartOnBoot as ToggleStartOnBoot,
 	ToggleSambaBindToPublicIp as ToggleBindToPublicIp,
 	ModifySambaSubnetBind as ModifySubnetBind
@@ -43,11 +50,11 @@ use App\Jobs\Container\Samba\{
 
 use App\Http\Resources\{ 
 	SambaUserResource,
-	SambaGroupResource, 
-	SambaDirectoryResource 
+	SambaGroupResource,
+	SambaShareResource 
 };
 
-class ContainerSambaRepository extends AmqpRepository
+class ContainerSambaRepository extends BaseRepository
 {
 	use SambaShareTrait;
 
@@ -77,8 +84,7 @@ class ContainerSambaRepository extends AmqpRepository
 		$container->load([
 			'sambaGroups.users', 
 			'sambaUsers', 
-			'sambaShares', 
-			'sambaDirectories'
+			'sambaShares'
 		]);
 
 		$sambaGroups = $container->sambaGroups;
@@ -90,7 +96,6 @@ class ContainerSambaRepository extends AmqpRepository
 			'samba_status' => $container->current_samba_status,
 			'samba_enability' => $container->current_samba_enability,
 			'samba_pid_numbers' => $container->current_samba_pid_numbers,
-			'samba_directories' => SambaDirectoryResource::collection($sambaDirectories),
 			'samba_groups' => SambaGroupResource::collection($sambaGroups),
 			'samba_users' => SambaUserResource::collection($sambaUsers),
 			'samba_shares' => SambaShareResource::collection($sambaShares),
@@ -132,6 +137,8 @@ class ContainerSambaRepository extends AmqpRepository
 			$job = new Start($container);
 			$container->trackDispatch($job);
 
+			$container->setSambaStatusRequesting();
+
 			$this->setSuccess('Samba is now starting.');
 		} catch (Exception $e) {
 			$error = $e->getMessage();
@@ -153,6 +160,8 @@ class ContainerSambaRepository extends AmqpRepository
 			$container = $this->getModel();
 			$job = new Stop($container);
 			$container->trackDispatch($job);
+
+			$container->setSambaStatusRequesting();
 			
 			$this->setSuccess('Stopping samba...');		
 		} catch (Exception $e) {
@@ -176,6 +185,8 @@ class ContainerSambaRepository extends AmqpRepository
 			$job = new Reload($container);
 			$container->trackDispatch($job);
 
+			$container->setSambaStatusRequesting();
+
 			$this->setSuccess('Reloading samba...');
 		} catch (Exception $e) {
 			$error = $e->getMessage();
@@ -197,6 +208,8 @@ class ContainerSambaRepository extends AmqpRepository
 			$container = $this->getModel();
 			$job = new Restart($container);
 			$container->trackDispatch($job);
+
+			$container->setSambaStatusRequesting();
 			
 			$this->setSuccess('Restarting samba...');
 		} catch (Exception $e) {
@@ -211,11 +224,24 @@ class ContainerSambaRepository extends AmqpRepository
 	 * Send command to enable samba service on boot 
 	 * and get current enability
 	 * 
-	 * @return int
+	 * @return array
 	 */
 	public function enable()
 	{
-		//
+		try {
+			$container = $this->getModel();
+			$job = new Enable($container);
+			$container->trackDispatch($job);
+
+			$container->setSambaEnabilityRequesting();
+
+			$this->setSuccess('Enabling samba...');
+		} catch (Exception $e) {
+			$error = $e->getMessage();
+			$this->setError('Failed enabling samba.', $error);
+		}
+
+		return $container->current_samba_enability;
 	}
 
 	/**
@@ -226,7 +252,20 @@ class ContainerSambaRepository extends AmqpRepository
 	 */
 	public function disable()
 	{
-		//
+		try {
+			$container = $this->getModel();
+			$job = new Disable($container);
+			$container->trackDispatch($job);
+
+			$container->setSambaEnabilityRequesting();
+
+			$this->setSuccess('Disabling samba...');
+		} catch (Exception $e) {
+			$error = $e->getMessage();
+			$this->setError('Failed enabling samba.', $error);
+		}
+
+		return $container->current_samba_enability;
 	}
 
 	/**
@@ -247,25 +286,16 @@ class ContainerSambaRepository extends AmqpRepository
 			$error = $e->getMessage();
 			$this->setError('Failed to toggle samba on boot.', $error);
 		}
+
+		return $container->current_samba_enability;
 	}
 
-	public function users()
-	{
-		$container = $this->getModel();
-		$users = $container->sambaUsers;
-		return SambaUserResource::collection($users);
-	}
-
-	public function notInGroupUsers(SambaGroup $group)
-	{
-		$users = SambaUser::where('container_id', $group->container_id)
-			->whereHas('groups', function ($query) use ($group) {
-				$query->where('samba_groups.id', '!=', $group->id);
-			})->get();
-
-		return SambaUserResource::collection($users);
-	}
-
+	/**
+	 * Send command to create samba user by supplied data of [username, password]
+	 * 
+	 * @param  array  $userData
+	 * @return bool
+	 */
 	public function createUser(array $userData)
 	{
 		try {
@@ -282,6 +312,13 @@ class ContainerSambaRepository extends AmqpRepository
 		return $this->returnResponse();
 	}
 
+	/**
+	 * Send command to change samba user password
+	 * 
+	 * @param  \App\Models\SambaUser  $user
+	 * @param  string  $password
+	 * @return bool
+	 */
 	public function changeUserPassword(SambaUser $user, string $password)
 	{
 		try {
@@ -298,6 +335,12 @@ class ContainerSambaRepository extends AmqpRepository
 		return $this->returnResponse();
 	}
 
+	/**
+	 * Send command to delete samba user
+	 * 
+	 * @param   \App\Models\SambaUser  $user
+	 * @return  bool
+	 */
 	public function deleteUser(SambaUser $user)
 	{
 		try {
@@ -314,6 +357,13 @@ class ContainerSambaRepository extends AmqpRepository
 		return $this->returnResponse();
 	}
 
+	/**
+	 * Send command to add user to share
+	 * 
+	 * @param  \App\Models\SambaShare  $share
+	 * @param  \App\Models\SambaUser  $user
+	 * @return bool
+	 */
 	public function addShareUser(SambaShare $share, SambaUser $user)
 	{
 		try {
@@ -330,6 +380,12 @@ class ContainerSambaRepository extends AmqpRepository
 		return $this->returnResponse();
 	}
 
+	/**
+	 * Send command to unlink user to share
+	 * 
+	 * @param  \App\Models\SambaShareUser  $shareUser
+	 * @return bool
+	 */
 	public function removeShareUser(SambaShareUser $shareUser)
 	{
 		try {
@@ -346,6 +402,13 @@ class ContainerSambaRepository extends AmqpRepository
 		return $this->returnResponse();
 	}
 
+	/**
+	 * Send command to link group to share
+	 * 
+	 * @param  \App\Models\SambaShare  $share
+	 * @param  \App\Models\SambaGroup  $group
+	 * @return bool
+	 */
 	public function addShareGroup(SambaShare $share, SambaGroup $group)
 	{
 		try {
@@ -362,6 +425,12 @@ class ContainerSambaRepository extends AmqpRepository
 		return $this->returnResponse();
 	}
 
+	/**
+	 * Send command to unlink group from share
+	 * 
+	 * @param  \App\Models\SambaShareGroup  $shareGroup
+	 * @return bool
+	 */
 	public function removeShareGroup(SambaShareGroup $shareGroup)
 	{
 		try {
@@ -378,10 +447,17 @@ class ContainerSambaRepository extends AmqpRepository
 		return $this->returnResponse();
 	}
 
+	/**
+	 * Send command to add user to group
+	 * 
+	 * @param  \App\Models\SambaGroup  $sambaGroup
+	 * @param  \App\Models\SambaUser  $sambaUser
+	 * @return bool
+	 */
 	public function addGroupUser(SambaGroup $sambaGroup, SambaUser $sambaUser)
 	{
 		try {
-			$container = $sambaGroup->container;
+			$container = $sambaGroup->container ?: $this->getModel();
 			$job = new AddGroupUser($sambaGroup, $sambaUser);
 			$container->trackDispatch($job);
 
@@ -394,6 +470,12 @@ class ContainerSambaRepository extends AmqpRepository
 		return $this->returnResponse();
 	}
 
+	/**
+	 * Send command to remove user from group
+	 * 
+	 * @param  \App\Models\SambaGroupUser  $groupUser
+	 * @return bool
+	 */
 	public function removeGroupUser(SambaGroupUser $groupUser)
 	{
 		try {
@@ -410,6 +492,12 @@ class ContainerSambaRepository extends AmqpRepository
 		return $this->returnResponse();
 	}
 
+	/**
+	 * Send command to toggle bind to public ip
+	 * 
+	 * @param  string  $status
+	 * @return bool
+	 */
 	public function toggleBindToPublicIp(string $status = 'bind')
 	{
 		if ($status != 'bind' || $status != 'unbind') {

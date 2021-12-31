@@ -10,9 +10,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
 use App\Models\{ Container, SambaDirectory, SambaShare };
-
 use App\Traits\TrackExecution;
-
 use App\Repositories\AmqpRepository;
 
 class CreateSambaShare implements ShouldQueue

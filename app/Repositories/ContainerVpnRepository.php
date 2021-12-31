@@ -4,15 +4,13 @@ namespace App\Repositories;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\Cache;
-
-use App\Utils\Repository;
-use App\Repositories\AmqpRepository;
+use App\Repositories\Base\BaseRepository;
 
 use App\Models\{ VpnUser, Container, VpnSubnet };
-
-use App\Enums\Container\Vpn\ContainerVpnEnability as Enability;
-
+use App\Enums\Container\Vpn\{ 
+	ContainerVpnStatus as Status,
+	ContainerVpnEnability as Enability
+};
 use App\Jobs\Container\Vpn\{
 	CreateVpnUser as CreateUser,
 	RevokeVpnUser as RevokeUser,
@@ -33,7 +31,7 @@ use App\Jobs\Container\Vpn\{
 
 use App\Http\Resources\{ VpnUserResource, VpnSubnetResource };
 
-class ContainerVpnRepository extends AmqpRepository
+class ContainerVpnRepository extends BaseRepository
 {
 	/**
 	 * Repository class constructor function
@@ -42,7 +40,6 @@ class ContainerVpnRepository extends AmqpRepository
 	 */
 	public function __construct()
 	{
-		parent::__construct();
 		$this->setInitModel(new Container);
 	}
 

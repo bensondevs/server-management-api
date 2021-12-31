@@ -10,7 +10,6 @@ use App\Enums\Container\Samba\{
 };
 
 use App\Models\{
-	SambaDirectory as Directory,
 	SambaShare as Share,
 	SambaGroup as Group,
 	SambaUser as User,
@@ -18,14 +17,6 @@ use App\Models\{
 
 trait SambaTrait 
 {
-	/**
-	 * Get Container existing samba directories
-	 */
-	public function sambaDirectories()
-	{
-		return $this->hasMany(Directory::class);
-	}
-
 	/**
 	 * Get container existing samba shares
 	 */
@@ -48,6 +39,18 @@ trait SambaTrait
     public function sambaUsers()
     {
     	return $this->hasMany(User::class);
+    }
+
+    /**
+     * Set container samba status as requesting
+     * 
+     * @return bool
+     */
+    public function setSambaStatusRequesting()
+    {
+    	$this->attributes['samba_smbd_status'] = SmbdStatus::Requesting;
+    	$this->attributes['samba_nmbd_status'] = NmbdStatus::Requesting;
+    	return $this->save();
     }
 
 	/**
@@ -171,6 +174,18 @@ trait SambaTrait
 		$sambaPidNumbers = json_encode($sambaPidNumbers);
 		$this->attributes['samba_pid_numbers'] = $sambaPidNumbers;
 	}
+
+	/**
+     * Set container samba enability as requesing
+     * 
+     * @return bool
+     */
+    public function setSambaEnabilityRequesting()
+    {
+    	$this->attributes['samba_smbd_enability'] = SmbdEnability::Requesting;
+    	$this->attributes['samba_nmbd_enability'] = NmbdEnability::Requesting;
+    	return $this->save();
+    }
 
 	/**
 	 * Get current samba smbd and nmbd enability

@@ -2,11 +2,21 @@
 
 namespace App\Observers;
 
-use App\Models\SambaUser;
-use App\Models\SambaGroup;
+use App\Models\{ SambaUser, SambaGroup };
 
 class SambaUserObserver
 {
+    /**
+     * Handle the SambaUser "creating" event.
+     *
+     * @param  \App\Models\SambaUser  $sambaUser
+     * @return void
+     */
+    public function creating(SambaUser $sambaUser)
+    {
+        $sambaUser->id = generateUuid();
+    }
+
     /**
      * Handle the SambaUser "created" event.
      *

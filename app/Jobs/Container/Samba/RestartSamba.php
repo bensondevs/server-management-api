@@ -11,32 +11,38 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
 
 use App\Models\Container;
-
 use App\Traits\TrackExecution;
+use App\Jobs\Container\ContainerBaseJob;
 
-use App\Repositories\AmqpRepository;
-
-class RestartSamba implements ShouldQueue
+class RestartSamba extends ContainerBaseJob implements ShouldQueue
 {
     use TrackExecution;
-
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * Timeout seconds until the job execution terminated
+     * 
+     * @var int
+     */
     public $timeout = 1200;
 
-    private $amqpRepo;
+    /**
+     * Target container model container
+     * 
+     * @var \App\Models\Container|null
+     */
     private $serverContainer;
 
     /**
      * Create a new job instance.
      *
+     * @param  \App\Models\Container  $serverContainer
      * @return void
      */
     public function __construct(Container $serverContainer)
     {
+        parent::__construct();
         $this->serverContainer = $serverContainer;
-
-        $this->amqpRepo = new AmqpRepository();
     }
 
     /**
@@ -49,12 +55,10 @@ class RestartSamba implements ShouldQueue
         $container = $this->serverContainer;
         $server = $container->server;
 
-        $this->amqpRepo->connectServerQueue($server);
-        $uuid = $this->amqpRepo->publishJson([
+        $response = $this->sendRequest($server, [
             'command' => 'restart samba',
             'container_id' => $container->id,
         ]);
-        $response = $this->amqpRepo->consumeServerResponse($server, $uuid);
 
         $this->recordResponse($response, ['samba_status']);
 

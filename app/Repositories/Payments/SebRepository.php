@@ -10,7 +10,8 @@ use App\Traits\ApiConsumerTrait;
 use App\Models\{ Payment, SebPayment, Order };
 use App\Enums\Payment\Seb\{
 	SebPaymentStatus as Status,
-	SebPaymentApiResponse as ApiResponseStatus
+	SebPaymentApiResponse as ApiResponseStatus,
+	SebPaymentState as State
 };
 
 class SebRepository extends BaseRepository

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Container\Samba;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+use App\Models\Container;
 use App\Repositories\ContainerSambaRepository;
 
 class ContainerSambaController extends Controller
@@ -75,7 +76,7 @@ class ContainerSambaController extends Controller
     public function stop(Container $container)
     {
         $this->samba->setModel($container);
-        $this->samba->stop();
+        $status = $this->samba->stop();
         return apiResponse($this->samba, ['samba_status' => $status]);
     }
 
@@ -88,7 +89,7 @@ class ContainerSambaController extends Controller
     public function reload(Container $container)
     {
         $this->samba->setModel($container);
-        $this->samba->reload();
+        $status = $this->samba->reload();
         return apiResponse($this->samba, ['samba_status' => $status]);
     }
 
@@ -101,7 +102,7 @@ class ContainerSambaController extends Controller
     public function restart(Container $container)
     {
         $this->samba->setModel($container);
-        $this->samba->restart();
+        $status = $this->samba->restart();
         return apiResponse($this->samba, ['samba_status' => $status]);
     }
 
