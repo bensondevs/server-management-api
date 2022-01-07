@@ -10,34 +10,48 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
 use App\Models\{ SambaGroup, SambaShare, SambaShareGroup };
-
 use App\Traits\TrackExecution;
+use App\Jobs\Container\ContainerBaseJob;
 
-use App\Repositories\AmqpRepository;
-
-class AddSambaShareGroup implements ShouldQueue
+class AddSambaShareGroup extends ContainerBaseJob implements ShouldQueue
 {
-    use TrackExecution;
-
+   use TrackExecution;
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * Timeout seconds until the job execution terminated
+     * 
+     * @var int
+     */
     public $timeout = 1200;
 
-    private $amqpRepo;
+    /**
+     * Target share model container
+     * 
+     * @var \App\Models\SambaShare|null
+     */
     private $share;
+
+    /**
+     * Added group model container
+     * 
+     * @var \App\Models\SambaGroup|null
+     */
     private $group;
 
     /**
      * Create a new job instance.
      *
+     * @var \App\Models\SambaShare  $share
+     * @var \App\Models\SambaGroup  $group
      * @return void
      */
     public function __construct(SambaShare $share, SambaGroup $group)
     {
+        parent::__construct();
+
         $this->share = $share;
         $this->group = $group; 
-
-        $this->amqpRepo = new AmqpRepository;
     }
 
     /**
@@ -52,14 +66,12 @@ class AddSambaShareGroup implements ShouldQueue
         $container = $share->container;
         $server = $container->server;
 
-        $this->amqpRepo->connectServerQueue($server);
-        $this->amqpRepo->publishJson([
+        $response = $this->sendRequest($server, [
             'command' => 'add samba share group',
             'container_id' => $container->id,
             'group_name' => $group->group_name,
             'share_name' => $share->share_name,
         ]);
-        $response = $this->amqpRepo->consumeServerResponse($server);
 
         $this->recordResponse($response);
 

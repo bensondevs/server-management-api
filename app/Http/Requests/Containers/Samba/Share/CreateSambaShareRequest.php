@@ -4,22 +4,10 @@ namespace App\Http\Requests\Containers\Samba\Share;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-use App\Models\{ Container, SambaDirectory };
 use App\Rules\AllowedSambaName;
 
 class CreateSambaShareRequest extends FormRequest
 {
-    private $directory;
-    private $serverContainer;
-
-    public function getServerContainer()
-    {
-        if ($this->serverContainer) return $this->serverContainer;
-
-        $id = $this->input('container_id');
-        return $this->serverContainer = Container::findOrFail($id);
-    }
-
     /**
      * Determine if the user is authorized to make this request.
      *

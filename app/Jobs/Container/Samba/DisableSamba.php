@@ -44,6 +44,7 @@ class DisableSamba extends ContainerBaseJob implements ShouldQueue
      */
     public function __construct(Container $serverContainer)
     {
+        parent::__construct();
         $this->serverContainer = $serverContainer;
     }
 

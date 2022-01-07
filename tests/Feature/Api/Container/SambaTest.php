@@ -47,12 +47,12 @@ use App\Jobs\Container\Samba\Share\{
     DeleteSambaShare,
 
     // Samba Share Group Action
-    AddSambaShareGroup,
-    RemoveSambaShareGroup,
+    Group\AddSambaShareGroup,
+    Group\RemoveSambaShareGroup,
 
     // Samba Share User Action
-    AddSambaShareUser,
-    RemoveSambaShareUser
+    User\AddSambaShareUser,
+    User\RemoveSambaShareUser
 };
 
 class SambaTest extends TestCase
@@ -570,7 +570,24 @@ class SambaTest extends TestCase
      */
     public function test_create_samba_share()
     {
-        //
+        Queue::fake();
+
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $container = $user->containers()->first() ?:
+            Container::factory()->for($user)->create();
+        $url = '/api/containers/' . $container->id . '/samba/shares/create';
+        $response = $this->json('POST', $url, [
+            'directory_name' => random_string(10),
+        ]);
+
+        $response->assertStatus(201);
+        $response->assertJson(function (AssertableJson $json) {
+            $json->has('message')->has('status');
+        });
+
+        Queue::assertPushed(CreateSambaShare::class);
     }
 
     /**
@@ -580,17 +597,45 @@ class SambaTest extends TestCase
      */
     public function test_show_samba_share()
     {
-        //
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $container = $user->containers()->first() ?:
+            Container::factory()->for($user)->create();
+        $share = SambaShare::factory()->for($container)->create();
+        $url = '/api/containers/' . $container->id . '/samba/shares/' . $share->id;
+        $response = $this->json('GET', $url);
+
+        $response->assertStatus(200);
+        $response->assertJson(function (AssertableJson $json) {
+            $json->has('samba_share');
+        });
     }
 
     /**
-     * An update samba share test
+     * A delete samba share test
      * 
      * @return void
      */
-    public function test_update_samba_share()
+    public function test_delete_samba_share()
     {
-        //
+        Queue::fake();
+
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $container = $user->containers()->first() ?:
+            Container::factory()->for($user)->create();
+        $share = SambaShare::factory()->for($container)->create();
+        $url = '/api/containers/' . $container->id . '/samba/shares/' . $share->id . '/delete';
+        $response = $this->json('DELETE', $url);
+
+        $response->assertStatus(200);
+        $response->assertJson(function (AssertableJson $json) {
+            $json->has('status')->has('message');
+        });
+
+        Queue::assertPushed(DeleteSambaShare::class);
     }
 
     /**
@@ -600,7 +645,19 @@ class SambaTest extends TestCase
      */
     public function test_populate_samba_share_groups()
     {
-        //
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $container = $user->containers()->first() ?:
+            Container::factory()->for($user)->create();
+        $share = SambaShare::factory()->for($container)->create();
+        $url = '/api/containers/' . $container->id . '/samba/shares/' . $share->id . '/groups';
+        $response = $this->json('GET', $url);
+
+        $response->assertStatus(200);
+        $response->assertJson(function (AssertableJson $json) {
+            $json->has('samba_groups');
+        });
     }
 
     /**
@@ -610,7 +667,24 @@ class SambaTest extends TestCase
      */
     public function test_add_samba_share_group()
     {
-        //
+        Queue::fake();
+
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $container = $user->containers()->first() ?:
+            Container::factory()->for($user)->create();
+        $share = SambaShare::factory()->for($container)->create();
+        $group = SambaGroup::factory()->for($container)->create();
+        $url = '/api/containers/' . $container->id . '/samba/shares/' . $share->id . '/groups/add/' . $group->id;
+        $response = $this->json('POST', $url);
+
+        $response->assertStatus(201);
+        $response->assertJson(function (AssertableJson $json) {
+            $json->has('status')->has('message');
+        });
+
+        Queue::assertPushed(AddSambaShareGroup::class);
     }
 
     /**
@@ -620,7 +694,27 @@ class SambaTest extends TestCase
      */
     public function test_remove_samba_share_group()
     {
-        //
+        Queue::fake();
+
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $container = $user->containers()->first() ?:
+            Container::factory()->for($user)->create();
+        $shareGroup = SambaShareGroup::factory()
+            ->for($container)
+            ->create();
+        $share = $shareGroup->share;
+        $group = $shareGroup->group;
+        $url = '/api/containers/' . $container->id . '/samba/shares/' . $share->id . '/groups/remove/' . $group->id;
+        $response = $this->json('DELETE', $url);
+
+        $response->assertStatus(200);
+        $response->assertJson(function (AssertableJson $json) {
+            $json->has('status')->has('message');
+        });
+
+        Queue::assertPushed(RemoveSambaShareGroup::class);
     }
 
     /**
@@ -630,7 +724,19 @@ class SambaTest extends TestCase
      */
     public function test_populate_samba_share_users()
     {
-        //
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $container = $user->containers()->first() ?:
+            Container::factory()->for($user)->create();
+        $share = SambaShare::factory()->for($container)->create();
+        $url = '/api/containers/' . $container->id . '/samba/shares/' . $share->id . '/users';
+        $response = $this->json('GET', $url);
+
+        $response->assertStatus(200);
+        $response->assertJson(function (AssertableJson $json) {
+            $json->has('samba_users');
+        });
     }
 
     /**
@@ -640,7 +746,25 @@ class SambaTest extends TestCase
      */
     public function test_add_samba_share_user()
     {
-        //
+        Queue::fake();
+
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $container = $user->containers()->first() ?:
+            Container::factory()->for($user)->create();
+        $share = SambaShare::factory()->for($container)->create();
+        $user = SambaUser::factory()->for($container)->create();
+        $url = '/api/containers/' . $container->id . '/samba/shares/' . $share->id . '/users/add/' . $user->id;
+        $response = $this->json('POST', $url);
+
+        $response->assertStatus(201);
+        $response->assertJson(function (AssertableJson $json) {
+            $json->has('status')->has('message');
+            $json->where('status', 'success');
+        });
+
+        Queue::assertPushed(AddSambaShareUser::class);
     }
 
     /**
@@ -650,6 +774,25 @@ class SambaTest extends TestCase
      */
     public function test_remove_samba_share_user()
     {
-        //
+        Queue::fake();
+
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $container = $user->containers()->first() ?:
+            Container::factory()->for($user)->create();
+        $shareUser = SambaShareUser::factory()->for($container)->create();
+        $share = $shareUser->share;
+        $user = $shareUser->user;
+        $url = '/api/containers/' . $container->id . '/samba/shares/' . $share->id . '/users/remove/' . $user->id;
+        $response = $this->json('DELETE', $url);
+
+        $response->assertStatus(200);
+        $response->assertJson(function (AssertableJson $json) {
+            $json->has('status')->has('message');
+            $json->where('status', 'success');
+        });
+
+        Queue::assertPushed(RemoveSambaShareUser::class);
     }
 }

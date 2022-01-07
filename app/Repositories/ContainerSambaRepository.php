@@ -22,9 +22,6 @@ use App\Enums\Container\Samba\{
 };
 use App\Traits\Repositories\SambaShare as SambaShareTrait;
 use App\Jobs\Container\Samba\{
-	Directory\CreateSambaDirectory as CreateDirectory,
-	Directory\DeleteSambaDirectory as DeleteDirectory,
-
 	Group\CreateSambaGroup as CreateGroup,
 	Group\DeleteSambaGroup as DeleteGroup,
 	Group\User\AddSambaGroupUser as AddGroupUser,
@@ -352,96 +349,6 @@ class ContainerSambaRepository extends BaseRepository
 		} catch (Exception $e) {
 			$error = $e->getMessage();
 			$this->setError('Failed deleting user.', $error);
-		}
-
-		return $this->returnResponse();
-	}
-
-	/**
-	 * Send command to add user to share
-	 * 
-	 * @param  \App\Models\SambaShare  $share
-	 * @param  \App\Models\SambaUser  $user
-	 * @return bool
-	 */
-	public function addShareUser(SambaShare $share, SambaUser $user)
-	{
-		try {
-			$container = $share->container;
-			$job = new AddShareUser($share, $user);
-			$container->trackDispatch($job);
-			
-			$this->setSuccess('Adding user to share...');		
-		} catch (Exception $e) {
-			$error = $e->getMessage();
-			$this->setError('Failed adding share user.', $error);
-		}
-
-		return $this->returnResponse();
-	}
-
-	/**
-	 * Send command to unlink user to share
-	 * 
-	 * @param  \App\Models\SambaShareUser  $shareUser
-	 * @return bool
-	 */
-	public function removeShareUser(SambaShareUser $shareUser)
-	{
-		try {
-			$container = $shareUser->container;
-			$job = new RemoveShareUser($shareUser);
-			$container->trackDispatch($job);
-			
-			$this->setSuccess('Removing share user...');
-		} catch (Exception $e) {
-			$error = $e->getMessage();
-			$this->setError('Failed removing share user.', $error);
-		}
-
-		return $this->returnResponse();
-	}
-
-	/**
-	 * Send command to link group to share
-	 * 
-	 * @param  \App\Models\SambaShare  $share
-	 * @param  \App\Models\SambaGroup  $group
-	 * @return bool
-	 */
-	public function addShareGroup(SambaShare $share, SambaGroup $group)
-	{
-		try {
-			$container = $share->container;
-			$job = new AddShareGroup($share, $group);
-			$container->trackDispatch($job);
-			
-			$this->setSuccess('Adding group to share...');		
-		} catch (Exception $e) {
-			$error = $e->getMessage();
-			$this->setError('Failed adding group to share.', $error);
-		}
-
-		return $this->returnResponse();
-	}
-
-	/**
-	 * Send command to unlink group from share
-	 * 
-	 * @param  \App\Models\SambaShareGroup  $shareGroup
-	 * @return bool
-	 */
-	public function removeShareGroup(SambaShareGroup $shareGroup)
-	{
-		try {
-			$container = $shareGroup->container;
-			$job = new RemoveShareGroup($shareGroup);
-			$container->trackDispatch($job);
-			
-			$this->setSuccess('Removing group from share...');		
-		} catch (Exception $e) {
-			$error = $e->getMessage();
-			$this->setError('Failed removing group from share.', $error);
 		}
 
 		return $this->returnResponse();

@@ -7,6 +7,17 @@ use App\Models\SambaShare;
 class SambaShareObserver
 {
     /**
+     * Handle the SambaShare "creating" event.
+     *
+     * @param  \App\Models\SambaShare  $sambaShare
+     * @return void
+     */
+    public function creating(SambaShare $sambaShare)
+    {
+        $sambaShare->id = generateUuid();
+    }
+
+    /**
      * Handle the SambaShare "created" event.
      *
      * @param  \App\Models\SambaShare  $sambaShare

@@ -107,7 +107,7 @@ class CreateContainersTable extends Migration
             $table->json('samba_pid_numbers')->nullable();
             $table->tinyInteger('samba_smbd_enability')->default(SambaSmbdEnability::Unknown);
             $table->tinyInteger('samba_nmbd_enability')->default(SambaNmbdEnability::Unknown);
-            $table->tinyInteger('samba_bind_to_public_ip')->default(ContainerSambaBindPublicIp::Unbinded);
+            $table->tinyInteger('samba_bind_to_public_ip')->default(SambaBindPublicIp::Unbinded);
 
             // NFS Service
             $table->tinyInteger('nfs_status')->default(NfsStatus::Unknown);

@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Webpatser\Uuid\Uuid;
+use Illuminate\Database\Eloquent\{ Model, SoftDeletes, Builder };
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+use App\Observers\SambaShareObserver as Observer;
 
 class SambaShare extends Model
 {
+    use HasFactory;
+
     /**
      * Model database table
      * 
@@ -44,9 +47,8 @@ class SambaShare extends Model
      */
     protected $fillable = [
         'container_id',
-        'samba_directory_id',
-        'samba_user_id',
         'share_name',
+        'share_config_content',
     ];
 
     /**
@@ -59,10 +61,33 @@ class SambaShare extends Model
     protected static function boot()
     {
     	parent::boot();
+        self::observe(Observer::class);
+    }
 
-    	self::creating(function ($sambaShare) {
-            $sambaShare->id = Uuid::generate()->string;
-    	});
+    /**
+     * Create callable attribute of "config_content"
+     * This callable attribute will return samba share config content
+     * as array
+     * 
+     * @return string
+     */
+    public function getConfigContentAttribute()
+    {
+        $content = $this->attributes['share_config_content'];
+        return json_decode($content, true);
+    }
+
+    /**
+     * Create settable attribute of "config_content"
+     * This settable attribute will set the "samba_config_content" column
+     * as json string using array as input
+     * 
+     * @param  array  $configContent
+     * @return void
+     */
+    public function setConfigContentAttribute(array $configContent)
+    {
+        $this->attributes['share_config_content'] = json_encode($configContent);
     }
 
     /**

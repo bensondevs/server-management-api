@@ -10,34 +10,51 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
 use App\Models\{ SambaUser, SambaShare, SambaShareUser };
-
 use App\Traits\TrackExecution;
+use App\Jobs\Container\ContainerBaseJob;
 
-use App\Repositories\AmqpRepository;
-
-class AddSambaShareUser implements ShouldQueue
+class AddSambaShareUser extends ContainerBaseJob implements ShouldQueue
 {
     use TrackExecution;
-
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * Timeout in seconds until the job execution terminated
+     * 
+     * @var int
+     */
     public $timeout = 1200;
 
-    private $amqpRepo;
+    /**
+     * Target share model container
+     * 
+     * @var \App\Models\SambaShare
+     */
     private $share;
+
+    /**
+     * Added user model container
+     * 
+     * @var \App\Models\SambaUser
+     */
     private $user;
 
     /**
-     * Create a new job instance.
+     * Create a new job instance and set the target share and added user.
+     * 
+     * First parameter will set the target samba share and
+     * Second parameter will set the added user to the share.
      *
+     * @param  \App\Models\SambaShare $share
+     * @param  \App\Models\SambaUser  $user
      * @return void
      */
     public function __construct(SambaShare $share, SambaUser $user)
     {
+        parent::__construct();
+
         $this->share = $share;
         $this->user = $user;
-
-        $this->amqpRepo = new AmqpRepository;
     }
 
     /**
@@ -54,14 +71,12 @@ class AddSambaShareUser implements ShouldQueue
         $username = $user->username;
         $shareName = $share->share_name;
 
-        $this->amqpRepo->connectServerQueue($server);
-        $this->amqpRepo->publishJson([
+        $response = $this->sendRequest($server, [
             'command' => 'add samba share user',
             'container_id' => $container->id,
             'username' => $username,
             'share_name' => $shareName,
         ]);
-        $response = $this->amqpRepo->consumeServerResponse($server);
 
         $this->recordResponse($response);
 

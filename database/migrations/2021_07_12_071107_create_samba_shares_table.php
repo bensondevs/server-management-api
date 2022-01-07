@@ -23,7 +23,7 @@ class CreateSambaSharesTable extends Migration
                 ->onDelete('CASCADE');
 
             $table->string('share_name')->nullable();
-            $table->text('share_content_config')->nullable();
+            $table->text('share_config_content')->nullable();
 
             $table->timestamps();
         });

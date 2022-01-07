@@ -9,12 +9,21 @@ use App\Http\Requests\Containers\Samba\Share\{
     CreateSambaShareRequest as CreateRequest,
     DeleteSambaShareRequest as DeleteShareRequest,
     User\AddSambaShareUserRequest as AddUserRequest,
-    User\RemoveSambaShareUserRequest as RemoveUserRequest,
     Group\AddSambaShareGroupRequest as AddGroupRequest,
-    Group\RemoveSambaShareGroupRequest as RemoveGroupRequest,
 };
-use App\Http\Resources\SambaShareResource;
-use App\Models\{ Container, SambaShare };
+use App\Http\Resources\{ 
+    SambaShareResource, 
+    SambaGroupResource, 
+    SambaUserResource 
+};
+use App\Models\{ 
+    Container, 
+    SambaShare, 
+    SambaGroup, 
+    SambaUser,
+    SambaShareUser,
+    SambaShareGroup
+};
 
 use App\Repositories\ContainerSambaRepository;
 
@@ -59,9 +68,9 @@ class ContainerSambaShareController extends Controller
      */
     public function create(CreateRequest $request, Container $container)
     {
-        $input = $request->validated();
         $this->samba->setModel($container);
-        $this->samba->createUser($input);
+        $directoryName = $request->input('directory_name');
+        $this->samba->createShare($directoryName);
         return apiResponse($this->samba);
     }
 
@@ -80,17 +89,30 @@ class ContainerSambaShareController extends Controller
     }
 
     /**
+     * Populate samba share users
+     * 
+     * @param  \App\Models\Container   $container
+     * @param  \App\Models\SambaShare  $share
+     * @return \Illuminate\Support\Facades\Response
+     */
+    public function shareUsers(Container $container, SambaShare $share)
+    {
+        $users = $share->users;
+        $users = SambaUserResource::collection($users);
+
+        return response()->json(['samba_users' => $users]);
+    }
+
+    /**
      * Add Samba Share User
      * 
-     * @param AddUserRequest  $request
-     * @param \App\Models\Container  $container
-     * @param \App\Models\SambaShare  $share
-     * @return Illuminate\Support\Facades\Response
+     * @param  \App\Models\Container  $container
+     * @param  \App\Models\SambaShare  $share
+     * @return \Illuminate\Support\Facades\Response
      */
-    public function addUser(AddUserRequest $request, Container $container, SambaShare $share)
+    public function addUser(Container $container, SambaShare $share, SambaUser $user)
     {
         $this->samba->setModel($container);
-        $user = $request->getSambaUser();
         $this->samba->addShareUser($share, $user);
         return apiResponse($this->samba);
     }
@@ -105,19 +127,44 @@ class ContainerSambaShareController extends Controller
      */
     public function removeUser(Container $container, SambaShare $share, SambaUser $user) 
     {
-        //
+        $this->samba->setModel($container);
+        $shareUser = SambaShareUser::where('samba_share_id', $share->id)
+            ->where('samba_user_id', $user->id)
+            ->first();
+        $this->samba->removeShareUser($shareUser);
+
+        return apiResponse($this->samba);
+    }
+
+    /**
+     * Populate samba share groups
+     * 
+     * @param  \App\Models\Container  $container
+     * @param  \App\Models\SambaShare $share
+     * @return \Illuminate\Support\Facades\Response
+     */
+    public function shareGroups(Container $container, SambaShare $share)
+    {
+        $groups = $share->groups;
+        $groups = SambaGroupResource::collection($groups);
+
+        return response()->json(['samba_groups' => $groups]);
     }
 
     /**
      * Add Samba Share Group
      * 
+     * @param AddSambaShareGroupRequest
      * @param \App\Models\Container  $container
      * @param \App\Models\SambaShare  $share
-     * @return Illuminate\Support\Facades\Response
+     * @return \Illuminate\Support\Facades\Response
      */
-    public function addGroup( Container $container, SambaShare $share) 
+    public function addGroup(Container $container, SambaShare $share, SambaGroup $group) 
     {
-        //
+        $this->samba->setModel($container);
+        $this->samba->addShareGroup($share, $group);
+
+        return apiResponse($this->samba);
     }
 
     /**
@@ -125,12 +172,18 @@ class ContainerSambaShareController extends Controller
      * 
      * @param \App\Models\Container  $container
      * @param \App\Models\SambaShare  $share
-     * @param \App\Models\SambaUser  $user
+     * @param \App\Models\SambaGroup  $user
      * @return Illuminate\Support\Facades\Response
      */
-    public function removeGroup(Container $container, SambaShare $share, SambaUser $user) 
+    public function removeGroup(Container $container, SambaShare $share, SambaGroup $group) 
     {
-        //
+        $this->samba->setModel($container);
+        $shareGroup = SambaShareGroup::where('samba_share_id', $share->id)
+            ->where('samba_group_id', $group->id)
+            ->firstOrFail();
+        $this->samba->removeShareGroup($shareGroup);
+
+        return apiResponse($this->samba);
     }
 
     /**
@@ -142,6 +195,9 @@ class ContainerSambaShareController extends Controller
      */
     public function delete(Container $container, SambaShare $share) 
     {
-        //
+        $this->samba->setModel($container);
+        $this->samba->deleteShare($share);
+
+        return apiResponse($this->samba);
     }
 }

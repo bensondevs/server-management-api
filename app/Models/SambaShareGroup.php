@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Webpatser\Uuid\Uuid;
+use Illuminate\Database\Eloquent\{ Model, SoftDeletes, Builder };
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+use App\Observers\SambaShareGroupObserver as Observer;
 
 class SambaShareGroup extends Model
 {
+    use HasFactory;
+
     /**
      * Model database table
      * 
@@ -65,10 +68,7 @@ class SambaShareGroup extends Model
     protected static function boot()
     {
     	parent::boot();
-
-    	self::creating(function ($sambaShareGroup) {
-            $sambaShareGroup->id = Uuid::generate()->string;
-    	});
+        self::observe(Observer::class);
     }
 
     /**
@@ -84,7 +84,7 @@ class SambaShareGroup extends Model
      */
     public function group()
     {
-        return $this->belongsTo(SambaGroup::class);
+        return $this->belongsTo(SambaGroup::class, 'samba_group_id');
     }
 
     /**
@@ -92,6 +92,6 @@ class SambaShareGroup extends Model
      */
     public function share()
     {
-        return $this->belongsTo(SambaShare::class);
+        return $this->belongsTo(SambaShare::class, 'samba_share_id');
     }
 }
