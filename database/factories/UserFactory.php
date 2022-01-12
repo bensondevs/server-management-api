@@ -17,6 +17,37 @@ class UserFactory extends Factory
     protected $model = User::class;
 
     /**
+     * The assigned role name after user's creation
+     * 
+     * @var string
+     */
+    private $role = 'user';
+
+    /**
+     * Configure the model factory.
+     *
+     * @return $this
+     */
+    public function configure()
+    {
+        $role = $this->role;
+
+        return $this->afterMaking(function (User $user) {
+            if ($user->email && (! $user->username)) {
+                $email = $user->email;
+                $user->username = emailToUsername($email);
+            }
+
+            if (! $user->username) {
+                $faker = $this->faker;
+                $user->username = $faker->userName() . $faker->userName();
+            }
+        })->afterCreating(function (User $user) use ($role) {
+            $user->assignRole($role);
+        });
+    }
+
+    /**
      * Define the model's default state.
      *
      * @return array
@@ -32,7 +63,7 @@ class UserFactory extends Factory
             'country' => $faker->country(),
             'address' => $faker->address(),
             'vat_number' => $faker->randomNumber(8, false),
-            'username' => $faker->userName() . $faker->userName(),
+            // 'username' => $faker->userName() . $faker->userName(),
             'email' => $faker->userName() . $faker->safeEmail(),
             'password' => bcrypt('password'),
             'company_name' => $faker->company(),
@@ -52,5 +83,18 @@ class UserFactory extends Factory
                 'email_verified_at' => null,
             ];
         });
+    }
+
+    /**
+     * Indicate that the model's user will be assigned with role of administrator
+     * after the model creation.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function administrator()
+    {
+        $this->role = 'administrator';
+
+        return $this;
     }
 }

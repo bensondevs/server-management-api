@@ -14,7 +14,7 @@ class UserResource extends JsonResource
      */
     public function toArray($request)
     {
-        return [
+        $structure = [
             'id' => $this->id,
 
             'account_type' => $this->account_type,
@@ -35,5 +35,11 @@ class UserResource extends JsonResource
             'company_name' => $this->company_name,
             'subscribe_newsletter' => $this->subscribe_newsletter,
         ];
+
+        if (isset($this->token)) {
+            $structure['token'] = $this->token;
+        }
+
+        return $structure;
     }
 }

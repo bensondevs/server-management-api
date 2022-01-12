@@ -7,7 +7,8 @@ use App\Http\Controllers\Meta\{
 	DatacenterController,
 	SubnetController,
 	JobTrackerController,
-	OrderController
+	OrderController,
+	UserController
 };
 
 /*
@@ -21,6 +22,10 @@ use App\Http\Controllers\Meta\{
 */
 
 Route::group(['as' => 'meta.'], function () {
+	Route::group(['prefix' => 'user', 'as' => 'user.'], function () {
+		Route::('account_types', [UserController::class, 'accountTypes']);
+	});
+
 	Route::group(['prefix' => 'countries', 'as' => 'countries.'], function () {
 		Route::get('/', [CountryController::class, 'countries'])->name('index');
 	});

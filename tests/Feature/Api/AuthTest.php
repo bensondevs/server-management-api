@@ -36,7 +36,7 @@ class AuthTest extends TestCase
         $response->assertJson(function (AssertableJson $json) {
             $json->has('message');
             $json->where('status', 'success');
-            $json->has('user');
+            $json->has('user')->etc();
         });
     }
 

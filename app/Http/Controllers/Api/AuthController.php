@@ -51,8 +51,52 @@ class AuthController extends Controller
             return apiResponse($this->auth);
         }
 
+        $token = $user->token;
         $user = new UserResource($user);
-        return apiResponse($this->auth, ['user' => $user]);
+        return apiResponse($this->auth, [
+            'user' => $user,
+            'token' => $token,
+        ]);
+    }
+
+    /**
+     * Check token in headers validity
+     * 
+     * @return \Illuminate\Support\Facades\Response
+     */
+    public function checkTokenValidity()
+    {
+        $isValid = auth('sanctum')->check();
+
+        return response()->json(['valid' => $isValid]);
+    }
+
+    /**
+     * Check if username is available
+     * 
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Support\Facades\Response
+     */
+    public function checkUsernameAvailable(Request $request)
+    {
+        $username = $request->input('username');
+        $exists =  db('users')->where('username', $username)->exists();
+
+        return response()->json(['available' => (! $exists)]);
+    }
+
+    /**
+     * Check if email is available
+     * 
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Support\Facades\Response
+     */
+    public function checkEmailAvailable()
+    {
+        $email = $request->input('email');
+        $exists = db('users')->where('email', $email)->exists();
+
+        return response()->json(['available' => (! $exists)]);
     }
 
     /**

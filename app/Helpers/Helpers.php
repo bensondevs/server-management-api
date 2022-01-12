@@ -76,6 +76,20 @@ if (! function_exists('urlToUsername')) {
 }
 
 /**
+ * Convert email name to username
+ * 
+ * @param  string  $email
+ * @return string
+ */
+if (! function_exists('emailToUsername')) {
+    function emailToUsername(string $email)
+    {
+        $explode = explode('@', $email);
+        return $explode[0];
+    }
+}
+
+/**
  * Get object pure class name without namespaces
  * 
  * @param  mixed  $class
@@ -267,8 +281,9 @@ if (! function_exists('apiResponse')) {
         $response = [];
 
         if (is_array($responseData)) {
-            $attribute = array_keys($responseData)[0];
-            $response[$attribute] = $responseData[$attribute];
+            foreach (array_keys($responseData) as $attribute) {
+                $response[$attribute] = $responseData[$attribute];
+            }
         } else if ($responseData !== null) {
             $response['data'] = $responseData;
         }
