@@ -81,6 +81,18 @@ class ContainerSambaUserController extends Controller
     }
 
     /**
+     * Show container samba user information details
+     * 
+     * @param  \App\Models\Container  $container
+     * @param  \App\Models\SambaUser  $user
+     */
+    public function show()
+    {
+        $sambaUser = new SambaUserResource($user);
+        return response()->json(['samba_user' => $sambaUser]);
+    }
+
+    /**
      * Change Container Samba User Passwod
      * 
      * @param ChangePasswordRequest  $request

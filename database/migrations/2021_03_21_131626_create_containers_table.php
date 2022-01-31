@@ -14,7 +14,8 @@ use App\Enums\Container\Vpn\{
 };
 use App\Enums\Container\Nfs\{
     ContainerNfsStatus as NfsStatus,
-    ContainerNfsEnability as NfsEnability
+    ContainerNfsEnability as NfsEnability,
+    ContainerNfsBindPublicIp as NfsBindPublicIp
 };
 use App\Enums\Container\Nginx\{
     ContainerNginxStatus as NginxStatus,
@@ -113,6 +114,7 @@ class CreateContainersTable extends Migration
             $table->tinyInteger('nfs_status')->default(NfsStatus::Unknown);
             $table->json('nfs_pid_numbers')->nullable();
             $table->tinyInteger('nfs_enability')->default(NfsEnability::Unknown);
+            $table->tinyInteger('nfs_bind_to_public_ip')->default(NfsBindPublicIp::Unbinded);
 
             // NGINX Service
             $table->tinyInteger('nginx_status')->default(NginxStatus::Unknown);

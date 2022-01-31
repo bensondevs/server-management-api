@@ -24,6 +24,7 @@ class CreateSambaSharesTable extends Migration
 
             $table->string('share_name')->nullable();
             $table->text('share_config_content')->nullable();
+            $table->char('permissions')->default('r');
 
             $table->timestamps();
         });

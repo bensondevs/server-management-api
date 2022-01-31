@@ -15,6 +15,14 @@ class NfsExportsSeeder extends Seeder
      */
     public function run()
     {
-        //
+        foreach (Container::with('nfsFolders')->get() as $container) {
+            foreach ($container->nfsFolders as $nfsFolder) {
+                NfsExport::factory()
+                    ->for($container)
+                    ->for($nfsFolder)
+                    ->count(rand(2, 5))
+                    ->create();
+            }
+        }
     }
 }

@@ -40,7 +40,13 @@ class ContainerController extends Controller
      */
     public function userContainers()
     {
-        return response()->json(['containers' => auth()->user()->containers()]);
+        $containers = Container::ownedBy(auth()->user())
+            // ->active()
+            ->with(['region', 'subscription.subscribeable', 'order'])
+            ->get();
+        return response()->json([
+            'containers' => ContainerResource::collection($containers)
+        ]);
     }
 
     /**

@@ -33,4 +33,32 @@ final class ContainerSambaBindPublicIp extends Enum
      * @var int
      */
     const Unknown = 3;
+
+    /**
+     * Get bootstrap badge HTML class
+     * 
+     * @return string
+     */
+    public function badgeHtmlClass()
+    {
+        switch ($this->value) {
+            case self::Requesting:
+                $labelType = 'label-secondary';
+                break;
+
+            case self::Binded:
+                $labelType = 'label-success';
+                break;
+            
+            case self::Unbinded:
+                $labelType = 'label-light';
+                break;
+
+            default:
+                $labelType = 'label-secondary';
+                break;
+        }
+
+        return 'label ' . $labelType . ' label-inline font-weight-lighter mr-2';
+    }
 }

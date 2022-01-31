@@ -17,8 +17,9 @@ class CountryController extends Controller
      */
     public function countries()
     {
+        $countries = Country::orderBy('country_name')->get();
         return response()->json([
-            'countries' => CountryResource::collection(Country::all())
+            'countries' => CountryResource::collection($countries)
         ]);
     }
 }

@@ -8,6 +8,11 @@ trait CompanyInputRequest
 {
     use InputRequest;
 
+    /**
+     * Found company model container
+     * 
+     * @var \App\Models\Company|null 
+     */
     private $company;
 
     public function getCompany()
@@ -21,8 +26,9 @@ trait CompanyInputRequest
         }
 
         // ID is already set
-        if ($id = $this->input('company_id')) 
+        if ($id = $this->input('company_id')) {
             return $this->company = Company::findOrFail($id);
+        }
 
         // None exist
         $user = $this->user();
@@ -73,7 +79,7 @@ trait CompanyInputRequest
 
     public function ruleWithCompany()
     {
-    	$input = $this->onlyInRules();
+    	$input = $this->validated();
     	$input['company_id'] = $this->getCompany()->id;
 
     	return $input;

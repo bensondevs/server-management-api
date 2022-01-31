@@ -9,11 +9,11 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-use App\Models\{ Container, SambaDirectory, SambaShare };
+use App\Models\{ Container, SambaShare };
 use App\Traits\TrackExecution;
 use App\Jobs\Container\ContainerBaseJob;
 
-class CreateSambaShare extends ContainerBaseJob implements ShouldQueue
+class ChangeSambaSharesPermissions extends ContainerBaseJob implements ShouldQueue
 {
     use TrackExecution;
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -26,30 +26,39 @@ class CreateSambaShare extends ContainerBaseJob implements ShouldQueue
     public $timeout = 1200;
 
     /**
-     * Target container model container
+     * Target server container
      * 
      * @var \App\Models\Container|null
      */
     private $serverContainer;
 
     /**
-     * Target directory name
+     * Samba Share Ids array
      * 
-     * @var string
+     * @var array
      */
-    private $directoryName;
+    private $sambaShareIds;
+
+    /**
+     * Samba Shares new permissions
+     * 
+     * @var array
+     */
+    private $permissions;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(Container $serverContainer, string $directoryName)
-    {
+    public function __construct(
+        Container $serverContainer, 
+        array $sambaShareIds, 
+        array $permissions
+    ) {
         parent::__construct();
-
-        $this->serverContainer = $serverContainer;
-        $this->directoryName = $directoryName;
+        $this->sambaShareIds = $sambaShareIds;
+        $this->permissions = $permissions;
     }
 
     /**
@@ -61,25 +70,23 @@ class CreateSambaShare extends ContainerBaseJob implements ShouldQueue
     {
         $container = $this->serverContainer;
         $server = $container->server;
-        $directoryName = $this->directoryName;
+        $ids = $this->sambaShareIds;
+        $permissions = $this->permissions;
 
         $response = $this->sendRequest($server, [
-            'command' => 'create samba share',
+            'command' => 'change samba shares permissions',
             'container_id' => $container->id,
-            'share_name' => $directoryName,
+            'samba_share_ids' => $ids,
+            'permissions' => $permissions,
         ]);
 
         $this->recordResponse($response);
 
         if ($response['status'] == 'success') {
-            $config = $response['share_config_content'];
-            $share = new SambaShare([
-                'container_id' => $container->id,
-                'share_name' => $directoryName,
-                'share_content_config' => $config,
-            ]);
-            $share->save();
+            foreach (SambaShare::whereIn('id', $ids)->get() as $share) {
+                $share->permissions_array = $permissions;
+                $share->save();
+            }
         }
-
     }
 }

@@ -23,10 +23,7 @@ class ContainerResource extends JsonResource
         $structure = [
             'id' => $this->id,
 
-            'service_plan_id' => $this->service_plan_id,
-
             'user_id' => $this->user_id,
-
             'region_id' => $this->region_id,
             'datacenter_id' => $this->datacenter_id,
             'server_id' => $this->server_id,
@@ -36,12 +33,11 @@ class ContainerResource extends JsonResource
             'hostname' => $this->hostname,
             'client_email' => $this->client_email,
 
+            'created_on_server_at' => $this->created_on_server_at,
+            'system_installed_at' => $this->system_installed_at,
+
             'status' => $this->status,
             'status_description' => $this->status_description,
-            
-            'disk_space' => $this->disk_space,
-            'disk_array' => $this->disk_array,
-            'breakpoints' => $this->breakpoints,
 
             'current' => $this->current,
 
@@ -57,6 +53,16 @@ class ContainerResource extends JsonResource
             if (! $structure['client_email']) {
                 $structure['client_email'] = $structure['user']->email;
             }
+        }
+
+        if ($this->relationLoaded('region')) {
+            $region = new RegionResource($this->region);
+            $structure['region'] = $region;
+        }
+
+        if ($this->relationLoaded('datacenter')) {
+            $datacenter = new DatacenterResource($this->datacenter);
+            $structure['datacenter'] = $datacenter;
         }
 
         if ($this->relationLoaded('server')) {
@@ -79,6 +85,10 @@ class ContainerResource extends JsonResource
 
         if ($this->relationLoaded('order')) {
             $structure['order'] = new OrderResource($this->order);
+        }
+
+        if ($this->relationLoaded('subscription')) {
+            $structure['subscription'] = new SubscriptionResource($this->subscription);
         }
 
         if ($this->relationLoaded('vpnUsers')) {

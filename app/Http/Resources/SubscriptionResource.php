@@ -30,7 +30,23 @@ class SubscriptionResource extends JsonResource
             'start' => $this->start,
             'human_start' => $this->human_start,
             'end' => $this->end,
+            'human_end' => $this->human_end,
         ];
+
+        if ($this->relationLoaded('user')) {
+            $user = new UserResource($this->user);
+            $structure['user'] = $user;
+        }
+
+        if ($this->relationLoaded('subscriber')) {
+            $subscriber = $this->subscriber;
+            $structure['subscriber'] = $subscriber;
+        }
+
+        if ($this->relationLoaded('subscribeable')) {
+            $subscribeable = $this->subscribeable;
+            $structure['subscribeable'] = $subscribeable;
+        }
 
         return $structure;
     }

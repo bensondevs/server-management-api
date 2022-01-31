@@ -104,6 +104,7 @@ class Container extends Model
         'samba_pid_numbers',
         'samba_smbd_enability',
         'samba_nmbd_enability',
+        'samba_bind_to_public_ip',
 
         'nfs_status',
         'nfs_pid_numbers',

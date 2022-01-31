@@ -44,6 +44,7 @@ class SambaShareFactory extends Factory
                 'config2' => random_string(),
                 'config3' => random_string(),
             ],
+            'permissions' => 'pwr',
         ];
     }
 }

@@ -13,13 +13,13 @@ use App\Models\Container;
 use App\Traits\TrackExecution;
 use App\Jobs\Container\ContainerBaseJob;
 
-class CompleteNfsCheck extends ContainerBaseJob implements ShouldQueue
+class BindNfsPublicIp  extends ContainerBaseJob implements ShouldQueue
 {
     use TrackExecution;
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * Targat container model to be checked
+     * Target container model to be executed
      * 
      * @var \App\Models\Container|null
      */
@@ -28,7 +28,7 @@ class CompleteNfsCheck extends ContainerBaseJob implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param \App\Models\Container  $serverContainer
+     * @param  \App\Models\Container  $serverContainer
      * @return void
      */
     public function __construct(Container $serverContainer)
@@ -48,19 +48,15 @@ class CompleteNfsCheck extends ContainerBaseJob implements ShouldQueue
         $server = $container->server;
 
         $response = $this->sendRequest($server, [
-            'command' => 'complete nfs check',
+            'command' => 'bind nfs public ip',
             'container_id' => $container->id,
         ]);
 
         $this->recordResponse($response, [
-            'nfs_status', 
-            'nfs_pid_numbers', 
-            'nfs_enability'
+            'bind_public_ip',
         ]);
 
-        $container->nfs_status = $response['nfs_status'] ?: 'Unknown';
-        $container->nfs_pid_numbers = $response['nfs_pid_numbers'];
-        $container->nfs_enability = $response['nfs_enability'];
+        $container->bind_public_ip = $response['bind_public_ip'];
         $container->save();
     }
 }

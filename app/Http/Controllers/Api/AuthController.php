@@ -91,7 +91,7 @@ class AuthController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Support\Facades\Response
      */
-    public function checkEmailAvailable()
+    public function checkEmailAvailable(Request $request)
     {
         $email = $request->input('email');
         $exists = db('users')->where('email', $email)->exists();

@@ -60,6 +60,10 @@ Route::group(['as' => 'api.'], function () {
 		Route::post('login', [AuthController::class, 'login'])->name('login');
 		Route::post('register', [AuthController::class, 'register'])->name('register');
 		Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+
+		Route::get('check_token', [AuthController::class, 'checkTokenValidity']);
+		Route::get('check_username', [AuthController::class, 'checkUsernameAvailable']);
+		Route::get('check_email', [AuthController::class, 'checkEmailAvailable']);
 	});
 
 	/**
@@ -156,6 +160,12 @@ Route::group(['as' => 'api.'], function () {
 					Route::post('/enable', [NfsController::class, 'enable']);
 					Route::post('/disable', [NfsController::class, 'disable']);
 
+					Route::group(['prefix' => 'public_ip'], function () {
+						Route::post('/bind', [NfsController::class, 'bindPublicIp']);
+						Route::post('/unbind', [NfsController::class, 'unbindPublicIp']);
+					});
+
+
 					/**
 					 * Container Folders Module
 					 */
@@ -215,17 +225,26 @@ Route::group(['as' => 'api.'], function () {
 					Route::post('/disable', [SambaController::class, 'disable']);
 
 					/**
+					 * Samba public ip modules
+					 */
+					Route::group(['prefix' => '/public_ip'], function () {
+						Route::post('/bind', [SambaController::class, 'bindPublicIp']);
+						Route::post('/unbind', [SambaController::class, 'unbindPublicIp']);
+					});
+
+					/**
 					 * Samba Share Modules
 					 */
 					Route::group(['prefix' => '/shares'], function () {
 						Route::get('/', [SambaShareController::class, 'sambaShares']);
 						Route::post('/create', [SambaShareController::class, 'create']);
+						Route::post('/change_permissions', [SambaShareController::class, 'changePermissions']);
 
 						Route::group(['prefix' => '/{share}'], function () {
 							/**
 							 * Samba Share basic actions
 							 */
-							Route::get('/', [SambaShareController::class, 'show']);
+							Route::get('/show', [SambaShareController::class, 'show']);
 							Route::delete('/delete', [SambaShareController::class, 'delete']);
 
 							/**
@@ -253,7 +272,7 @@ Route::group(['as' => 'api.'], function () {
 					 */
 					Route::group(['prefix' => '/groups'], function () {
 						Route::get('/', [SambaGroupController::class, 'sambaGroups']);
-						Route::get('/{group}', [SambaGroupController::class, 'show']);
+						Route::get('/{group}/show', [SambaGroupController::class, 'show']);
 
 						/**
 						 * Samba Group Users
@@ -271,8 +290,12 @@ Route::group(['as' => 'api.'], function () {
 					Route::group(['prefix' => '/users'], function () {
 						Route::get('/', [SambaUserController::class, 'sambaUsers']);
 						Route::post('/create', [SambaUserController::class, 'create']);
-						Route::match(['PUT', 'PATCH'], '/{user}/change_password', [SambaUserController::class, 'changePassword']);
-						Route::delete('/{user}/delete', [SambaUserController::class, 'delete']);
+
+						Route::group(['prefix' => '/{user}'], function () {
+							Route::get('/show', [SambaUserController::class, 'show']);
+							Route::match(['PUT', 'PATCH'], '/change_password', [SambaUserController::class, 'changePassword']);
+							Route::delete('/delete', [SambaUserController::class, 'delete']);
+						});
 					});
 				});
 

@@ -17,7 +17,10 @@ use App\Jobs\Container\Nfs\{
 	StartNfs as Start,
 	StopNfs as Stop,
 	EnableNfs as Enable,
-	DisableNfs as Disable
+	DisableNfs as Disable,
+
+	BindNfsPublicIp as BindPublicIp,
+	UnbindNfsPublicIp as UnbindPublicIp
 };
 use App\Http\Resources\{
 	NfsExportResource, 
@@ -184,12 +187,54 @@ class ContainerNfsRepository extends BaseRepository
 			$job = new Disable($container);
 			$container->trackDispatch($job);
 			
-			$this->setSuccess('Enabling NFS star on boot...');		
+			$this->setSuccess('Enabling NFS start on boot...');		
 		} catch (Exception $e) {
 			$error = $e->getMessage();
 			$this->setError('Failed enabling NFS start on boot', $error);
 		}
 
 		return $container->current_nfs_enability;
+	}
+
+	/**
+	 * Bind NFS to public ip
+	 * 
+	 * @return int
+	 */
+	public function bindPublicIp()
+	{
+		try {
+			$container = $this->getModel();
+			$job = new BindPublicIp($container);
+			$container->trackDispatch($job);
+
+			$this->setSuccess('Binding NFS to public IP...');
+		} catch (Exception $e) {
+			$error = $e->getMessage();
+			$this->setError('Failed to bind NFS to public IP.', $error);
+		}
+
+		return $container->current_nfs_bind_public_ip;
+	}
+
+	/**
+	 * Unbind NFS to public ip
+	 * 
+	 * @return int
+	 */
+	public function unbindPublicIp()
+	{
+		try {
+			$container = $this->getModel();
+			$job = new unbindPublicIp($container);
+			$container->trackDispatch($job);
+
+			$this->setSuccess('Unbinding NFS from public IP...');
+		} catch (Exception $e) {
+			$error = $e->getMessage();
+			$this->setError('Failed to unbind NFS from public IP.', $error);
+		}
+
+		return $container->current_nfs_bind_public_ip;
 	}
 }

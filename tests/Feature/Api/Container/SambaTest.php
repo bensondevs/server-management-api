@@ -45,6 +45,7 @@ use App\Jobs\Container\Samba\Share\{
     // Basic Samba Share Action
     CreateSambaShare,
     DeleteSambaShare,
+    ChangeSambaSharesPermissions,
 
     // Samba Share Group Action
     Group\AddSambaShareGroup,
@@ -444,7 +445,7 @@ class SambaTest extends TestCase
         $container = $user->containers()->first() ?:
             Container::factory()->for($user)->create();
         $sambaGroup = SambaGroup::factory()->for($container)->create();
-        $url = '/api/containers/' . $container->id . '/samba/groups/' . $sambaGroup->id;
+        $url = '/api/containers/' . $container->id . '/samba/groups/' . $sambaGroup->id . '/show';
         $response = $this->json('GET', $url);
 
         $response->assertStatus(200);
@@ -585,9 +586,48 @@ class SambaTest extends TestCase
         $response->assertStatus(201);
         $response->assertJson(function (AssertableJson $json) {
             $json->has('message')->has('status');
+            $json->where('status', 'success');
         });
 
         Queue::assertPushed(CreateSambaShare::class);
+    }
+
+    /**
+     * A change samba shares permissions test
+     * 
+     * @return void
+     */
+    public function test_change_samba_shares_permissions()
+    {
+        Queue::fake();
+
+        $user = User::first() ?: User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+
+        $container = $user->containers()->first() ?:
+            Container::factory()->for($user)->create();
+        $shares = SambaShare::factory()
+            ->for($container)
+            ->count(5)
+            ->create();
+        $url = '/api/containers/' . $container->id . '/samba/shares/change_permissions';
+
+        $payload = [
+            'permissions' => ['public', 'write'],
+            'samba_share_ids' => [],
+        ];
+        foreach ($shares as $key => $share) {
+            array_push($payload['samba_share_ids'], $share->id);
+        }
+        $response = $this->json('POST', $url, $payload);
+
+        $response->assertStatus(201);
+        $response->assertJson(function (AssertableJson $json) {
+            $json->has('message')->has('status');
+            $json->where('status', 'success');
+        });
+
+        Queue::assertPushed(ChangeSambaSharesPermissions::class);
     }
 
     /**
@@ -603,7 +643,7 @@ class SambaTest extends TestCase
         $container = $user->containers()->first() ?:
             Container::factory()->for($user)->create();
         $share = SambaShare::factory()->for($container)->create();
-        $url = '/api/containers/' . $container->id . '/samba/shares/' . $share->id;
+        $url = '/api/containers/' . $container->id . '/samba/shares/' . $share->id . '/show';
         $response = $this->json('GET', $url);
 
         $response->assertStatus(200);

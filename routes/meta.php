@@ -23,7 +23,7 @@ use App\Http\Controllers\Meta\{
 
 Route::group(['as' => 'meta.'], function () {
 	Route::group(['prefix' => 'user', 'as' => 'user.'], function () {
-		Route::('account_types', [UserController::class, 'accountTypes']);
+		Route::get('account_types', [UserController::class, 'accountTypes']);
 	});
 
 	Route::group(['prefix' => 'countries', 'as' => 'countries.'], function () {
@@ -47,7 +47,6 @@ Route::group(['as' => 'meta.'], function () {
 	Route::group(['prefix' => 'container', 'as' => 'container.'], function () {
 		Route::get('status_badges', [ContainerController::class, 'statusBadges']);
 		Route::get('vpn_status_badges', [ContainerController::class, 'vpnStatusBadges']);
-		Route::get('vpn_start_on_boot_statuses', [ContainerController::class, 'vpnStartOnBootStatuses']);
 		Route::get('samba_status_badges', [ContainerController::class, 'sambaStatusBadges']);
 		Route::get('nfs_status_badges', [ContainerController::class, 'nfsStatusBadges']);
 		Route::get('nginx_status_badges', [ContainerController::class, 'nginxStatusBadges']);

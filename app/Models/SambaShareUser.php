@@ -94,4 +94,12 @@ class SambaShareUser extends Model
     {
         return $this->belongsTo(SambaUser::class, 'samba_user_id');
     }
+
+    /**
+     * Get permission of this connection between user and share
+     */
+    public function permission()
+    {
+        return $this->hasOne(SambaShareUserPermission::class);
+    }
 }

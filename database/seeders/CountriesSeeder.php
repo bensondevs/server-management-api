@@ -32,7 +32,7 @@ class CountriesSeeder extends Seeder
         $countries = [];
         foreach ($rawCountries as $rawCountry) {
             $country = [
-    			'country_name' => $rawCountry['name']['official'],
+    			'country_name' => $rawCountry['name']['common'],
     			'country_json' => json_encode($rawCountry),
                 'created_at' => now(),
                 'updated_at' => now(),

@@ -7,6 +7,7 @@ use App\Http\Resources\SambaShareResource;
 use App\Jobs\Container\Samba\Share\{
     CreateSambaShare as Create,
     DeleteSambaShare as Delete,
+    ChangeSambaSharesPermissions as ChangePermissions,
     Group\AddSambaShareGroup as AddGroup,
     Group\RemoveSambaShareGroup as RemoveGroup,
     User\AddSambaShareUser as AddUser,
@@ -52,6 +53,28 @@ trait SambaShare
         } catch (Exception $e) {
             $error = $e->getMessage();
             $this->setError('Failed creating share for directory.', $error);
+        }
+
+        return $this->returnResponse();
+    }
+
+    /**
+     * Send commant to change change samba share permissions
+     * 
+     * @param  array  $sambaShareIds
+     * @param  array  $permissions
+     */
+    public function changeSharesPermissions(array $sambaShareIds, array $permissions)
+    {
+        try {
+            $container = $this->getModel();
+            $job = new ChangePermissions($container, $sambaShareIds, $permissions);
+            $container->trackDispatch($job);
+
+            $this->setSuccess('Changing shares permissions...');
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+            $this->setError('Failed to change shares permisions.', $error);
         }
 
         return $this->returnResponse();

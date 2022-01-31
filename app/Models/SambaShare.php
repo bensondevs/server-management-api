@@ -91,6 +91,50 @@ class SambaShare extends Model
     }
 
     /**
+     * Create settable attribute of "permissions_attribute"
+     * This settavle attribute will set the "permissions" column as
+     * string of permissions using array of input
+     * 
+     * @param  array  $permissions
+     * @return void
+     */
+    public function setPermissionsArrayAttribute(array $permissions)
+    {
+        $stringPermissions = '';
+        foreach (array_unique($permissions) as $permission) {
+            switch (strtolower($permission)) {
+                case 'public':
+                    $stringPermissions .= 'p';
+                    break;
+
+                case 'read':
+                    $stringPermissions .= 'r';
+                    break;
+
+                case 'write':
+                    $stringPermissions .= 'w';
+                    break;
+
+                case 'p':
+                    $stringPermissions .= 'p';
+                    break;
+
+                case 'r':
+                    $stringPermissions .= 'r';
+                    break;
+
+                case 'w':
+                    $stringPermissions .= 'w';
+                    break;
+                
+                default:
+                    //
+                    break;
+            }
+        }
+    }
+
+    /**
      * Get container of the samba share
      */
     public function container()

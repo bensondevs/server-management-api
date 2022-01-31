@@ -4,7 +4,8 @@ namespace App\Traits\Container;
 
 use App\Enums\Container\Nfs\{
     ContainerNfsStatus as Status,
-    ContainerNfsEnability as Enability
+    ContainerNfsEnability as Enability,
+    ContainerNfsBindPublicIp as BindPublicIp
 };
 
 use App\Models\{
@@ -156,5 +157,33 @@ trait NfsTrait
         $statusKey = ucfirst($status);
         $status = (Enability::fromKey($statusKey))->value;
         $this->attributes['nfs_enability'] = $status;
+    }
+
+    /**
+     * Get NFS bind to public IP
+     * 
+     * @return int
+     */
+    public function getCurrentNfsBindPublicIpAttribute()
+    {
+        return $this->attributes['nfs_bind_public_ip'];
+    }
+
+    /**
+     * Set NFS bind to public IP
+     * 
+     * @param  string  $bindPublicIp
+     * @return void
+     */
+    public function setNfsBindPublicIpAttribute(string $bindPublicIp)
+    {
+        if (is_numeric($bindPublicIp)) {
+            $this->attributes['nfs_bind_public_ip'] = (int) $bindPublicIp;
+            return;
+        }
+
+        $statusKey = ucfirst($bindPublicIp);
+        $status = (BindPublicIp::fromKey($statusKey))->value;
+        $this->attributes['nfs_bind_public_ip'] = $status;
     }
 }

@@ -6,22 +6,39 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 
 use App\Rules\UniqueWithCondition;
-
 use App\Traits\InputRules;
-
-use App\Models\Container;
-use App\Models\NfsFolder;
+use App\Models\{ Container, NfsFolder };
 
 class CreateContainerNfsExportRequest extends FormRequest
 {
     use InputRules;
 
+    /**
+     * Target server container
+     * 
+     * @var \App\Models\Container|null
+     */
     private $serverContainer;
+
+    /**
+     * Target NFS folder to be exported
+     * 
+     * @var \App\Models\NfsFolder|null
+     */
     private $nfsFolder;
 
+    /**
+     * Get server container from route binding or input
+     * 
+     * @return \App\Models\Container|abort 404
+     */
     public function getServerContainer()
     {
         if ($this->serverContainer) return $this->serverContainer;
+
+        if ($this->route('container')) {
+            return $this->serverContainer = $this->route('container');
+        }
 
         $id = $this->input('id') ?: $this->input('container_id');
         return $this->serverContainer = Container::findOrFail($id);
@@ -43,6 +60,19 @@ class CreateContainerNfsExportRequest extends FormRequest
     public function authorize()
     {
         return true;
+    }
+
+    /**
+     * Prepare input before validation
+     * 
+     * @return void
+     */
+    protected function prepareForValidation()
+    {
+        if (is_array($this->input('permissions'))) {
+            $permissions = $this->input('permissions');
+            $this->merge(['permissions' => implode('', $permissions)]);
+        }
     }
 
     /**

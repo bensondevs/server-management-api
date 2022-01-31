@@ -181,6 +181,8 @@ class ContainerSambaController extends Controller
      */
     public function modifyBindedSubnet(Request $request, Container $container)
     {
-        //
+        $this->samba->setModel($container);
+        $this->samba->modifyBindedSubnet();
+        return apiResponse($this->samba);
     }
 }

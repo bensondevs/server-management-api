@@ -93,6 +93,7 @@ class ContainerSambaRepository extends BaseRepository
 			'samba_status' => $container->current_samba_status,
 			'samba_enability' => $container->current_samba_enability,
 			'samba_pid_numbers' => $container->current_samba_pid_numbers,
+			'samba_bind_to_public_ip' => $container->samba_bind_to_public_ip,
 			'samba_groups' => SambaGroupResource::collection($sambaGroups),
 			'samba_users' => SambaUserResource::collection($sambaUsers),
 			'samba_shares' => SambaShareResource::collection($sambaShares),

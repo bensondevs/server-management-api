@@ -106,9 +106,8 @@ class ContainerNfsController extends Controller
     {
         $this->nfs->setModel($container);
         $enability = $this->nfs->enable();
-        return apiResponse($this->nfs, [
-            'nfs_enability' => $enability
-        ]);
+
+        return apiResponse($this->nfs, ['nfs_enability' => $enability]);
     }
 
     /**
@@ -121,8 +120,35 @@ class ContainerNfsController extends Controller
     {
         $this->nfs->setModel($container);
         $enability = $this->nfs->disable();
-        return apiResponse($this->nfs, [
-            'nfs_enability' => $enability
-        ]);
+
+        return apiResponse($this->nfs, ['nfs_enability' => $enability]);
+    }
+
+    /**
+     * Bind NFS to public IP and return current bind to public ip status of NFS
+     * 
+     * @param  \App\Models\Container  $container
+     * @return \Illuminate\Support\Facades\Response
+     */
+    public function bindPublicIp(Container $container)
+    {
+        $this->nfs->setModel($container);
+        $bindPublicIp = $this->nfs->bindPublicIp();
+
+        return apiResponse($this->nfs, ['nfs_bind_public_ip' => $bindPublicIp]);
+    }
+
+    /**
+     * Unbind NFS to public IP and return current bind to public ip status of NFS
+     * 
+     * @param  \App\Models\Container  $container
+     * @return \Illuminate\Support\Facades\Response
+     */
+    public function unbindPublicIp(Container $container)
+    {
+        $this->nfs->setModel($container);
+        $bindPublicIp = $this->nfs->unbindPublicIp();
+
+        return apiResponse($this->nfs, ['nfs_bind_public_ip' => $bindPublicIp]);
     }
 }

@@ -178,6 +178,7 @@ return [
         Spatie\Permission\PermissionServiceProvider::class,
         Barryvdh\Debugbar\ServiceProvider::class,
         Torann\GeoIP\GeoIPServiceProvider::class,
+        FruitCake\Cors\CorsServiceProvider::class,
     ],
 
     /*

@@ -29,6 +29,9 @@ class DatabaseSeeder extends Seeder
             ServiceAddonsSeeder::class,
 
             ContainersSeeder::class,
+            VpnUsersSeeder::class,
+            NfsFoldersSeeder::class,
+            NfsExportsSeeder::class,
         ]);
     }
 }

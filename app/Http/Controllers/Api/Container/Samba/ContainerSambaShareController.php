@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\Containers\Samba\Share\{
     CreateSambaShareRequest as CreateRequest,
     DeleteSambaShareRequest as DeleteShareRequest,
+    ChangeSambaSharesPermissionsRequest as ChangePermissionsRequest,
     User\AddSambaShareUserRequest as AddUserRequest,
     Group\AddSambaShareGroupRequest as AddGroupRequest,
 };
@@ -77,15 +78,35 @@ class ContainerSambaShareController extends Controller
     /**
      * Show samba share details
      * 
-     * @param \App\Models\Container  $container
-     * @param \App\Models\SambaShare  $share
-     * @return Illuminate\Support\Facades\Response
+     * @param  \App\Models\Container  $container
+     * @param  \App\Models\SambaShare  $share
+     * @return \Illuminate\Support\Facades\Response
      */
     public function show(Container $container, SambaShare $share)
     {
         $share->load(['groups', 'users']);
         $share = new SambaShareResource($share);
         return response()->json(['samba_share' => $share]);
+    }
+
+    /**
+     * Change samba share permissions
+     * 
+     * @param  \App\Models\Container  $container
+     * @param  ChangePermissionsRequest  $request
+     * @return \Illuminate\Support\Facades\Response
+     */
+    public function changePermissions(
+        Container $container, 
+        ChangePermissionsRequest $request
+    ) {
+        $this->samba->setModel($container);
+
+        $ids = $request->input('samba_share_ids');
+        $permissions = $request->input('permissions');
+        $this->samba->changeSharesPermissions($ids, $permissions);
+
+        return apiResponse($this->samba);
     }
 
     /**

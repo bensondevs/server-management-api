@@ -3,7 +3,6 @@
 namespace App\Traits;
 
 use App\Traits\PopulateRequestOptions;
-
 use App\Models\Company;
 
 trait CompanyPopulateRequestOptions 

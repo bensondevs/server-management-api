@@ -50,6 +50,13 @@ class NfsExport extends Model
     protected $with = ['folder'];
 
     /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = ['ip_binary'];
+
+    /**
      * Model fillable column
      * 
      * @var array
@@ -134,6 +141,14 @@ class NfsExport extends Model
      * Get folder which shared through NFS Export
      */
     public function folder()
+    {
+        return $this->nfsFolder();
+    }
+
+    /**
+     * Get alias of nfs folder
+     */
+    public function nfsFolder()
     {
         return $this->belongsTo(NfsFolder::class);
     }
