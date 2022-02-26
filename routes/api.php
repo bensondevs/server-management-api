@@ -60,10 +60,13 @@ Route::group(['as' => 'api.'], function () {
 		Route::post('login', [AuthController::class, 'login'])->name('login');
 		Route::post('register', [AuthController::class, 'register'])->name('register');
 		Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+		Route::post('forgot_password', [AuthController::class, 'forgotPassword'])->name('forgot_password');
+		Route::post('reset_password', [AuthController::class, 'resetPassword'])->name('resetPassword');
 
 		Route::get('check_token', [AuthController::class, 'checkTokenValidity']);
 		Route::get('check_username', [AuthController::class, 'checkUsernameAvailable']);
 		Route::get('check_email', [AuthController::class, 'checkEmailAvailable']);
+		Route::get('check_reset_token', [AuthController::class, 'checkResetTokenValidity']);
 	});
 
 	/**

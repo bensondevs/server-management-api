@@ -3,26 +3,27 @@
 namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\{ InteractsWithQueue, SerializesModels };
+use Illuminate\Contracts\Queue\{ ShouldBeUnique, ShouldQueue };
 
 use App\Repositories\OrderRepository;
-
-use App\Mail\Containers\ContainerExpiredMail;
-use App\Mail\Containers\ContainerDeletedMail;
-
+use App\Mail\Containers\{
+    ContainerExpiredMail, 
+    ContainerDeletedMail
+};
 use App\Jobs\SendMail;
-
-use App\Models\Invoice;
-use App\Models\Container;
+use App\Models\{ Invoice, Container };
 
 class CheckExpiredContainer implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * Job execution timeout in seconds
+     * 
+     * @var int
+     */
     public $timeout = 180;
 
     /**
@@ -32,7 +33,7 @@ class CheckExpiredContainer implements ShouldQueue
      */
     public function __construct()
     {
-        
+        //
     }
 
     /**
@@ -42,7 +43,7 @@ class CheckExpiredContainer implements ShouldQueue
      */
     public function handle()
     {
-        $now = carbon()->now()->copy();
+        $now = now()->copy();
         $updateContainers = Container::expired()->update(['status' => 'expired']);
         $expiredContainers = Container::expired()->get();
 
@@ -78,7 +79,7 @@ class CheckExpiredContainer implements ShouldQueue
                 dispatch($sendReminderMail);
             }
 
-            // Last day, timit is reached
+            // Last day, limit is reached
             if ($limitLeft < 0) {
                 // Send information to user email
                 $email = new ContainerDeletedMail($container);

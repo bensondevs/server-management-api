@@ -348,37 +348,4 @@ class BaseRepository
 
 	    return $this->setPagination($paginations);
 	}
-
-	public function find($id)
-	{
-		$model = $this->getModel();
-		$model = $model->find($id);
-
-		$this->setModel($model);
-
-		return $this->getModel();
-	}
-
-	public function freshSearch(Model $model, $keyword)
-	{
-		$columns = $model->getFillable();
-
-		foreach ($columns as $key => $column) {
-			if ($key == 0)
-				$model->where($column, 'like', '%' . $keyword . '%');
-			else
-				$model->orWhere($column, 'like', '%' . $keyword . '%');
-		}
-
-		$this->setCollection($model->get());
-
-		return $this->getCollection();
-	}
-
-	public function search($keyword)
-	{
-		$collection = $this->getCollection() ?
-			$this->getCollection() :
-			$this->all();
-	}
 }

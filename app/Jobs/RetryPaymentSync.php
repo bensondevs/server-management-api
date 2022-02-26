@@ -10,26 +10,36 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
 use App\Models\Payment;
-
 use App\Repositories\PaymentRepository;
 
 class RetryPaymentSync implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $timeout = 900;
+    /**
+     * Job execution timeout in seconds
+     * 
+     * @var int
+     */
+    public $timeout = 900; // 15 mins max
 
-    private $paymentRepo;
+    /**
+     * Payment repository class container
+     * 
+     * @var \App\Repositories\PaymentRepository|null
+     */
+    private $paymentRepository;
 
     /**
      * Create a new job instance.
      *
+     * @param  \App\Models\Payment  $payment
      * @return void
      */
     public function __construct(Payment $payment)
     {
-        $this->paymentRepo = new PaymentRepository;
-        $this->paymentRepo->setModel($payment);
+        $this->paymentRepository = new PaymentRepository;
+        $this->paymentRepository->setModel($payment);
     }
 
     /**
@@ -39,6 +49,6 @@ class RetryPaymentSync implements ShouldQueue
      */
     public function handle()
     {
-        $this->paymentRepo->checkPayment();
+        $this->paymentRepository->checkPayment();
     }
 }

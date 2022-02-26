@@ -44,6 +44,12 @@ class UserRepository extends BaseRepository
 		return $this->getModel();
 	}
 
+	/**
+	 * Update user's password
+	 * 
+	 * @param  string  $password
+	 * @return \App\Models\User
+	 */
 	public function updatePassword(string $password)
 	{
 		try {
@@ -53,15 +59,20 @@ class UserRepository extends BaseRepository
 
 			$this->setModel($user);
 
-			$this->setSuccess('Successfully change user password.');
+			$this->setSuccess('Successfully update user\'s password.');
 		} catch (QueryException $qe) {
 			$error = $qe->getMessage();
-			$this->setError('Failed to change user password.', $error);
+			$this->setError('Failed to update user\'s password.', $error);
 		}
 
 		return $this->getModel();
 	}
 
+	/**
+	 * To enable/disable subscription to newsletter
+	 * 
+	 * @return \App\Models\User
+	 */
 	public function toggleNewsletter()
 	{
 		try {
@@ -78,6 +89,11 @@ class UserRepository extends BaseRepository
 		return $this->getModel();
 	}
 
+	/**
+	 * Verify user's email
+	 * 
+	 * @return \App\Models\User
+	 */
 	public function verifyEmail()
 	{
 		try {
@@ -94,6 +110,11 @@ class UserRepository extends BaseRepository
 		return $this->getModel();
 	}
 
+	/**
+	 * Delete user model record
+	 * 
+	 * @return bool
+	 */
 	public function delete()
 	{
 		try {

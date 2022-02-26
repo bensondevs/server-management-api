@@ -8,6 +8,9 @@ use App\Models\Container;
 
 class CreateContainerNfsFolderRequest extends FormRequest
 {
+    /**
+     * Server Co
+     */
     private $serverContainer;
 
     public function getServerContainer()

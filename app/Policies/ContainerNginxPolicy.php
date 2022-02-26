@@ -3,52 +3,115 @@
 namespace App\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
-
-use App\Models\User;
-use App\Models\Container;
-use App\Models\NginxLocation;
+use App\Models\{ User, Container, NginxLocation };
 
 class ContainerNginxPolicy
 {
     use HandlesAuthorization;
 
+    /**
+     * Determines that current user is allowed to check status
+     * of the NGINX service in certain container
+     * 
+     * @param  \App\Models\User       $user
+     * @param  \App\Models\Container  $container
+     * @return  \Illuminate\Auth\Access\Response|bool
+     */
     public function checkStatus(User $user, Container $container)
     {
-        return $user->hasContainerPermission($container->id, 'check status container nginxes');
+        $permission = 'check status container nginxes';
+        return $user->hasContainerPermission($container->id, $permission);
     }
 
+    /**
+     * Determines that current user is allowed to check PID Numbers
+     * of the NGINX service in certain container
+     * 
+     * @param  \App\Models\User           $user
+     * @param  \App\Models\NginxLocation  $location
+     * @return  \Illuminate\Auth\Access\Response|bool
+     */
     public function checkPidNumbers(User $user, NginxLocation $location)
     {
-        return $user->hasContainerPermission($location->container_id, 'check pid numbers container nginxes');
+        $permission = 'check pid numbers container nginxes';
+        return $user->hasContainerPermission($location->container_id, $permission);
     }
 
+    /**
+     * Determines that current user is allowed to create location
+     * 
+     * @param  \App\Models\User           $user
+     * @param  \App\Models\NginxLocation  $location
+     * @return  \Illuminate\Auth\Access\Response|bool
+     */
     public function createLocation(User $user, NginxLocation $location)
     {
-        return $user->hasContainerPermission($location->container_id, 'create location container nginxes');
+        $permission = 'create location container nginxes';
+        return $user->hasContainerPermission($location->container_id, $permission);
     }
 
+    /**
+     * Determines that current user is allowed to create location
+     * 
+     * @param  \App\Models\User           $user
+     * @param  \App\Models\NginxLocation  $location
+     * @return  \Illuminate\Auth\Access\Response|bool
+     */
     public function removeLocation(User $user, Container $container)
     {
-        return $user->hasContainerPermission($container->id, 'remove location container nginxes');
+        $permission = 'remove location container nginxes';
+        return $user->hasContainerPermission($container, $permission);
     }
 
+    /**
+     * Determines that current user is allowed to start NGINX service
+     * 
+     * @param  \App\Models\User       $user
+     * @param  \App\Models\Container  $container
+     * @return  \Illuminate\Auth\Access\Response|bool
+     */
     public function start(User $user, Container $container)
     {
-        return $user->hasContainerPermission($container->id, 'start container nginxes');
+        $permission = 'start container nginxes';
+        return $user->hasContainerPermission($container, $permission);
     }
 
+    /**
+     * Determines that current user is allowed to restart NGINX service
+     * 
+     * @param  \App\Models\User       $user
+     * @param  \App\Models\Container  $container
+     * @return  \Illuminate\Auth\Access\Response|bool
+     */
     public function restart(User $user, Container $container)
     {
-        return $user->hasContainerPermission($container->id, 'restart container nginxes');
+        $permission = 'restart container nginxes';
+        return $user->hasContainerPermission($container, $permission);
     }
 
+    /**
+     * Determines that current user is allowed to reload NGINX service
+     * 
+     * @param  \App\Models\User       $user
+     * @param  \App\Models\Container  $container
+     * @return  \Illuminate\Auth\Access\Response|bool
+     */
     public function reload(User $user, Container $container)
     {
-        return $user->hasContainerPermission($container->id, 'reload container nginxes');
+        $permission = 'reload container nginxes';
+        return $user->hasContainerPermission($container, $permission);
     }
 
+    /**
+     * Determines that current user is allowed to stop NGINX service
+     * 
+     * @param  \App\Models\User       $user
+     * @param  \App\Models\Container  $container
+     * @return  \Illuminate\Auth\Access\Response|bool
+     */
     public function stop(User $user, Container $container)
     {
-        return $user->hasContainerPermission($container->id, 'stop container nginxes');
+        $permission = 'stop container nginxes';
+        return $user->hasContainerPermission($container, $permission);
     }
 }

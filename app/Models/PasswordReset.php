@@ -3,26 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\{ Model, SoftDeletes, Builder };
+use Illuminate\Database\Eloquent\{ Model, Builder, SoftDeletes };
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Webpatser\Uuid\Uuid;
-use App\Traits\HasPrice;
 
-use App\Observers\ServiceAddonObserver as Observer;
-use App\Enums\ServiceAddon\ServiceAddonStatus as Status;
-use App\Enums\ContainerProperty\ContainerPropertyType as PropertyType;
-
-class ServiceAddon extends Model
+class PasswordReset extends Model
 {
     use HasFactory;
-    use HasPrice;
 
     /**
      * Model table name
      * 
      * @var string
      */
-    protected $table = 'service_addons';
+    protected $table = 'password_resets';
 
     /**
      * Model primary key
@@ -55,15 +49,8 @@ class ServiceAddon extends Model
      * @var array 
      */
     protected $fillable = [
-        'addon_name',
-        'addon_code',
-        'description',
-
-        'status',
-        'duration_days',
-
-        'property_type',
-        'property_value',
+        'email',
+        'token',
     ];
 
     /**
@@ -76,31 +63,48 @@ class ServiceAddon extends Model
     protected static function boot()
     {
     	parent::boot();
-        self::observe(Observer::class);
     }
 
     /**
-     * Create callable attribute of "status_description"
-     * This callable attribute will return enum description
+     * Check if email and token is matched in the record
      * 
-     * @return string
+     * @static
+     * @param  string  $email
+     * @param  string  $token
+     * @return bool
      */
-    public function getStatusDescriptionAttribute()
+    public static function match(string $email, string $token)
     {
-        $status = $this->attributes['status'];
-        return Status::getDescription($status);
+        return self::whereEmail($email)
+            ->whereToken($token)
+            ->exists();
     }
 
     /**
-     * Create callable attribute of "property_type_description"
-     * This callable attribute will return container property enum
-     * description as string.
+     * Find token exist in the record
      * 
-     * @return string
+     * @param  string  $token
+     * @return self
      */
-    public function getPropertyTypeDescriptionAttribute()
+    public static function findByToken(string $token)
     {
-        $type = $this->attributes['property_type'];
-        return PropertyType::getDescription($type);
+        return self::whereToken($token)->first();
+    } 
+
+    /**
+     * Find token owned by a certain user
+     * 
+     * @param  static
+     * @param  \App\Models\User|string  $user
+     * @return self|null
+     */
+    public static function findByUser($user)
+    {
+        if (! $user instanceof User) {
+            $user = User::findByIdentity($user, true);
+        }
+
+        $email = $user->email;
+        return self::whereEmail($email)->first();
     }
 }

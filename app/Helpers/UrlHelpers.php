@@ -146,3 +146,35 @@ if (! function_exists('requestMethod')) {
 		return request_method();
 	}
 }
+
+/**
+ * Concat array of paths and avoid the double slash
+ * in the paths concated.
+ * 
+ * This function has 3 parameters
+ * - First parameter will handle array of paths,
+ * - Set second parameter to true and the resulted path will be
+ * started with slash,
+ * - Set the third parameter to true and the resulted path will
+ * be ended with slash.
+ * 
+ * @param  array  $paths
+ * @param  bool   $startSlash
+ * @param  bool   $endSlash
+ * @return string
+ */
+if (! function_exists('concat_paths')) {
+    function concat_paths(array $paths, bool $startSlash = false, bool $endSlash = false)
+    {
+        // Implode with glue of "/"
+        $concatedPaths = implode('/', $paths);
+
+        // If $startSlash is true, add slash to first character.
+        if ($startSlash) $concatedPaths = '/' . $concatedPaths;
+
+        // If $endSlash is true, add slash to last character. 
+        if ($endSlash) $concatedPaths .= '/';
+
+        return $concatedPaths;
+    }
+}

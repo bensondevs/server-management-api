@@ -10,9 +10,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
 use App\Repositories\AmqpRepository;
-
 use App\Models\Container;
-
 use App\Traits\TrackExecution;
 
 class RecreateContainer implements ShouldQueue
@@ -21,13 +19,24 @@ class RecreateContainer implements ShouldQueue
 
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * Server container class container
+     * 
+     * @var \App\Models\Container|null
+     */
     private $serverContainer;
 
+    /**
+     * AMQP Repository class container
+     * 
+     * @var \App\Repositories\AmqpRepository|null
+     */
     private $amqpRepo;
 
     /**
      * Create a new job instance.
      *
+     * @param  \App\Models\Container  $serverContainer
      * @return void
      */
     public function __construct(Container $serverContainer)

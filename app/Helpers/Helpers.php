@@ -3,6 +3,7 @@
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Mail\Mailable;
 use Webpatser\Uuid\Uuid;
 
 /**
@@ -360,5 +361,20 @@ if (! function_exists('random_ip')) {
     function random_ip()
     {
         return mt_rand(0, 255) . '.' . mt_rand(0, 255) . '.' . mt_rand(0, 255) . '.' . mt_rand(0, 255);
+    }
+}
+
+/**
+ * Send email to destination
+ * 
+ * @param  \Illuminate\Mail\Mailable  $mailable
+ * @param  string  $receipient
+ * @return bool
+ */
+if (! function_exists('send_email')) {
+    function send_mail(Mailable $mailable, string $recipient)
+    {
+        $sendMailJob = new \App\Jobs\SendMail($mailable, $recipient);
+        dispatch($sendMailJob);
     }
 }

@@ -26,9 +26,8 @@ class RegisterRequest extends FormRequest
      */
     protected function prepareForValidation()
     {
-        $this->merge([
-            'subscribe_newsletter' => strtobool($this->input('subscribe_newsletter')),
-        ]);
+        $subsNewsletter = strtobool($this->input('subscribe_newsletter'));
+        $this->merge(['subscribe_newsletter' => $subsNewsletter]);
     }
 
     /**

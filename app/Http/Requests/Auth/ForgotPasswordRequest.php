@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Carts;
+namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class SetCartQuantityRequest extends FormRequest
+class ForgotPasswordRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,6 +23,6 @@ class SetCartQuantityRequest extends FormRequest
      */
     public function rules()
     {
-        return ['quantity' => ['required', 'numeric']];
+        return ['email' => ['required', 'string', 'exists:users,email']];
     }
 }

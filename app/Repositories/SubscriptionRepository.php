@@ -22,6 +22,20 @@ class SubscriptionRepository extends BaseRepository
 	}
 
 	/**
+	 * Retrieve user's subscription if exists
+	 * If not, then this will return as false boolean
+	 * 
+	 * @param  \App\Models\User  $user
+	 * @return 
+	 */
+	public function userSubscription(User $user)
+	{
+		return $user->subscriptions()
+			->where('status', Status::Active)
+			->first() : false;
+	}
+
+	/**
 	 * Create subscription
 	 * 
 	 * @param Order  $order

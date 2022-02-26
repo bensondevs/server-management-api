@@ -236,7 +236,12 @@ class User extends Authenticatable
      */
     public function guessCurrency()
     {
-        //
+        $ipApiService = new App\Services\IpApiService();
+        $currency = $ipApiService->getCurrency();
+
+        return in_array($currency, ['USD', 'EUR']) ?
+            Currency::getValues($currency) :
+            Currency::USD;
     }
 
     /**
@@ -319,7 +324,8 @@ class User extends Authenticatable
     public static function findByIdentity(string $login, bool $abortNotFound = false)
     {
         $query = self::where('email', $login)
-            ->orWhere('username', $login);
+            ->orWhere('username', $login)
+            ->orWhere('id', $login);
         return $abortNotFound ? 
             $query->firstOrFail() : 
             $query->first();
@@ -333,5 +339,25 @@ class User extends Authenticatable
     public function isPasswordMatch(string $password)
     {
         return hash_check($password, $this->attributes['password']);
+    }
+
+    /**
+     * Check user has permission to a container
+     * 
+     * @param  \App\Models\Container|string  $container
+     * @param  string  $doSomething
+     * @return bool
+     */
+    public function hasContainerPermission($container, string $doSomething)
+    {
+        if (! $container instanceof Container) {
+            $container = Container::findOrFail($container);
+        }
+
+        if ($container->user_id !== $this->attributes['id']) {
+            return false;
+        }
+
+        return $user->hasPermissionTo($doSomething);
     }
 }

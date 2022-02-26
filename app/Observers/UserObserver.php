@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Models\User;
+use App\Models\{ User, PasswordReset };
 
 class UserObserver
 {
@@ -40,7 +40,9 @@ class UserObserver
      */
     public function updated(User $user)
     {
-        //
+        if ($user->isDirty('password')) {
+            PasswordReset::whereEmail($user->email)->delete();
+        }
     }
 
     /**

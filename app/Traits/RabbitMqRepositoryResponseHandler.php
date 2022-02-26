@@ -4,8 +4,19 @@ namespace App\Traits;
 
 trait RabbitMqRepositoryResponseHandler 
 {
+    /**
+     * RabbitMQ Response container
+     * 
+     * @var array
+     */
     private $rabbitmqResponse;
 
+    /**
+     * Handle rabbit mq response
+     * 
+     * @param  mixed  $response
+     * @return bool
+     */
     public function handleRabbitMqResponse($response = null)
     {
         $this->rabbitmqResponse = $response;
@@ -24,6 +35,11 @@ trait RabbitMqRepositoryResponseHandler
         return true;
     }
 
+    /**
+     * Return rabbit mq response
+     * 
+     * @return array
+     */
     public function returnRabbitMqResponse()
     {
         if (! $this->rabbitmqResponse) return [];
